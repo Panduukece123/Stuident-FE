@@ -8,7 +8,7 @@ import {
 
 export const Faq = () => {
   return (
-    <div className="p-6 max-w-7xl ">
+    <div className="p-6 max-w-7xl">
       <div className="mb-10 items-center">
         <h1 className="text-2xl font-semibold text-center">
           Pertanyaan yang Sering Diajukan (FAQ)
@@ -20,7 +20,7 @@ export const Faq = () => {
         className="w-full"
       >
         <AccordionItem value="item-1">
-          <AccordionTrigger className={"text-lg cursor-pointer"}>
+          <AccordionTrigger className={"text-lg cursor-pointer hover:no-underline hover:text-primary"}>
             Apa itu Stuident?
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4 text-base font-light">
@@ -33,7 +33,7 @@ export const Faq = () => {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-2">
-          <AccordionTrigger className={"text-lg cursor-pointer"}>
+          <AccordionTrigger className={"text-lg cursor-pointer hover:no-underline hover:text-primary"}>
             Siapa saja yang menjadi pengajar di sini?
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4 text-base font-light">
@@ -47,7 +47,7 @@ export const Faq = () => {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
-          <AccordionTrigger className={"text-lg cursor-pointer"}>
+          <AccordionTrigger className={"text-lg cursor-pointer hover:no-underline hover:text-primary"}>
             Apakah program ini cocok untuk saya yang masih pemula?
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4 text-base font-light">
@@ -60,7 +60,7 @@ export const Faq = () => {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-4">
-          <AccordionTrigger className={"text-lg cursor-pointer"}>
+          <AccordionTrigger className={"text-lg cursor-pointer hover:no-underline hover:text-primary"}>
             Apa perbedaan utama antara E-Learning dan Bootcamp
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4 text-base font-light">
@@ -78,7 +78,7 @@ export const Faq = () => {
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-5">
-          <AccordionTrigger className={"text-lg cursor-pointer"}>
+          <AccordionTrigger className={"text-lg cursor-pointer hover:no-underline hover:text-primary"}>
             Apakah saya akan mendapatkan sertifikat setelah menyelesaikan
             program?
           </AccordionTrigger>

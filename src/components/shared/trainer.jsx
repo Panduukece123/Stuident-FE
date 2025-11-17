@@ -47,9 +47,12 @@ export const Trainer = () => {
   ];
 
   return (
-    <div className="p-6 max-w-7xl">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto w-full">
       <Card
-        className={"p-10 flex flex-row gap-10 relative overflow-hidden"}
+        // HANYA UBAH DI SINI:
+        // 1. flex-col (HP) -> lg:flex-row (Laptop)
+        // 2. Padding disesuaikan dikit
+        className={"p-6 lg:p-10 flex flex-col lg:flex-row gap-6 lg:gap-10 relative overflow-hidden"}
         style={{
           background: `linear-gradient(to right, #074799, #3DBDC2)`,
         }}
@@ -59,22 +62,32 @@ export const Trainer = () => {
           alt="Dekorasi background"
           className="absolute z-0 top-0 left-0 w-full h-full object-cover opacity-20"
         />
-        <div className="relative z-10 w-full flex flex-row gap-10">
-          <div className="w-1/4 flex flex-col gap-5 shrink-0">
-            <h1 className="text-2xl font-semibold text-white">
+        
+        {/* UBAH DI SINI JUGA (Wrapper Konten): flex-col -> lg:flex-row */}
+        <div className="relative z-10 w-full flex flex-col lg:flex-row gap-6 lg:gap-10">
+          
+          {/* BAGIAN TEKS */}
+          {/* w-full di HP, lg:w-1/4 di Laptop */}
+          <div className="w-full lg:w-1/4 flex flex-col gap-3 lg:gap-5 text-center shrink-0">
+            <h1 className="text-xl md:text-2xl font-semibold text-white">
               Belajar Langsung dari Para Pakar Industri
             </h1>
-            <p className="text-justify text-white">
+            <p className="text-sm md:text-base text-justify text-white">
               Materi kami disusun dan dibawakan oleh para senior-level di
               bidangnya yang aktif bekerja di perusahaan teknologi terdepan.
             </p>
           </div>
-          <div className="flex-1 overflow-x-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+
+          {/* BAGIAN LIST TRAINER */}
+          {/* w-full di HP, lg:flex-1 di Laptop */}
+          <div className="w-full lg:flex-1 overflow-x-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <div className="flex gap-4 min-w-max">
               {trainers.map((trainer, index) => (
+                
+                // --- INI KARTU TRAINER ASLI ANDA (TIDAK SAYA UBAH) ---
                 <Card
                   key={index}
-                  className="w-52 shrink-0 bg-white overflow-hidden "
+                  className="w-52 shrink-0 bg-white overflow-hidden"
                 >
                   <CardContent className="text-center px-3">
                     <img
@@ -91,9 +104,12 @@ export const Trainer = () => {
                     </p>
                   </CardContent>
                 </Card>
+                // -----------------------------------------------------
+
               ))}
             </div>
           </div>
+
         </div>
       </Card>
     </div>

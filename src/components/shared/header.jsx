@@ -3,6 +3,8 @@ import * as React from "react";
 import {
   Carousel,
   CarouselContent,
+  CarouselPrevious,
+  CarouselNext,
   CarouselItem,
 } from "@/components/ui/carousel";
 
@@ -42,27 +44,21 @@ export function Header() {
     });
   }, [api]);
 
-  React.useEffect(() => {
-    if (!api) return;
-
-    const interval = setInterval(() => {
-      api.scrollNext();
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [api]);
-
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="w-full p-6">
-        <Carousel setApi={setApi} className="w-full" opts={{ loop: true }}>
+      <div className="w-full p-4 md:p-6">
+        <Carousel
+          setApi={setApi}
+          className="w-full relative group"
+          opts={{ loop: true }}
+        >
           <CarouselContent>
             {items.map((item, index) => (
               <CarouselItem key={item.id}>
                 <div className="p-1">
-                  <div className="relative w-full h-96 overflow-hidden rounded-lg">
+                  <div className="relative w-full aspect-4/1 overflow-hidden rounded-lg">
                     <img
-                      src={item.image}
+                      src={item.image} // Keep the original image source
                       alt={`Slide ${item.id}`}
                       className="w-full h-full object-cover"
                     />
@@ -71,13 +67,15 @@ export function Header() {
               </CarouselItem>
             ))}
           </CarouselContent>
+          <CarouselPrevious className="cursor-pointer absolute left-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <CarouselNext className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Carousel>
         <div className="flex justify-center gap-2 mt-2">
           {items.map((_, index) => (
             <button
               key={index}
               onClick={() => api?.scrollTo(index)}
-              className={`h-1 rounded-full transition-all ${
+              className={`h-1 md:h-2 rounded-full transition-all ${
                 current === index ? "w-8 bg-primary" : "w-2 bg-muted"
               }`}
               aria-label={`Go to slide ${index + 1}`}
