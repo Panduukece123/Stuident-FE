@@ -1,17 +1,16 @@
 import * as React from "react";
-import { Header } from "@/components/shared/header";
-import { Infografis } from "@/components/shared/infografis";
-import { Highlight } from "@/components/shared/highlight";
-import { Trainer } from "@/components/shared/trainer";
-import { Partner } from "@/components/shared/partner";
-import { Faq } from "@/components/shared/faq";
+import { Header } from "@/components/section/HeaderSection";
+import { Infografis } from "@/components/section/InfografisSection";
+import { Highlight } from "@/components/section/HighlightSection";
+import { Trainer } from "@/components/section/TrainerSection";
+import { Partner } from "@/components/section/PartnerSection";
+import { Faq } from "@/components/section/FaqSection";
 
 export function HomePage() {
   return (
     <div className="flex flex-col gap-4 w-full">
       <Header />
       <Infografis />
-      
       <Highlight />
       <Trainer />
       <Partner />

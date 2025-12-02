@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 
 export const Highlight = () => {
   return (
-    <div className="w-full px-4 py-8 md:p-10"> {/* Padding disesuaikan */}
+    <div className="w-full p-4 py-8 md:p-6"> {/* Padding disesuaikan */}
       
       {/* HEADER SECTION */}
       <div className="mb-10 md:mb-16 flex flex-col gap-3 items-center text-center">

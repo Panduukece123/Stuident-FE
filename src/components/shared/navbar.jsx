@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router";
 import { Menu } from "lucide-react"; // Ikon Hamburger
+import { Search } from "lucide-react"; // Ikon Search
 import Logo from "../../assets/images/stuident-logo.svg";
 
 // Import Components
@@ -26,11 +27,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
+import { Input } from "../ui/input";
 
 export const Navbar = () => {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="mx-auto flex h-16 w-full items-center justify-between px-6">
+      <div className="mx-auto flex h-16 w-full items-center justify-between px-6 gap-4">
         {/* --- 1. LOGO (KIRI) --- */}
         <div className="flex items-center gap-3">
           <img src={Logo} alt="Stuident" width={36} height={36} />
@@ -39,9 +41,19 @@ export const Navbar = () => {
           </div>
         </div>
 
+        {/* --- SEARCH BAR (TENGAH, HANYA DI DESKTOP) --- */}
+        <div className="hidden md:flex flex-1 max-w-xs lg:max-w-md items-center relative">
+          <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Cari program, mentor..."
+            className="w-full pl-9 pr-3 py-2 rounded-md border bg-background focus-visible:ring-1 focus-visible:ring-primary"
+          />
+        </div>
+
         {/* --- 2. DESKTOP NAVIGATION (TENGAH) --- */}
         {/* Bagian ini saya kembalikan PERSIS seperti kode asli Anda */}
-        <div className="hidden md:flex md:flex-1 md:justify-start md:pl-10">
+        <div className="hidden md:flex md:flex-1 md:justify-start">
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
               <NavigationMenuItem>
@@ -149,7 +161,7 @@ export const Navbar = () => {
               <NavigationMenuItem>
                 <NavigationMenuLink
                   href="#"
-                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-[active=true]:bg-accent/60"
+                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-[active=true]:bg-accent/60 whitespace-nowrap"
                 >
                   Corporate Service
                 </NavigationMenuLink>
@@ -168,10 +180,18 @@ export const Navbar = () => {
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="outline" size="sm" className="cursor-pointer">
-            Login
-          </Button>
-          <Button size="sm" className="cursor-pointer">
+          <Link
+            to="/login"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
+            <Button variant="outline" size="sm" className="cursor-pointer ">
+              Login
+            </Button>
+          </Link>
+          <Button
+            size="sm"
+            className="cursor-pointer"
+          >
             Register
           </Button>
         </div>

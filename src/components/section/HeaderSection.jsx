@@ -55,7 +55,7 @@ export function Header() {
           <CarouselContent>
             {items.map((item, index) => (
               <CarouselItem key={item.id}>
-                <div className="p-1">
+                <div>
                   <div className="relative w-full aspect-4/1 overflow-hidden rounded-lg">
                     <img
                       src={item.image} // Keep the original image source
