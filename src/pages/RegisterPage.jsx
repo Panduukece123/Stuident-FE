@@ -1,75 +1,207 @@
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router"; 
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios"; // Jangan lupa import axios
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React from "react";
-import { Link } from "react-router";
+
+// 1. Definisikan Schema Zod
+const registerSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, "Nama wajib diisi")
+      .max(255, "Nama maksimal 255 karakter"),
+    email: z
+      .string()
+      .min(1, "Email wajib diisi")
+      .email("Format email tidak valid"), 
+    password: z
+      .string()
+      .min(1, "Password wajib diisi")
+      .min(8, "Password minimal 8 karakter"),
+    confirmPassword: z
+      .string()
+      .min(1, "Konfirmasi password wajib diisi"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Konfirmasi password tidak cocok",
+    path: ["confirmPassword"],
+  });
 
 export const RegisterPage = () => {
+  const navigate = useNavigate(); 
+  const [isLoading, setIsLoading] = useState(false); 
+
+  // 2. Setup React Hook Form
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  // 3. Fungsi submit ke API
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        password_confirmation: data.confirmPassword, 
+      };
+
+      // Tembak API Register
+      const response = await axios.post("http://localhost:8000/api/register", payload);
+
+      console.log("Register Berhasil:", response.data);
+
+      // Skenario 2: Redirect ke Login (User harus login ulang) - Lebih umum
+      navigate("/login");
+      alert("Registrasi berhasil! Silakan login.");
+
+    } catch (error) {
+      console.error("Register Gagal:", error);
+
+      if (error.response && error.response.status === 422) {
+        const serverErrors = error.response.data.errors;
+        
+        // Loop error dari Laravel
+        Object.keys(serverErrors).forEach((key) => {
+          setError(key, {
+            type: "server",
+            message: serverErrors[key][0],
+          });
+        });
+
+      } else {
+        alert("Terjadi kesalahan sistem. Coba lagi nanti.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-center items-center">
       <div className="flex flex-row w-full gap-28 max-w-7xl px-30 pt-6">
         <div className="w-1/3 items-center flex justify-center">
           <img src="/avatar-auth.png" width={200} alt="avatar-auth" />
         </div>
-        <form className="flex flex-col gap-5 w-1/2 max-w-md justify-center">
+
+        <form 
+          onSubmit={handleSubmit(onSubmit)} 
+          className="flex flex-col gap-5 w-1/2 max-w-md justify-center"
+        >
           <div className="flex flex-col">
             <h1 className="font-bold text-3xl bg-linear-to-r from-[#074799] to-[#3DBDC2] bg-clip-text text-transparent">
               Hello, Stuideners
             </h1>
             <p className="text-muted-foreground">
-              Masuk untuk melanjutkan ke akunmu
+              Daftar untuk memulai belajar
             </p>
           </div>
+
           <div className="flex flex-col gap-3">
             <Label htmlFor="name">Nama Lengkap</Label>
             <Input
               type="text"
               id="name"
-              className={"h-10"}
+              disabled={isLoading}
+              className={`h-10 ${errors.name ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               placeholder="Masukkan nama lengkap Anda"
+              {...register("name")}
             />
+            {errors.name && (
+              <span className="text-sm text-red-500 font-medium">
+                {errors.name.message}
+              </span>
+            )}
           </div>
+
           <div className="flex flex-col gap-3">
             <Label htmlFor="email">Email</Label>
             <Input
               type="email"
               id="email"
-              className={"h-10"}
+              disabled={isLoading}
+              className={`h-10 ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               placeholder="contoh: email@domain.com"
+              {...register("email")}
             />
+            {errors.email && (
+              <span className="text-sm text-red-500 font-medium">
+                {errors.email.message}
+              </span>
+            )}
           </div>
+
           <div className="flex flex-col gap-3">
             <Label htmlFor="password">Password</Label>
             <Input
               type="password"
               id="password"
-              className={"h-10"}
+              disabled={isLoading}
+              className={`h-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               placeholder="Masukkan password Anda"
+              {...register("password")}
             />
+            {errors.password && (
+              <span className="text-sm text-red-500 font-medium">
+                {errors.password.message}
+              </span>
+            )}
           </div>
+
           <div className="flex flex-col gap-3">
             <Label htmlFor="confirm-password">Konfirmasi Password</Label>
             <Input
               type="password"
               id="confirm-password"
-              className={"h-10"}
+              disabled={isLoading}
+              className={`h-10 ${errors.confirmPassword ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               placeholder="Konfirmasi password Anda"
+              {...register("confirmPassword")}
             />
+            {errors.confirmPassword && (
+              <span className="text-sm text-red-500 font-medium">
+                {errors.confirmPassword.message}
+              </span>
+            )}
           </div>
+
           <Button
             type="submit"
-            className="h-10 bg-linear-to-r from-[#074799] to-[#3DBDC2]"
+            disabled={isLoading}
+            className="h-10 bg-linear-to-r from-[#074799] to-[#3DBDC2] cursor-pointer disabled:opacity-50"
           >
-            Masuk
+            {isLoading ? "Memproses..." : "Daftar"}
           </Button>
+
           <div className="relative flex items-center justify-center text-xs text-muted-foreground">
             <span className="absolute bg-background px-2">
-              atau masuk dengan
+              atau daftar dengan
             </span>
             <hr className="w-full border-t border-gray-300" />
           </div>
-          <Button variant="outline" className="w-full h-10">
-            <svg
+
+          <Button variant="outline" type="button" className="w-full h-10 cursor-pointer">
+             {/* ... SVG Google ... */}
+             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 48 48"
               width="24"
@@ -92,40 +224,35 @@ export const RegisterPage = () => {
                 d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
               />
             </svg>
-            Log In with Google
+            Sign Up with Google
           </Button>
+
           <div className="text-center text-sm text-muted-foreground">
-            Belum punya akun?{" "}
-            <Link to="/register" className="text-primary hover:underline">
-              Register
+            Sudah punya akun?{" "}
+            <Link
+              to="/login"
+              className="text-primary hover:underline cursor-pointer"
+            >
+              Login
             </Link>
           </div>
         </form>
       </div>
+      
+      {/* Wave Background */}
       <div className="w-full overflow-hidden leading-none">
         <svg
           viewBox="0 100 1440 220"
           xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none" // Agar wave tidak gepeng saat di-resize
+          preserveAspectRatio="none"
           className="w-full h-auto block"
         >
-          {/* Definisi Gradasi Warna */}
           <defs>
-            <linearGradient
-              id="gradient-wave"
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="0%"
-            >
-              {/* Warna Biru Gelap (Kiri) */}
+            <linearGradient id="gradient-wave" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#074799" />
-              {/* Warna Biru Terang/Cyan (Kanan) */}
               <stop offset="100%" stopColor="#3DBDC2" />
             </linearGradient>
           </defs>
-
-          {/* Gambar Gelombang */}
           <path
             fill="url(#gradient-wave)"
             fillOpacity="1"

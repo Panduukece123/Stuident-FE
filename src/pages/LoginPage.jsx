@@ -1,57 +1,175 @@
+import React from "react";
+import { Link } from "react-router";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router";
-import React from "react";
+import axios from "axios";
+
+// 1. Definisikan Schema Zod sesuai pesan backend
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: "Email wajib diisi" })
+    .email("Format email tidak valid"), 
+  password: z
+    .string()
+    .min(1, { message: "Password wajib diisi" }) 
+    .min(8, { message: "Password minimal 8 karakter" }), 
+});
 
 export const LoginPage = () => {
+  // 2. Setup React Hook Form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  // 3. Fungsi submit (hanya jalan jika validasi lolos)
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/login",
+        data
+      );
+      console.log("Login Berhasil:", response.data);
+      localStorage.setItem("token", response.data.access_token);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login Gagal:", error);
+
+      if (error.response) {
+        // KASUS 1: Error Validasi Laravel (422)
+        if (error.response.status === 422) {
+          const serverErrors = error.response.data.errors;
+          Object.keys(serverErrors).forEach((key) => {
+            setError(key, {
+              type: "server",
+              message: serverErrors[key][0],
+            });
+          });
+        }
+
+        // KASUS 2: Login Gagal / Unauthorized (401)
+        else if (error.response.status === 401) {
+          setError("email", {
+            type: "manual",
+            message: "Email atau password salah",
+          });
+          setError("password", { 
+            type: "manual",
+            message: "Cek kembali password Anda",
+          });
+          
+        }
+
+        // KASUS 3: Error Server Lain (500, dll)
+        else {
+          setError("email", {
+            type: "manual",
+            message: "Terjadi kesalahan server. Coba lagi nanti.",
+          });
+        }
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-center items-center">
       <div className="flex flex-row w-full gap-28 max-w-7xl px-30 pt-6">
         <div className="w-1/3 items-center flex justify-center">
           <img src="/avatar-auth.png" width={200} alt="avatar-auth" />
         </div>
-        <form className="flex flex-col gap-5 w-1/2 max-w-md justify-center">
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-5 w-1/2 max-w-md justify-center"
+        >
           <div className="flex flex-col">
-            <h1
-              className="font-bold text-3xl bg-linear-to-r from-[#074799] to-[#3DBDC2] bg-clip-text text-transparent"
-            >Hello, Stuideners</h1>
+            <h1 className="font-bold text-3xl bg-linear-to-r from-[#074799] to-[#3DBDC2] bg-clip-text text-transparent">
+              Hello, Stuideners
+            </h1>
             <p className="text-muted-foreground">
               Masuk untuk melanjutkan ke akunmu
             </p>
           </div>
+
+          {/* EMAIL INPUT */}
           <div className="flex flex-col gap-3">
             <Label htmlFor="email">Email</Label>
             <Input
               type="email"
               id="email"
-              className={"h-10"}
+              className={`h-10 ${
+                errors.email ? "border-red-500 focus-visible:ring-red-500" : ""
+              }`}
               placeholder="contoh: email@domain.com"
+              {...register("email")} // Integrasi hook form
             />
+
+            {errors.email && (
+              <span className="text-sm text-red-500 font-medium">
+                {errors.email.message}
+              </span>
+            )}
           </div>
+
           <div className="flex flex-col gap-3">
             <Label htmlFor="password">Password</Label>
             <Input
               type="password"
               id="password"
-              className={"h-10"}
+              className={`h-10 ${
+                errors.password
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              }`}
               placeholder="Masukkan password Anda"
+              {...register("password")} // Integrasi hook form
             />
+
+            {errors.password && (
+              <span className="text-sm text-red-500 font-medium">
+                {errors.password.message}
+              </span>
+            )}
           </div>
-          <Button type="submit" className="h-10 bg-linear-to-r from-[#074799] to-[#3DBDC2] cursor-pointer" >
+
+          <Button
+            type="submit"
+            className="h-10 bg-linear-to-r from-[#074799] to-[#3DBDC2] cursor-pointer"
+          >
             Masuk
           </Button>
+
           <div className="relative flex items-center justify-center text-xs text-muted-foreground">
             <span className="absolute bg-background px-2">
               atau masuk dengan
             </span>
             <hr className="w-full border-t border-gray-300" />
-          </div> 
-          <Button variant="outline" className="w-full h-10 cursor-pointer">
+          </div>
+
+          <Button
+            variant="outline"
+            type="button"
+            className="w-full h-10 cursor-pointer"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 48 48"
-              
               width="24"
               height="24"
             >
@@ -76,7 +194,10 @@ export const LoginPage = () => {
           </Button>
           <div className="text-center text-sm text-muted-foreground">
             Belum punya akun?{" "}
-            <Link to="/register" className="text-primary hover:underline cursor-pointer">
+            <Link
+              to="/register"
+              className="text-primary hover:underline cursor-pointer"
+            >
               Register
             </Link>
           </div>
@@ -86,10 +207,9 @@ export const LoginPage = () => {
         <svg
           viewBox="0 100 1440 220"
           xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none" // Agar wave tidak gepeng saat di-resize
+          preserveAspectRatio="none"
           className="w-full h-auto block"
         >
-          {/* Definisi Gradasi Warna */}
           <defs>
             <linearGradient
               id="gradient-wave"
@@ -98,14 +218,10 @@ export const LoginPage = () => {
               x2="100%"
               y2="0%"
             >
-              {/* Warna Biru Gelap (Kiri) */}
               <stop offset="0%" stopColor="#074799" />
-              {/* Warna Biru Terang/Cyan (Kanan) */}
               <stop offset="100%" stopColor="#3DBDC2" />
             </linearGradient>
           </defs>
-
-          {/* Gambar Gelombang */}
           <path
             fill="url(#gradient-wave)"
             fillOpacity="1"
