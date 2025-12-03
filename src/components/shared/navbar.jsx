@@ -30,6 +30,8 @@ import {
 import { Input } from "../ui/input";
 
 export const Navbar = () => {
+  const isLoggedIn = true; // Hardcoded for demo based on image
+
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="mx-auto flex h-16 w-full items-center justify-between px-6 gap-4">
@@ -180,20 +182,32 @@ export const Navbar = () => {
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Link
-            to="/login"
-            className="text-sm font-medium hover:text-primary transition-colors"
-          >
-            <Button variant="outline" size="sm" className="cursor-pointer ">
-              Login
-            </Button>
-          </Link>
-          <Button
-            size="sm"
-            className="cursor-pointer"
-          >
-            Register
-          </Button>
+          {isLoggedIn ? (
+            <div className="flex items-center gap-3 bg-cyan-500 text-white px-3 py-1.5 rounded-full">
+              <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden border-2 border-white">
+                <img
+                  src="https://github.com/shadcn.png"
+                  alt="User"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="text-sm font-medium pr-2">Bima Adsandita</span>
+            </div>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                <Button variant="outline" size="sm" className="cursor-pointer ">
+                  Login
+                </Button>
+              </Link>
+              <Button size="sm" className="cursor-pointer">
+                Register
+              </Button>
+            </>
+          )}
         </div>
 
         <Sheet>
