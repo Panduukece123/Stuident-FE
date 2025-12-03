@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router"; 
+import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,6 +8,7 @@ import axios from "axios"; // Jangan lupa import axios
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import authService from "@/services/AuthService";
 
 // 1. Definisikan Schema Zod
 const registerSchema = z
@@ -17,9 +18,8 @@ const registerSchema = z
       .min(1, "Nama wajib diisi")
       .max(255, "Nama maksimal 255 karakter"),
     email: z
-      .string()
-      .min(1, "Email wajib diisi")
-      .email("Format email tidak valid"), 
+      .email({ error: "Format email tidak valid" })
+      .max(255, { error: "Email maksimal 255 karakter" }),
     password: z
       .string()
       .min(1, "Password wajib diisi")
@@ -34,8 +34,8 @@ const registerSchema = z
   });
 
 export const RegisterPage = () => {
-  const navigate = useNavigate(); 
-  const [isLoading, setIsLoading] = useState(false); 
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   // 2. Setup React Hook Form
   const {
@@ -58,38 +58,37 @@ export const RegisterPage = () => {
     setIsLoading(true);
 
     try {
+      // 1. Siapkan Payload (Mapping data tetap dilakukan disini)
       const payload = {
         name: data.name,
         email: data.email,
         password: data.password,
-        password_confirmation: data.confirmPassword, 
+        password_confirmation: data.confirmPassword, // Mapping
+        role: "student", // Hardcode role
       };
 
-      // Tembak API Register
-      const response = await axios.post("http://localhost:8000/api/register", payload);
+      // 2. PANGGIL SERVICE (Ganti axios.post manual)
+      const responseData = await authService.register(payload);
 
-      console.log("Register Berhasil:", response.data);
-
-      // Skenario 2: Redirect ke Login (User harus login ulang) - Lebih umum
+      console.log("Register Berhasil:", responseData);
+      
       navigate("/login");
       alert("Registrasi berhasil! Silakan login.");
 
     } catch (error) {
       console.error("Register Gagal:", error);
 
+      // Error handling tetap sama karena authService melempar error axios asli
       if (error.response && error.response.status === 422) {
         const serverErrors = error.response.data.errors;
-        
-        // Loop error dari Laravel
         Object.keys(serverErrors).forEach((key) => {
           setError(key, {
             type: "server",
             message: serverErrors[key][0],
           });
         });
-
       } else {
-        alert("Terjadi kesalahan sistem. Coba lagi nanti.");
+        alert("Terjadi kesalahan sistem.");
       }
     } finally {
       setIsLoading(false);
@@ -103,8 +102,8 @@ export const RegisterPage = () => {
           <img src="/avatar-auth.png" width={200} alt="avatar-auth" />
         </div>
 
-        <form 
-          onSubmit={handleSubmit(onSubmit)} 
+        <form
+          onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-5 w-1/2 max-w-md justify-center"
         >
           <div className="flex flex-col">
@@ -122,7 +121,9 @@ export const RegisterPage = () => {
               type="text"
               id="name"
               disabled={isLoading}
-              className={`h-10 ${errors.name ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              className={`h-10 ${
+                errors.name ? "border-red-500 focus-visible:ring-red-500" : ""
+              }`}
               placeholder="Masukkan nama lengkap Anda"
               {...register("name")}
             />
@@ -139,7 +140,9 @@ export const RegisterPage = () => {
               type="email"
               id="email"
               disabled={isLoading}
-              className={`h-10 ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              className={`h-10 ${
+                errors.email ? "border-red-500 focus-visible:ring-red-500" : ""
+              }`}
               placeholder="contoh: email@domain.com"
               {...register("email")}
             />
@@ -156,7 +159,11 @@ export const RegisterPage = () => {
               type="password"
               id="password"
               disabled={isLoading}
-              className={`h-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              className={`h-10 ${
+                errors.password
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              }`}
               placeholder="Masukkan password Anda"
               {...register("password")}
             />
@@ -173,7 +180,11 @@ export const RegisterPage = () => {
               type="password"
               id="confirm-password"
               disabled={isLoading}
-              className={`h-10 ${errors.confirmPassword ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              className={`h-10 ${
+                errors.confirmPassword
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : ""
+              }`}
               placeholder="Konfirmasi password Anda"
               {...register("confirmPassword")}
             />
@@ -199,9 +210,13 @@ export const RegisterPage = () => {
             <hr className="w-full border-t border-gray-300" />
           </div>
 
-          <Button variant="outline" type="button" className="w-full h-10 cursor-pointer">
-             {/* ... SVG Google ... */}
-             <svg
+          <Button
+            variant="outline"
+            type="button"
+            className="w-full h-10 cursor-pointer"
+          >
+            {/* ... SVG Google ... */}
+            <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 48 48"
               width="24"
@@ -238,7 +253,7 @@ export const RegisterPage = () => {
           </div>
         </form>
       </div>
-      
+
       {/* Wave Background */}
       <div className="w-full overflow-hidden leading-none">
         <svg
@@ -248,7 +263,13 @@ export const RegisterPage = () => {
           className="w-full h-auto block"
         >
           <defs>
-            <linearGradient id="gradient-wave" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient
+              id="gradient-wave"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
               <stop offset="0%" stopColor="#074799" />
               <stop offset="100%" stopColor="#3DBDC2" />
             </linearGradient>

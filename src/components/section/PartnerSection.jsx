@@ -23,8 +23,9 @@ export const Partner = () => {
         {/* --- HEADER SECTION --- */}
         <div className="flex flex-col gap-3 items-center text-center">
           <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
-            Jaringan Pakar Kami Berasal Dari
+            Partner Kami
           </h1>
+          <div className="mx-auto h-1 w-28 rounded-full bg-primary" />
           <p className="text-sm md:text-base text-muted-foreground w-full md:w-2/3 lg:w-1/2">
             Para mentor kami adalah praktisi aktif yang membawa pengalaman dunia
             nyata dari perusahaan teknologi terdepan.

@@ -11,6 +11,7 @@ export const Highlight = () => {
         <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
           Temukan Jalur Belajar Terbaik Anda
         </h1>
+        <div className="mx-auto h-1 w-96 rounded-full bg-primary" />
         <p className="text-base md:text-lg text-muted-foreground w-full md:w-3/5">
           Kami menyediakan beragam format pembelajaran untuk menyesuaikan dengan
           gaya dan kesibukan Anda.

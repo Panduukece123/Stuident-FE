@@ -27,11 +27,11 @@ export const Infografis = () => {
           
           {/* BAGIAN KIRI: TEKS */}
           {/* Mobile: w-full (100%), Laptop: w-1/3 (33%) */}
-          <div className="w-full lg:w-1/3 flex flex-col gap-4 lg:gap-5 text-center lg:text-left">
-            <h1 className="text-xl md:text-2xl font-semibold text-white">
+          <div className="w-full lg:w-2/5 flex flex-col gap-4 lg:gap-5 text-center lg:text-left">
+            <h1 className="text-xl md:text-2xl font-semibold text-white text-center">
               STUIDENT (Synergy Development Unit of International Student)
             </h1>
-            <p className="text-sm text-justify text-white/90 leading-relaxed">
+            <p className="text-base text-justify text-white/90 leading-relaxed">
               Stuident adalah platform terintegrasi untuk manajemen beasiswa,
               mentorship, dan pengembangan mahasiswa, dirancang untuk
               menjembatani mahasiswa, institusi, dan peluang global. Kami
