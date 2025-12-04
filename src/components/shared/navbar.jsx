@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom"; // 1. Tambah useLocation
+import { Link, useLocation, useNavigate } from "react-router-dom"; // 1. Tambah useLocation
 import { Menu, Search } from "lucide-react";
 import Logo from "../../assets/images/stuident-logo.svg";
 
@@ -30,12 +30,18 @@ import { Input } from "../ui/input";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
- DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
 export const Navbar = () => {
   // 2. Ambil lokasi URL saat ini
   const location = useLocation();
+  const navigate = useNavigate();
   const pathname = location.pathname;
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -87,12 +93,10 @@ export const Navbar = () => {
               {/* E-LEARNING */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger
-                  // Cek apakah URL diawali dengan parent path (opsional logic)
+                  // Kalau diklik Trigger-nya, dia ke paling atas halaman E-Learning
+                  onClick={() => navigate("/e-learning")}
                   className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! data-[state=open]:text-primary ${
-                    pathname.includes("/course") ||
-                    pathname.includes("/bootcamp")
-                      ? "text-primary"
-                      : ""
+                    pathname === "/e-learning" ? "text-primary" : ""
                   }`}
                 >
                   E-Learning
@@ -101,13 +105,10 @@ export const Navbar = () => {
                   <ul className="grid gap-2 w-56 lg:grid-rows-[.75fr_1fr]">
                     <li>
                       <NavigationMenuLink asChild>
+                        {/* PERUBAHAN DISINI: Tambah #course */}
                         <Link
-                          to="/course"
-                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${
-                            pathname === "/course"
-                              ? "bg-accent/50 text-primary"
-                              : ""
-                          }`}
+                          to="/e-learning#course"
+                          className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
                         >
                           <div className="font-medium text-foreground">
                             Course
@@ -120,13 +121,10 @@ export const Navbar = () => {
                     </li>
                     <li>
                       <NavigationMenuLink asChild>
+                        {/* PERUBAHAN DISINI: Tambah #bootcamp */}
                         <Link
-                          to="/bootcamp"
-                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${
-                            pathname === "/bootcamp"
-                              ? "bg-accent/50 text-primary"
-                              : ""
-                          }`}
+                          to="/e-learning#bootcamp"
+                          className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
                         >
                           <div className="font-medium text-foreground">
                             Bootcamp
@@ -227,31 +225,33 @@ export const Navbar = () => {
           <div className="hidden items-center gap-2 md:flex">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
+                <Button
+                  variant="ghost"
+                  className="relative bg-primary hover:bg-primary/50 flex flex-row gap-2 focus-visible:ring-0 cursor-pointer"
+                >
+                  <Avatar className="h-6 w-6">
                     <AvatarImage src="/avatars/01.png" alt="@shadcn" />
                     <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                   </Avatar>
+                  <h1 className="text-white">{user.name}</h1>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {user.name}
+                    </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  Profile
+                <DropdownMenuItem className={"cursor-pointer"}>
+                  <Link to="/profile">Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem className={"cursor-pointer"}>
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -347,43 +347,50 @@ export const Navbar = () => {
                 <div className="mt-3 flex flex-col gap-3">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Button
+                        variant="ghost"
+                        className="relative h-8 w-8 rounded-full"
+                      >
                         <Avatar className="h-8 w-8">
                           <AvatarImage src="/avatars/01.png" alt="@shadcn" />
                           <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuContent
+                      className="w-56"
+                      align="end"
+                      forceMount
+                    >
                       <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">{user.name}</p>
+                          <p className="text-sm font-medium leading-none">
+                            {user.name}
+                          </p>
                           <p className="text-xs leading-none text-muted-foreground">
                             {user.email}
                           </p>
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        Settings
-                      </DropdownMenuItem>
+                      <DropdownMenuItem>Profile</DropdownMenuItem>
+                      <DropdownMenuItem>Settings</DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>
-                        Log out
-                      </DropdownMenuItem>
+                      <DropdownMenuItem>Log out</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               ) : (
                 <div className="mt-3 flex flex-col gap-3">
                   <Link to="/register">
-                    <Button className="w-full" size="sm">Register</Button>
+                    <Button className="w-full" size="sm">
+                      Register
+                    </Button>
                   </Link>
                   <Link to="/login">
-                    <Button variant="outline" className="w-full" size="sm">Login</Button>
+                    <Button variant="outline" className="w-full" size="sm">
+                      Login
+                    </Button>
                   </Link>
                 </div>
               )}
