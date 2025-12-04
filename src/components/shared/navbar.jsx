@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router"; // 1. Tambah useLocation
+import { Link, useLocation } from "react-router-dom"; // 1. Tambah useLocation
 import { Menu, Search } from "lucide-react";
 import Logo from "../../assets/images/stuident-logo.svg";
 
@@ -28,10 +28,17 @@ import {
 } from "../ui/accordion";
 import { Input } from "../ui/input";
 
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import {
+ DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
+} from "../ui/dropdown-menu";
+
 export const Navbar = () => {
   // 2. Ambil lokasi URL saat ini
   const location = useLocation();
   const pathname = location.pathname;
+
+  const user = JSON.parse(localStorage.getItem("user"));
 
   // Helper function buat Mobile Menu (biar kodingan rapi)
   const getMobileLinkClass = (path) => {
@@ -65,7 +72,6 @@ export const Navbar = () => {
         <div className="hidden md:flex md:flex-1 md:justify-start">
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
-              
               {/* HOME LINK */}
               <NavigationMenuItem>
                 {/* Gunakan asChild agar bisa pakai Link router */}
@@ -80,9 +86,14 @@ export const Navbar = () => {
 
               {/* E-LEARNING */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger 
+                <NavigationMenuTrigger
                   // Cek apakah URL diawali dengan parent path (opsional logic)
-                  className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! data-[state=open]:text-primary ${pathname.includes('/course') || pathname.includes('/bootcamp') ? 'text-primary' : ''}`}
+                  className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! data-[state=open]:text-primary ${
+                    pathname.includes("/course") ||
+                    pathname.includes("/bootcamp")
+                      ? "text-primary"
+                      : ""
+                  }`}
                 >
                   E-Learning
                 </NavigationMenuTrigger>
@@ -92,10 +103,18 @@ export const Navbar = () => {
                       <NavigationMenuLink asChild>
                         <Link
                           to="/course"
-                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${pathname === "/course" ? "bg-accent/50 text-primary" : ""}`}
+                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${
+                            pathname === "/course"
+                              ? "bg-accent/50 text-primary"
+                              : ""
+                          }`}
                         >
-                          <div className="font-medium text-foreground">Course</div>
-                          <div className="text-muted-foreground text-xs">Belajar bareng mitra terbaik</div>
+                          <div className="font-medium text-foreground">
+                            Course
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            Belajar bareng mitra terbaik
+                          </div>
                         </Link>
                       </NavigationMenuLink>
                     </li>
@@ -103,10 +122,18 @@ export const Navbar = () => {
                       <NavigationMenuLink asChild>
                         <Link
                           to="/bootcamp"
-                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${pathname === "/bootcamp" ? "bg-accent/50 text-primary" : ""}`}
+                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${
+                            pathname === "/bootcamp"
+                              ? "bg-accent/50 text-primary"
+                              : ""
+                          }`}
                         >
-                          <div className="font-medium text-foreground">Bootcamp</div>
-                          <div className="text-muted-foreground text-xs">Program intensif siap kerja</div>
+                          <div className="font-medium text-foreground">
+                            Bootcamp
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            Program intensif siap kerja
+                          </div>
                         </Link>
                       </NavigationMenuLink>
                     </li>
@@ -136,14 +163,36 @@ export const Navbar = () => {
                       <NavigationMenuLink asChild>
                         <Link
                           to="/life-plan"
-                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${pathname === "/life-plan" ? "bg-accent/50 text-primary" : ""}`}
+                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${
+                            pathname === "/life-plan"
+                              ? "bg-accent/50 text-primary"
+                              : ""
+                          }`}
                         >
-                          <div className="font-medium text-foreground">Life Plan Mentoring</div>
-                          <div className="text-muted-foreground text-xs">Mentoring rencana hidup</div>
+                          <div className="font-medium text-foreground">
+                            Life Plan Mentoring
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            Mentoring rencana hidup
+                          </div>
                         </Link>
                       </NavigationMenuLink>
                     </li>
-                    {/* ... item lainnya ... */}
+                    <li>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="#"
+                          className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
+                        >
+                          <div className="font-medium text-foreground">
+                            Academic Mentoring
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            Bimbingan akademik
+                          </div>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
@@ -173,30 +222,56 @@ export const Navbar = () => {
           </NavigationMenu>
         </div>
 
-        {/* --- BUTTONS --- */}
-        <div className="hidden items-center gap-2 md:flex">
-          <Link
-            to="/login"
-          >
-            <Button 
-                variant={pathname === "/login" ? "default" : "outline"} // Ubah variant kalau aktif
-                size="sm" 
-                className="cursor-pointer"
-            >
-              Login
-            </Button>
-          </Link>
-          <Link to="/register">
-            <Button 
-                variant={pathname === "/register" ? "secondary" : "default"} // Ubah variant kalau aktif
-                size="sm" 
-                className="cursor-pointer"
-            >
-              Register
-            </Button>
-          </Link>
-        </div>
-
+        {user ? (
+          // Jika user sudah login
+          <div className="hidden items-center gap-2 md:flex">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="/avatars/01.png" alt="@shadcn" />
+                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
+          // Jika user belum login
+          <div className="hidden items-center gap-2 md:flex">
+            <Link to="/login">
+              <Button variant={"outline"} size="sm" className="cursor-pointer">
+                Login
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button size="sm" className="cursor-pointer">
+                Register
+              </Button>
+            </Link>
+          </div>
+        )}
         {/* --- MOBILE SHEET --- */}
         <Sheet>
           <SheetTrigger asChild>
@@ -216,7 +291,6 @@ export const Navbar = () => {
 
             <div className="flex flex-col gap-4 mt-4">
               <div className="flex flex-col space-y-3">
-                
                 {/* 4. Logic Active Mobile */}
                 <Link to="/" className={getMobileLinkClass("/")}>
                   Home
@@ -224,25 +298,43 @@ export const Navbar = () => {
 
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="elearning" className="border-b-0">
-                    <AccordionTrigger className={`cursor-pointer text-sm hover:no-underline hover:text-primary ${pathname.includes('course') ? 'text-primary font-bold' : 'font-medium'}`}>
+                    <AccordionTrigger
+                      className={`cursor-pointer text-sm hover:no-underline hover:text-primary ${
+                        pathname.includes("course")
+                          ? "text-primary font-bold"
+                          : "font-medium"
+                      }`}
+                    >
                       E-Learning
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col space-y-2 pl-4 border-l ml-2">
-                      <Link to="/course" className={getMobileLinkClass("/course")}>
+                      <Link
+                        to="/course"
+                        className={getMobileLinkClass("/course")}
+                      >
                         Course
                       </Link>
-                      <Link to="/bootcamp" className={getMobileLinkClass("/bootcamp")}>
+                      <Link
+                        to="/bootcamp"
+                        className={getMobileLinkClass("/bootcamp")}
+                      >
                         Bootcamp
                       </Link>
                     </AccordionContent>
                   </AccordionItem>
-                   {/* ... Accordion Mentor sama logikanya ... */}
+                  {/* ... Accordion Mentor sama logikanya ... */}
                 </Accordion>
 
-                <Link to="/scholarship" className={getMobileLinkClass("/scholarship")}>
+                <Link
+                  to="/scholarship"
+                  className={getMobileLinkClass("/scholarship")}
+                >
                   Scholarship
                 </Link>
-                <Link to="/corporate" className={getMobileLinkClass("/corporate")}>
+                <Link
+                  to="/corporate"
+                  className={getMobileLinkClass("/corporate")}
+                >
                   Corporate Service
                 </Link>
                 <Link to="/article" className={getMobileLinkClass("/article")}>
@@ -250,14 +342,51 @@ export const Navbar = () => {
                 </Link>
               </div>
 
-              <div className="mt-3 flex flex-col gap-3">
-                <Link to="/register">
+              {user ? (
+                // Jika user sudah login di mobile
+                <div className="mt-3 flex flex-col gap-3">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src="/avatars/01.png" alt="@shadcn" />
+                          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{user.name}</p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {user.email}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        Settings
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        Log out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="mt-3 flex flex-col gap-3">
+                  <Link to="/register">
                     <Button className="w-full" size="sm">Register</Button>
-                </Link>
-                <Link to="/login">
+                  </Link>
+                  <Link to="/login">
                     <Button variant="outline" className="w-full" size="sm">Login</Button>
-                </Link>
-              </div>
+                  </Link>
+                </div>
+              )}
             </div>
           </SheetContent>
         </Sheet>
