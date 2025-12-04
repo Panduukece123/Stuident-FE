@@ -16,11 +16,11 @@ function App() {
         <Routes>
           <Route path="/" element={<AppLayout />}>
             <Route index element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
 
-            <Route path="/profile" element={<ProfileLayout />}>
-              <Route index element={<MyProfile />} />
+            <Route path="profile" element={<ProfileLayout />}>
+              <Route path="my-profile" element={<MyProfile />} />
             </Route>
           </Route>
         </Routes>
