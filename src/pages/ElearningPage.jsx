@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Navbar } from "../components/shared/navbar";
 import { Footer } from "../components/shared/footer"; // Assuming Footer exists
-import { Header } from "../components/section/HeaderSection";
+import { ElearningBanner } from "../components/section/ElearningBanner";
 import { ElearningCategories } from "../components/section/ElearningCategories";
 import { ElearningCourseList } from "../components/section/ElearningCourseList";
+import ElearningService from "../services/elearningService";
 
 export const ElearningPage = () => {
   const [courses, setCourses] = useState([]);
@@ -15,56 +15,20 @@ export const ElearningPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const fetchCourses = async () => {
+  const fetchCoursesData = async () => {
     try {
       setLoading(true);
-      console.log(`Fetching all courses...`);
-      // Fetch all courses (or as many as API returns in one page)
-      const response = await axios.get(`/api/courses`);
-      console.log("Response received:", response);
-
-      const responseData = response.data;
-      const data = responseData.data || [];
-
-      if (Array.isArray(data)) {
-        const mappedCourses = data.map((course) => ({
-          title: course.title || "Untitled Course",
-          level: course.level || "Beginner",
-          rating: course.rating || 4.8,
-          reviews: course.reviews_count || 120,
-          description: course.description || "No description available.",
-          price: course.price ? Number(course.price) : 0,
-          image: course.image_url || null,
-          instructor: course.instructor,
-          category: course.category || "Umum", // Map category
-        }));
-
-        // Store ALL fetched courses
-        setCourses(mappedCourses);
-      } else {
-        console.error("API response is not an array:", data);
-        setCourses([]);
-      }
+      const data = await ElearningService.fetchCourses();
+      setCourses(data);
     } catch (err) {
-      console.error("Error fetching courses:", err);
-      let errorMessage = "Gagal memuat data kursus.";
-
-      if (err.response) {
-        errorMessage += ` Server Error: ${err.response.status} ${err.response.statusText}`;
-      } else if (err.request) {
-        errorMessage += " Tidak ada respon dari server.";
-      } else {
-        errorMessage += ` ${err.message}`;
-      }
-
-      setError(errorMessage);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCourses();
+    fetchCoursesData();
   }, []);
 
   // Calculate pagination values
@@ -97,7 +61,7 @@ export const ElearningPage = () => {
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
         <p className="text-red-500 font-medium">{error}</p>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => fetchCoursesData()}
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
         >
           Coba Lagi
@@ -115,7 +79,7 @@ export const ElearningPage = () => {
       */}
 
       <main className="flex-1">
-        <Header />
+        <ElearningBanner />
         <ElearningCategories categories={uniqueCategories} />
 
         {/* Using the same fetched courses for demonstration.  
