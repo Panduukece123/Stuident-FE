@@ -10,6 +10,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<AppLayout />}>
             <Route index element={<HomePage />} />

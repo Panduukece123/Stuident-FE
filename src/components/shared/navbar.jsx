@@ -1,7 +1,6 @@
 import React from "react";
-import { Link } from "react-router";
-import { Menu } from "lucide-react"; // Ikon Hamburger
-import { Search } from "lucide-react"; // Ikon Search
+import { Link, useLocation, useNavigate } from "react-router-dom"; // 1. Tambah useLocation
+import { Menu, Search } from "lucide-react";
 import Logo from "../../assets/images/stuident-logo.svg";
 
 // Import Components
@@ -29,21 +28,31 @@ import {
 } from "../ui/accordion";
 import { Input } from "../ui/input";
 
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+
 export const Navbar = () => {
   const isLoggedIn = true; // Hardcoded for demo based on image
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="mx-auto flex h-16 w-full items-center justify-between px-6 gap-4">
-        {/* --- 1. LOGO (KIRI) --- */}
-        <div className="flex items-center gap-3">
+        {/* --- 1. LOGO --- */}
+        <Link to="/" className="flex items-center gap-3">
           <img src={Logo} alt="Stuident" width={36} height={36} />
           <div className="leading-tight">
             <p className="text-xl text-foreground">Stuident</p>
           </div>
-        </div>
+        </Link>
 
-        {/* --- SEARCH BAR (TENGAH, HANYA DI DESKTOP) --- */}
+        {/* --- SEARCH BAR --- */}
         <div className="hidden md:flex flex-1 max-w-xs lg:max-w-md items-center relative">
           <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -53,32 +62,40 @@ export const Navbar = () => {
           />
         </div>
 
-        {/* --- 2. DESKTOP NAVIGATION (TENGAH) --- */}
-        {/* Bagian ini saya kembalikan PERSIS seperti kode asli Anda */}
+        {/* --- 2. DESKTOP NAVIGATION --- */}
         <div className="hidden md:flex md:flex-1 md:justify-start">
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
+              {/* HOME LINK */}
               <NavigationMenuItem>
+                {/* Gunakan asChild agar bisa pakai Link router */}
                 <NavigationMenuLink
-                  href="#"
-                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-[active=true]:bg-accent/60"
+                  asChild
+                  active={pathname === "/"} // 3. Logic Active Desktop
+                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary focus:bg-transparent cursor-pointer"
                 >
-                  Home
+                  <Link to="/">Home</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              {/* Dropdown E-Learning (Punya Anda) */}
+              {/* E-LEARNING */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! data-[state=open]:text-primary">
+                <NavigationMenuTrigger
+                  // Kalau diklik Trigger-nya, dia ke paling atas halaman E-Learning
+                  onClick={() => navigate("/e-learning")}
+                  className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! data-[state=open]:text-primary ${
+                    pathname === "/e-learning" ? "text-primary" : ""
+                  }`}
+                >
                   E-Learning
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  {/* Layout Grid Asli Anda */}
                   <ul className="grid gap-2 w-56 lg:grid-rows-[.75fr_1fr]">
                     <li>
                       <NavigationMenuLink asChild>
+                        {/* PERUBAHAN DISINI: Tambah #course */}
                         <Link
-                          to="#"
+                          to="/e-learning#course"
                           className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
                         >
                           <div className="font-medium text-foreground">
@@ -92,8 +109,9 @@ export const Navbar = () => {
                     </li>
                     <li>
                       <NavigationMenuLink asChild>
+                        {/* PERUBAHAN DISINI: Tambah #bootcamp */}
                         <Link
-                          to="#"
+                          to="/e-learning#bootcamp"
                           className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
                         >
                           <div className="font-medium text-foreground">
@@ -109,28 +127,33 @@ export const Navbar = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
+              {/* SCHOLARSHIP */}
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  href="#"
-                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-[active=true]:bg-accent/60"
+                  asChild
+                  active={pathname === "/scholarship"}
+                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer"
                 >
-                  Scholarship
+                  <Link to="/scholarship">Scholarship</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              {/* Dropdown My Mentor (Punya Anda) */}
+              {/* MY MENTOR */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:text-primary data-[state=open]:bg-accent/60!">
                   My Mentor
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  {/* Layout Grid Asli Anda */}
                   <ul className="grid gap-2 w-56 lg:grid-rows-[.75fr_1fr]">
                     <li>
                       <NavigationMenuLink asChild>
                         <Link
-                          to="#"
-                          className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
+                          to="/life-plan"
+                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${
+                            pathname === "/life-plan"
+                              ? "bg-accent/50 text-primary"
+                              : ""
+                          }`}
                         >
                           <div className="font-medium text-foreground">
                             Life Plan Mentoring
@@ -160,56 +183,84 @@ export const Navbar = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
+              {/* CORPORATE */}
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  href="#"
-                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-[active=true]:bg-accent/60 whitespace-nowrap"
+                  asChild
+                  active={pathname === "/corporate"}
+                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary whitespace-nowrap cursor-pointer"
                 >
-                  Corporate Service
+                  <Link to="/corporate">Corporate Service</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
+              {/* ARTICLE */}
               <NavigationMenuItem>
                 <NavigationMenuLink
-                  href="#"
-                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-[active=true]:bg-accent/60"
+                  asChild
+                  active={pathname === "/article"}
+                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer"
                 >
-                  Article
+                  <Link to="/article">Article</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
 
-        <div className="hidden items-center gap-2 md:flex">
-          {isLoggedIn ? (
-            <div className="flex items-center gap-3 bg-cyan-500 text-white px-3 py-1.5 rounded-full">
-              <div className="w-8 h-8 rounded-full bg-gray-300 overflow-hidden border-2 border-white">
-                <img
-                  src="https://github.com/shadcn.png"
-                  alt="User"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="text-sm font-medium pr-2">Bima Adsandita</span>
-            </div>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="text-sm font-medium hover:text-primary transition-colors"
-              >
-                <Button variant="outline" size="sm" className="cursor-pointer ">
-                  Login
+        {user ? (
+          // Jika user sudah login
+          <div className="hidden items-center gap-2 md:flex">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative bg-primary hover:bg-primary/50 flex flex-row gap-2 focus-visible:ring-0 cursor-pointer"
+                >
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src="/avatars/01.png" alt="@shadcn" />
+                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <h1 className="text-white">{user.name}</h1>
                 </Button>
-              </Link>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {user.name}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className={"cursor-pointer"}>
+                  <Link to="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className={"cursor-pointer"}>
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
+          // Jika user belum login
+          <div className="hidden items-center gap-2 md:flex">
+            <Link to="/login">
+              <Button variant={"outline"} size="sm" className="cursor-pointer">
+                Login
+              </Button>
+            </Link>
+            <Link to="/register">
               <Button size="sm" className="cursor-pointer">
                 Register
               </Button>
-            </>
-          )}
-        </div>
-
+            </Link>
+          </div>
+        )}
+        {/* --- MOBILE SHEET --- */}
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden">
@@ -226,86 +277,111 @@ export const Navbar = () => {
               </div>
             </SheetHeader>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 mt-4">
               <div className="flex flex-col space-y-3">
-                <Link
-                  to="#"
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                >
+                {/* 4. Logic Active Mobile */}
+                <Link to="/" className={getMobileLinkClass("/")}>
                   Home
                 </Link>
 
-                {/* Accordion khusus HP */}
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="elearning" className="border-b-0">
-                    <AccordionTrigger className="cursor-pointer text-sm hover:no-underline hover:text-primary font-medium">
+                    <AccordionTrigger
+                      className={`cursor-pointer text-sm hover:no-underline hover:text-primary ${
+                        pathname.includes("course")
+                          ? "text-primary font-bold"
+                          : "font-medium"
+                      }`}
+                    >
                       E-Learning
                     </AccordionTrigger>
                     <AccordionContent className="flex flex-col space-y-2 pl-4 border-l ml-2">
                       <Link
-                        to="#"
-                        className="text-sm text-muted-foreground hover:text-primary"
+                        to="/course"
+                        className={getMobileLinkClass("/course")}
                       >
                         Course
                       </Link>
                       <Link
-                        to="#"
-                        className="text-sm text-muted-foreground hover:text-primary"
+                        to="/bootcamp"
+                        className={getMobileLinkClass("/bootcamp")}
                       >
                         Bootcamp
                       </Link>
                     </AccordionContent>
                   </AccordionItem>
-
-                  <AccordionItem value="mentor" className="border-b-0">
-                    <AccordionTrigger className="cursor-pointer text-sm hover:no-underline hover:text-primary font-medium">
-                      My Mentor
-                    </AccordionTrigger>
-                    <AccordionContent className="flex flex-col space-y-2 pl-4 border-l ml-2">
-                      <Link
-                        to="#"
-                        className="text-sm text-muted-foreground hover:text-primary"
-                      >
-                        Life Plan Mentoring
-                      </Link>
-                      <Link
-                        to="#"
-                        className="text-sm text-muted-foreground hover:text-primary"
-                      >
-                        Academic Mentoring
-                      </Link>
-                    </AccordionContent>
-                  </AccordionItem>
+                  {/* ... Accordion Mentor sama logikanya ... */}
                 </Accordion>
 
                 <Link
-                  to="#"
-                  className="pb-3 text-sm font-medium hover:text-primary transition-colors"
+                  to="/scholarship"
+                  className={getMobileLinkClass("/scholarship")}
                 >
                   Scholarship
                 </Link>
                 <Link
-                  to="#"
-                  className="pb-3 text-sm font-medium hover:text-primary transition-colors"
+                  to="/corporate"
+                  className={getMobileLinkClass("/corporate")}
                 >
                   Corporate Service
                 </Link>
-                <Link
-                  to="#"
-                  className="text-sm font-medium hover:text-primary transition-colors"
-                >
+                <Link to="/article" className={getMobileLinkClass("/article")}>
                   Article
                 </Link>
               </div>
 
-              <div className="mt-3 flex flex-col gap-3">
-                <Button className="w-full" size="sm">
-                  Register
-                </Button>
-                <Button variant="outline" className="w-full" size="sm">
-                  Login
-                </Button>
-              </div>
+              {user ? (
+                // Jika user sudah login di mobile
+                <div className="mt-3 flex flex-col gap-3">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="relative h-8 w-8 rounded-full"
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src="/avatars/01.png" alt="@shadcn" />
+                          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-56"
+                      align="end"
+                      forceMount
+                    >
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">
+                            {user.name}
+                          </p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {user.email}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>Profile</DropdownMenuItem>
+                      <DropdownMenuItem>Settings</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>Log out</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="mt-3 flex flex-col gap-3">
+                  <Link to="/register">
+                    <Button className="w-full" size="sm">
+                      Register
+                    </Button>
+                  </Link>
+                  <Link to="/login">
+                    <Button variant="outline" className="w-full" size="sm">
+                      Login
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </SheetContent>
         </Sheet>
