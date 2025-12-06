@@ -8,7 +8,6 @@ import ScrollToTop from "./components/ScrollToTop";
 import { ProfileLayout } from "./layouts/ProfileLayout";
 import { MyProfile } from "./pages/profile/MyProfile";
 import { MyProfileOrderHistory } from "./pages/profile/MyProfileOrderHistory";
-import { CourseShowPage } from "./pages/course/CourseShowPage";
 
 function App() {
   return (
@@ -25,9 +24,6 @@ function App() {
               <Route path="my-profile" element={<MyProfile />} />
               <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
             </Route>
-
-            <Route path="/coursedetail" element={<CourseShowPage />} />
-              
           </Route>
         </Routes>
       </BrowserRouter>
