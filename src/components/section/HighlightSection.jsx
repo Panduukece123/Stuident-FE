@@ -11,16 +11,16 @@ export const Highlight = () => {
         <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
           Temukan Jalur Belajar Terbaik Anda
         </h1>
+        <div className="mx-auto h-1 w-96 rounded-full bg-primary" />
         <p className="text-base md:text-lg text-muted-foreground w-full md:w-3/5">
           Kami menyediakan beragam format pembelajaran untuk menyesuaikan dengan
           gaya dan kesibukan Anda.
         </p>
       </div>
 
-      <div className="mx-auto max-w-7xl flex flex-col gap-16 md:gap-24">
+      <div className="mx-auto max-w-7xl flex flex-col gap-8 md:gap-12">
         
         {/* --- SECTION 1: E-LEARNING --- */}
-        {/* Normal: Gambar Kiri, Teks Kanan */}
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
           
           {/* Image */}
