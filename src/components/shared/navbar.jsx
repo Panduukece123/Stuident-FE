@@ -1,5 +1,5 @@
-import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom"; // 1. Tambah useLocation
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, Search } from "lucide-react";
 import Logo from "../../assets/images/stuident-logo.svg";
 
@@ -39,24 +39,63 @@ import {
 } from "../ui/dropdown-menu";
 
 export const Navbar = () => {
-  // 2. Ambil lokasi URL saat ini
   const location = useLocation();
   const navigate = useNavigate();
   const pathname = location.pathname;
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  // Initialize user state from localStorage
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  // Helper function buat Mobile Menu (biar kodingan rapi)
+  // Handle Logout
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("/login");
+  };
+
+  // Check token validity on mount
+  useEffect(() => {
+    const checkTokenValidity = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      try {
+        const response = await fetch("http://localhost:8000/api/auth/me", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+          },
+        });
+
+        // Auto logout if token is expired (401)
+        if (response.status === 401) {
+          console.warn("Token expired, auto logging out...");
+          handleLogout();
+        }
+      } catch (error) {
+        console.error("Gagal validasi token", error);
+      }
+    };
+
+    checkTokenValidity();
+  }, []);
+
   const getMobileLinkClass = (path) => {
     return pathname === path
-      ? "text-sm font-bold text-primary transition-colors" // Style Active
-      : "text-sm font-medium text-muted-foreground hover:text-primary transition-colors"; // Style Default
+      ? "text-sm font-bold text-primary transition-colors"
+      : "text-sm font-medium text-muted-foreground hover:text-primary transition-colors";
   };
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="mx-auto flex h-16 w-full items-center justify-between px-6 gap-4">
-        {/* --- 1. LOGO --- */}
+        {/* LOGO */}
         <Link to="/" className="flex items-center gap-3">
           <img src={Logo} alt="Stuident" width={36} height={36} />
           <div className="leading-tight">
@@ -64,7 +103,7 @@ export const Navbar = () => {
           </div>
         </Link>
 
-        {/* --- SEARCH BAR --- */}
+        {/* SEARCH BAR */}
         <div className="hidden md:flex flex-1 max-w-xs lg:max-w-md items-center relative">
           <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -74,16 +113,15 @@ export const Navbar = () => {
           />
         </div>
 
-        {/* --- 2. DESKTOP NAVIGATION --- */}
+        {/* DESKTOP NAVIGATION */}
         <div className="hidden md:flex md:flex-1 md:justify-start">
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
               {/* HOME LINK */}
               <NavigationMenuItem>
-                {/* Gunakan asChild agar bisa pakai Link router */}
                 <NavigationMenuLink
                   asChild
-                  active={pathname === "/"} // 3. Logic Active Desktop
+                  active={pathname === "/"}
                   className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary focus:bg-transparent cursor-pointer"
                 >
                   <Link to="/">Home</Link>
@@ -93,7 +131,6 @@ export const Navbar = () => {
               {/* E-LEARNING */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger
-                  // Kalau diklik Trigger-nya, dia ke paling atas halaman E-Learning
                   onClick={() => navigate("/e-learning")}
                   className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! data-[state=open]:text-primary ${
                     pathname === "/e-learning" ? "text-primary" : ""
@@ -105,7 +142,6 @@ export const Navbar = () => {
                   <ul className="grid gap-2 w-56 lg:grid-rows-[.75fr_1fr]">
                     <li>
                       <NavigationMenuLink asChild>
-                        {/* PERUBAHAN DISINI: Tambah #course */}
                         <Link
                           to="/e-learning#course"
                           className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
@@ -121,7 +157,6 @@ export const Navbar = () => {
                     </li>
                     <li>
                       <NavigationMenuLink asChild>
-                        {/* PERUBAHAN DISINI: Tambah #bootcamp */}
                         <Link
                           to="/e-learning#bootcamp"
                           className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
@@ -248,10 +283,13 @@ export const Navbar = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className={"cursor-pointer"}>
-                  <Link to="/profile">Profile</Link>
+                <DropdownMenuItem className={"cursor-pointer"} asChild>
+                  <Link to="/profile/my-profile">Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className={"cursor-pointer"}>
+                <DropdownMenuItem
+                  className={"cursor-pointer text-red-500 focus:text-red-500"}
+                  onClick={handleLogout}
+                >
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -272,7 +310,8 @@ export const Navbar = () => {
             </Link>
           </div>
         )}
-        {/* --- MOBILE SHEET --- */}
+        
+        {/* MOBILE SHEET */}
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden">
@@ -291,7 +330,6 @@ export const Navbar = () => {
 
             <div className="flex flex-col gap-4 mt-4">
               <div className="flex flex-col space-y-3">
-                {/* 4. Logic Active Mobile */}
                 <Link to="/" className={getMobileLinkClass("/")}>
                   Home
                 </Link>
@@ -322,7 +360,6 @@ export const Navbar = () => {
                       </Link>
                     </AccordionContent>
                   </AccordionItem>
-                  {/* ... Accordion Mentor sama logikanya ... */}
                 </Accordion>
 
                 <Link
@@ -343,7 +380,6 @@ export const Navbar = () => {
               </div>
 
               {user ? (
-                // Jika user sudah login di mobile
                 <div className="mt-3 flex flex-col gap-3">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -373,10 +409,12 @@ export const Navbar = () => {
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Settings</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>Log out</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/profile/my-profile">Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+                        Log out
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
