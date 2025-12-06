@@ -68,9 +68,9 @@ export const Trainer = () => {
           
           {/* BAGIAN TEKS */}
           {/* w-full di HP, lg:w-1/4 di Laptop */}
-          <div className="w-full lg:w-1/4 flex flex-col gap-3 lg:gap-5 text-center shrink-0">
+          <div className="w-full lg:w-1/5 flex flex-col gap-3 lg:gap-5 text-center shrink-0">
             <h1 className="text-xl md:text-2xl font-semibold text-white">
-              Belajar Langsung dari Para Pakar Industri
+              Belajar Langsung dari Mentor Berpengalaman
             </h1>
             <p className="text-sm md:text-base text-justify text-white">
               Materi kami disusun dan dibawakan oleh para senior-level di
@@ -93,7 +93,7 @@ export const Trainer = () => {
                     <img
                       src="https://placehold.co/300x200"
                       alt={trainer.name}
-                      className="object-cover mb-2 rounded"
+                      className="object-cover mb-2 rounded h-40 w-full"
                     />
                     <h3 className="font-semibold text-lg">{trainer.name}</h3>
                     <p className="text-sm text-muted-foreground">

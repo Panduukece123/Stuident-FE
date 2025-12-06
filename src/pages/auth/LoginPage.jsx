@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,25 +7,30 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import axios from "axios";
+import authService from "@/services/AuthService";
 
-// 1. Definisikan Schema Zod sesuai pesan backend
+// 1. Definisikan Schema Zod
 const loginSchema = z.object({
   email: z
     .string()
-    .min(1, { message: "Email wajib diisi" })
-    .email("Format email tidak valid"), 
+    .min(1, "Email wajib diisi")
+    .email("Format email tidak valid") // String langsung lebih aman
+    .max(255, "Email maksimal 255 karakter"),
   password: z
     .string()
-    .min(1, { message: "Password wajib diisi" }) 
-    .min(8, { message: "Password minimal 8 karakter" }), 
+    .min(1, "Password wajib diisi")
+    .min(8, "Password minimal 8 karakter"),
 });
 
 export const LoginPage = () => {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const navigate = useNavigate();
+
   // 2. Setup React Hook Form
   const {
     register,
     handleSubmit,
+    setError, // <--- JANGAN LUPA INI!
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
@@ -35,52 +40,65 @@ export const LoginPage = () => {
     },
   });
 
-  // 3. Fungsi submit (hanya jalan jika validasi lolos)
+  // 3. Fungsi submit
   const onSubmit = async (data) => {
     setIsLoading(true);
+
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/login",
-        data
-      );
-      console.log("Login Berhasil:", response.data);
-      localStorage.setItem("token", response.data.access_token);
-      navigate("/dashboard");
+      const responseData = await authService.login(data);
+      
+      // Ambil token dari berbagai kemungkinan struktur response
+      const token = responseData.data?.token || responseData.token || responseData.access_token;
+
+      if (token) {
+        // Simpan token
+        localStorage.setItem("token", token);
+
+        // Simpan user kalau ada
+        if (responseData.data?.user) {
+          localStorage.setItem("user", JSON.stringify(responseData.data.user));
+        } else if (responseData.user) {
+          localStorage.setItem("user", JSON.stringify(responseData.user));
+        }
+
+        navigate("/dashboard");
+      } else {
+        console.error("Token tidak ditemukan.");
+        setError("email", {
+          type: "manual",
+          message: "Gagal login: Token tidak diterima.",
+        });
+      }
     } catch (error) {
-      console.error("Login Gagal:", error);
-
-      if (error.response) {
-        // KASUS 1: Error Validasi Laravel (422)
-        if (error.response.status === 422) {
-          const serverErrors = error.response.data.errors;
-          Object.keys(serverErrors).forEach((key) => {
-            setError(key, {
-              type: "server",
-              message: serverErrors[key][0],
-            });
-          });
-        }
-
-        // KASUS 2: Login Gagal / Unauthorized (401)
-        else if (error.response.status === 401) {
-          setError("email", {
+      // Handle Error 422 (Validasi)
+      if (error.response && error.response.status === 422) {
+        const validationErrors = error.response.data.errors;
+        Object.keys(validationErrors).forEach((field) => {
+          setError(field, {
             type: "manual",
-            message: "Email atau password salah",
+            message: validationErrors[field][0],
           });
-          setError("password", { 
-            type: "manual",
-            message: "Cek kembali password Anda",
-          });
-          
-        }
+        });
+      } 
+      // Handle Error 401 (Salah Password/Email)
+      else if (error.response && error.response.status === 401) {
+        // Bikin Email Merah + Ada Pesan
+        setError("email", {
+          type: "manual",
+          message: "",
+        });
 
-        // KASUS 3: Error Server Lain (500, dll)
-        else {
-          setError("email", {
+        // Bikin Password Merah juga (Pesannya bisa dikosongin kalau gak mau double teks)
+        setError("password", {
+          type: "manual",
+          message: "Email atau password salah", // Spasi kosong biar cuma border merah, atau tulis ulang pesannya
+        });
+      } else {
+        // Error lain (Server mati / koneksi putus)
+        setError("email", {
             type: "manual",
-            message: "Terjadi kesalahan server. Coba lagi nanti.",
-          });
-        }
+            message: "Terjadi kesalahan server.",
+        });
       }
     } finally {
       setIsLoading(false);
@@ -113,13 +131,13 @@ export const LoginPage = () => {
             <Input
               type="email"
               id="email"
+              disabled={isLoading} // Disable pas loading
               className={`h-10 ${
                 errors.email ? "border-red-500 focus-visible:ring-red-500" : ""
               }`}
               placeholder="contoh: email@domain.com"
-              {...register("email")} // Integrasi hook form
+              {...register("email")}
             />
-
             {errors.email && (
               <span className="text-sm text-red-500 font-medium">
                 {errors.email.message}
@@ -127,20 +145,21 @@ export const LoginPage = () => {
             )}
           </div>
 
+          {/* PASSWORD INPUT */}
           <div className="flex flex-col gap-3">
             <Label htmlFor="password">Password</Label>
             <Input
               type="password"
               id="password"
+              disabled={isLoading} // Disable pas loading
               className={`h-10 ${
                 errors.password
                   ? "border-red-500 focus-visible:ring-red-500"
                   : ""
               }`}
               placeholder="Masukkan password Anda"
-              {...register("password")} // Integrasi hook form
+              {...register("password")}
             />
-
             {errors.password && (
               <span className="text-sm text-red-500 font-medium">
                 {errors.password.message}
@@ -150,12 +169,14 @@ export const LoginPage = () => {
 
           <Button
             type="submit"
-            className="h-10 bg-linear-to-r from-[#074799] to-[#3DBDC2] cursor-pointer"
+            disabled={isLoading}
+            className="h-10 bg-linear-to-r from-[#074799] to-[#3DBDC2] cursor-pointer disabled:opacity-50"
           >
-            Masuk
+            {isLoading ? "Memproses..." : "Masuk"}
           </Button>
 
-          <div className="relative flex items-center justify-center text-xs text-muted-foreground">
+          {/* ... Sisa kode UI (Google Button, Link Register, Wave SVG) tetap sama ... */}
+           <div className="relative flex items-center justify-center text-xs text-muted-foreground">
             <span className="absolute bg-background px-2">
               atau masuk dengan
             </span>
@@ -167,7 +188,8 @@ export const LoginPage = () => {
             type="button"
             className="w-full h-10 cursor-pointer"
           >
-            <svg
+            {/* SVG Google */}
+             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 48 48"
               width="24"
