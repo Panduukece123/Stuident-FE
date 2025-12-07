@@ -7,6 +7,8 @@ import { RegisterPage } from "./pages/auth/RegisterPage";
 import ScrollToTop from "./components/ScrollToTop";
 import { ProfileLayout } from "./layouts/ProfileLayout";
 import { MyProfile } from "./pages/profile/MyProfile";
+import { MyProfileOrderHistory } from "./pages/profile/MyProfileOrderHistory";
+import ScholarshipPage from "./pages/scholarsip/ScholarshipPage";
 
 function App() {
   return (
@@ -21,7 +23,15 @@ function App() {
 
             <Route path="profile" element={<ProfileLayout />}>
               <Route path="my-profile" element={<MyProfile />} />
+              <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
             </Route>
+
+            <Route path="scholarship" element={<ScholarshipPage />} >
+
+            
+            </Route>
+
+
           </Route>
         </Routes>
       </BrowserRouter>
