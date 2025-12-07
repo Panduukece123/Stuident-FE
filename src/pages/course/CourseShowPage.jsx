@@ -112,7 +112,32 @@ export default function CourseShowPage() {
                             <h1 className="text-xl md:text-2xl font-semibold w-full">
                                 Kurikulum
                             </h1>
-                            Segera Hadir...
+                            <ol>
+                                <li>
+                                    Lorem Ipsum Dolor Sit Amet
+                                    <ul>
+                                        <li>Lorem ipsum dolor sit amet</li>
+                                        <li>Lorem ipsum dolor sit amet</li>
+                                        <li>Lorem ipsum dolor sit amet</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    Lorem Ipsum Dolor Sit Amet
+                                    <ul>
+                                        <li>Lorem ipsum dolor sit amet</li>
+                                        <li>Lorem ipsum dolor sit amet</li>
+                                        <li>Lorem ipsum dolor sit amet</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    Lorem Ipsum Dolor Sit Amet
+                                    <ul>
+                                        <li>Lorem ipsum dolor sit amet</li>
+                                        <li>Lorem ipsum dolor sit amet</li>
+                                        <li>Lorem ipsum dolor sit amet</li>
+                                    </ul>
+                                </li>
+                            </ol>
                         </Card>
                     </TabsContent>
 

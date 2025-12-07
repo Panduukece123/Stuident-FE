@@ -8,7 +8,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import { ProfileLayout } from "./layouts/ProfileLayout";
 import { MyProfile } from "./pages/profile/MyProfile";
 import { MyProfileOrderHistory } from "./pages/profile/MyProfileOrderHistory";
-import { CourseShowPage } from "./pages/course/CourseShowPage";
+import CourseShowPage from "./pages/course/CourseShowPage";
 
 function App() {
   return (
