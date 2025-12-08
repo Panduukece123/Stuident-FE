@@ -9,6 +9,7 @@ import { ProfileLayout } from "./layouts/ProfileLayout";
 import { MyProfile } from "./pages/profile/MyProfile";
 import { MyProfileOrderHistory } from "./pages/profile/MyProfileOrderHistory";
 import ScholarshipPage from "./pages/scholarsip/ScholarshipPage";
+import { OurServices } from "./pages/OurServices";
 
 function App() {
   return (
@@ -26,12 +27,9 @@ function App() {
               <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
             </Route>
 
-            <Route path="scholarship" element={<ScholarshipPage />} >
+            <Route path="our-services" element={<OurServices />} />
 
-            
-            </Route>
-
-
+            <Route path="scholarship" element={<ScholarshipPage />}></Route>
           </Route>
         </Routes>
       </BrowserRouter>
