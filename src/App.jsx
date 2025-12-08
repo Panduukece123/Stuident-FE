@@ -24,10 +24,7 @@ function App() {
 
             <Route path="profile" element={<ProfileLayout />}>
               <Route path="my-profile" element={<MyProfile />} />
-              <Route
-                path="my-orderhistory"
-                element={<MyProfileOrderHistory />}
-              />
+              <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
             </Route>
 
             <Route path="our-services" element={<OurServices />} />

@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/carousel";
 import { carouselItems } from "@/data/mockData";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export function OurServices() {
   const [api, setApi] = React.useState();
@@ -97,11 +96,6 @@ export function OurServices() {
                 berbagai fitur seperti pendaftaran program, akses materi pembelajaran, 
                 dan pelacakan kemajuan belajar mereka.
               </p>
-              <div className="pt-2">
-                <Button size="lg" className="w-full md:w-auto">
-                  Hubungi Kami
-                </Button>
-              </div>
             </div>
           </div>
         </div>
@@ -137,11 +131,41 @@ export function OurServices() {
                 berbagai fitur seperti pendaftaran program, akses materi pembelajaran, 
                 dan pelacakan kemajuan belajar mereka.
               </p>
-              <div className="pt-2">
-                <Button size="lg" className="w-full md:w-auto">
-                  Lihat Program
-                </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Photo + Desc 3*/}
+      <div className="w-full mt-12">
+        <div className="max-w-7xl mx-auto w-full p-4 md:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div className="flex justify-center md:justify-end">
+              <div className="w-full max-w-[600px] md:pr-6">
+                <Card>
+                  <CardContent className="p-0">
+                    <img
+                      src="https://placehold.co/600x400"
+                      alt="Service Photo"
+                      className="w-full aspect-3/2 object-cover rounded-lg"
+                    />
+                  </CardContent>
+                </Card>
               </div>
+            </div>
+
+            {/* Description Section */}
+            <div className="flex flex-col justify-center md:pl-6">
+              <h3 className="text-3xl font-bold mb-4">Stuident</h3>
+              <p className="text-gray-600 text-lg mb-4 leading-relaxed text-justify">
+                Platform pembelajaran yang modern, responsif, dan mudah diakses oleh mahasiswa 
+                dan pekerja untuk mendapatkan informasi program terbaru.
+              </p>
+              <p className="text-gray-600 text-lg mb-6 leading-relaxed text-justify">
+                Dengan antarmuka yang intuitif, pengguna dapat dengan mudah menavigasi
+                berbagai fitur seperti pendaftaran program, akses materi pembelajaran, 
+                dan pelacakan kemajuan belajar mereka.
+              </p>
             </div>
           </div>
         </div>
