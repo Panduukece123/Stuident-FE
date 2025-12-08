@@ -7,32 +7,11 @@ import {
   CarouselNext,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { carouselItems } from "@/data/mockData";
 
 export function Header() {
   const [api, setApi] = React.useState();
   const [current, setCurrent] = React.useState(0);
-  const items = [
-    {
-      id: 1,
-      image: "https://placehold.co/600x400",
-    },
-    {
-      id: 2,
-      image: "https://placehold.co/600x400",
-    },
-    {
-      id: 3,
-      image: "https://placehold.co/600x400",
-    },
-    {
-      id: 4,
-      image: "https://placehold.co/600x400",
-    },
-    {
-      id: 5,
-      image: "https://placehold.co/600x400",
-    },
-  ];
 
   React.useEffect(() => {
     if (!api) return;
@@ -53,7 +32,7 @@ export function Header() {
           opts={{ loop: true }}
         >
           <CarouselContent>
-            {items.map((item, index) => (
+            {carouselItems.map((item) => (
               <CarouselItem key={item.id}>
                 <div>
                   <div className="relative w-full aspect-4/1 overflow-hidden rounded-lg">
@@ -71,7 +50,7 @@ export function Header() {
           <CarouselNext className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </Carousel>
         <div className="flex justify-center gap-2 mt-2">
-          {items.map((_, index) => (
+          {carouselItems.map((_, index) => (
             <button
               key={index}
               onClick={() => api?.scrollTo(index)}
