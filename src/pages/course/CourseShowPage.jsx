@@ -112,10 +112,10 @@ export default function CourseShowPage() {
                             <h1 className="text-xl md:text-2xl font-semibold w-full">
                                 Kurikulum
                             </h1>
-                            <ol>
+                            <ol className="list-decimal">
                                 <li>
                                     Lorem Ipsum Dolor Sit Amet
-                                    <ul>
+                                    <ul className="list-disc">
                                         <li>Lorem ipsum dolor sit amet</li>
                                         <li>Lorem ipsum dolor sit amet</li>
                                         <li>Lorem ipsum dolor sit amet</li>
@@ -123,7 +123,7 @@ export default function CourseShowPage() {
                                 </li>
                                 <li>
                                     Lorem Ipsum Dolor Sit Amet
-                                    <ul>
+                                    <ul className="list-disc">
                                         <li>Lorem ipsum dolor sit amet</li>
                                         <li>Lorem ipsum dolor sit amet</li>
                                         <li>Lorem ipsum dolor sit amet</li>

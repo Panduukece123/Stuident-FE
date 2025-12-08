@@ -26,7 +26,7 @@ function App() {
               <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
             </Route>
 
-            <Route path="/coursedetail" element={<CourseShowPage />} />
+            <Route path="/course-detail" element={<CourseShowPage />} />
               
           </Route>
         </Routes>
