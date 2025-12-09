@@ -23,6 +23,7 @@ function App() {
 
           <Route path="e-learning" element={<ElearningPage />} />
 
+          <Route path="elearning-detail" element={<CourseShowPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
 
