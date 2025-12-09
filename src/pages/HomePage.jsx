@@ -14,7 +14,7 @@ export function HomePage() {
       <Highlight />
       <Trainer />
       <Partner />
-      <Faq/>
+      <Faq />
     </div>
   );
 }
