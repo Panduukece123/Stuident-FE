@@ -6,7 +6,7 @@ import Logo from "../../assets/images/stuident-logo.svg";
 // 1. IMPORT PROFILE SERVICE
 import ProfileService from "@/services/ProfileService"; 
 
-// Import Components (Sama seperti sebelumnya)
+// Import Components
 import { Button } from "../ui/button";
 import {
   NavigationMenu,
@@ -42,7 +42,7 @@ import {
 } from "../ui/dropdown-menu";
 
 export const Navbar = () => {
-  const location = useLocation();
+  const location = useLocation(); // Ini pemicu update-nya
   const navigate = useNavigate();
   const pathname = location.pathname;
 
@@ -58,7 +58,24 @@ export const Navbar = () => {
     navigate("/login");
   };
 
-  // 2. UPDATE LOGIC CEK TOKEN PAKE PROFILE SERVICE
+  // --- 2. UPDATE UI SAAT PINDAH HALAMAN (Supaya abis login langsung berubah) ---
+  useEffect(() => {
+    const checkUser = () => {
+      const savedUser = localStorage.getItem("user");
+      if (savedUser) {
+        // Cek dulu apakah data berubah biar gak render ulang terus
+        const parsedUser = JSON.parse(savedUser);
+        if (JSON.stringify(user) !== JSON.stringify(parsedUser)) {
+            setUser(parsedUser);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+    checkUser();
+  }, [location, user]); // Jalan setiap kali URL berubah
+
+  // --- 3. CEK TOKEN VALIDITY (Auto Logout) ---
   useEffect(() => {
     const checkTokenValidity = async () => {
       const token = localStorage.getItem("token");
@@ -67,7 +84,6 @@ export const Navbar = () => {
 
       try {
         await ProfileService.getMe(); 
-        
       } catch (error) {
         if (error.response && error.response.status === 401) {
           console.warn("Token expired, auto logging out...");
@@ -79,7 +95,8 @@ export const Navbar = () => {
     };
 
     checkTokenValidity();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Cek token cukup sekali pas mount, atau tambahkan [location] kalau mau super strict
 
   const getMobileLinkClass = (path) => {
     return pathname === path
@@ -109,7 +126,7 @@ export const Navbar = () => {
         </div>
 
         {/* DESKTOP NAVIGATION */}
-        <div className="flex ">
+        <div className="hidden md:flex md:flex-1 md:justify-start">
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
               {/* HOME LINK */}
@@ -250,7 +267,7 @@ export const Navbar = () => {
           </NavigationMenu>
         </div>
 
-        {/* USER MENU & MOBILE SHEET (SAMA SEPERTI SEBELUMNYA) */}
+        {/* USER MENU */}
         {user ? (
           <div className="hidden items-center gap-2 md:flex">
             <DropdownMenu>
@@ -261,7 +278,7 @@ export const Navbar = () => {
                 >
                   <Avatar className="h-6 w-6">
                     <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{user.name ? user.name.charAt(0) : "U"}</AvatarFallback>
                   </Avatar>
                   <h1 className="text-white">{user.name}</h1>
                 </Button>
@@ -282,7 +299,7 @@ export const Navbar = () => {
                   <Link to="/profile/my-profile">Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  className={"cursor-pointer text-red-500 focus:text-red-500"}
+                  className={"cursor-pointer text-red-500 focus:text-red-500"} 
                   onClick={handleLogout}
                 >
                   Log out
@@ -305,6 +322,7 @@ export const Navbar = () => {
           </div>
         )}
 
+        {/* MOBILE SHEET */}
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden">
@@ -372,6 +390,7 @@ export const Navbar = () => {
                 </Link>
               </div>
 
+              {/* MOBILE USER MENU */}
               {user ? (
                 <div className="mt-3 flex flex-col gap-3">
                   <DropdownMenu>
@@ -382,7 +401,7 @@ export const Navbar = () => {
                       >
                         <Avatar className="h-8 w-8">
                           <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-                          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                          <AvatarFallback>{user.name ? user.name.charAt(0) : "U"}</AvatarFallback>
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
@@ -406,7 +425,7 @@ export const Navbar = () => {
                         <Link to="/profile/my-profile">Profile</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={handleLogout}
+                        onClick={handleLogout} 
                         className="text-red-500 focus:text-red-500"
                       >
                         Log out

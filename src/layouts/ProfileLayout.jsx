@@ -93,14 +93,14 @@ export const ProfileLayout = () => {
               </Button>
             </Link>
 
-            <Link to="/profile/enrolled-courses">
+            <Link to="/profile/my-enrolled-courses">
               <Button variant="ghost" className={getSidebarClass("/profile/enrolled-courses")}>
                  <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
               </Button>
             </Link>
 
-            <Link to="/profile/order-history">
-              <Button variant="ghost" className={getSidebarClass("/profile/order-history")}>
+            <Link to="/profile/my-order-history">
+              <Button variant="ghost" className={getSidebarClass("/profile/my-order-history")}>
                  <ShoppingCart className="mr-3 h-5 w-5" /> Order History
               </Button>
             </Link>
