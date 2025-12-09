@@ -28,7 +28,9 @@ function App() {
               <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
             </Route>
 
-            <Route path="/course-detail" element={<CourseShowPage />} />
+            <Route path="course">
+              <Route path="show/:id" element={<CourseShowPage />} />
+            </Route>
               
             <Route path="our-services" element={<OurServices />} />
 
