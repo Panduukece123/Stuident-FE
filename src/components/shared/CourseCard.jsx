@@ -16,7 +16,7 @@ export const CourseCard = ({
   rating,
   reviews,
   description,
-  price,
+  price='0',
   image,
 }) => {
   return (
