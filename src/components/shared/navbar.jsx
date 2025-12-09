@@ -3,7 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, Search } from "lucide-react";
 import Logo from "../../assets/images/stuident-logo.svg";
 
-// Import Components
+// 1. IMPORT PROFILE SERVICE
+import ProfileService from "@/services/ProfileService"; 
+
+// Import Components (Sama seperti sebelumnya)
 import { Button } from "../ui/button";
 import {
   NavigationMenu,
@@ -43,13 +46,11 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const pathname = location.pathname;
 
-  // Initialize user state from localStorage
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  // Handle Logout
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
@@ -57,7 +58,7 @@ export const Navbar = () => {
     navigate("/login");
   };
 
-  // Check token validity on mount
+  // 2. UPDATE LOGIC CEK TOKEN PAKE PROFILE SERVICE
   useEffect(() => {
     const checkTokenValidity = async () => {
       const token = localStorage.getItem("token");
@@ -65,21 +66,15 @@ export const Navbar = () => {
       if (!token) return;
 
       try {
-        const response = await fetch("http://localhost:8000/api/auth/me", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
-        });
-
-        // Auto logout if token is expired (401)
-        if (response.status === 401) {
+        await ProfileService.getMe(); 
+        
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
           console.warn("Token expired, auto logging out...");
           handleLogout();
+        } else {
+          console.error("Gagal validasi token:", error);
         }
-      } catch (error) {
-        console.error("Gagal validasi token", error);
       }
     };
 
@@ -255,8 +250,8 @@ export const Navbar = () => {
           </NavigationMenu>
         </div>
 
+        {/* USER MENU & MOBILE SHEET (SAMA SEPERTI SEBELUMNYA) */}
         {user ? (
-          // Jika user sudah login
           <div className="hidden items-center gap-2 md:flex">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -286,7 +281,7 @@ export const Navbar = () => {
                 <DropdownMenuItem className={"cursor-pointer"} asChild>
                   <Link to="/profile/my-profile">Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem
+                <DropdownMenuItem 
                   className={"cursor-pointer text-red-500 focus:text-red-500"}
                   onClick={handleLogout}
                 >
@@ -296,7 +291,6 @@ export const Navbar = () => {
             </DropdownMenu>
           </div>
         ) : (
-          // Jika user belum login
           <div className="hidden items-center gap-2 md:flex">
             <Link to="/login">
               <Button variant={"outline"} size="sm" className="cursor-pointer">
@@ -310,8 +304,7 @@ export const Navbar = () => {
             </Link>
           </div>
         )}
-        
-        {/* MOBILE SHEET */}
+
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden">
@@ -412,7 +405,10 @@ export const Navbar = () => {
                       <DropdownMenuItem asChild>
                         <Link to="/profile/my-profile">Profile</Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+                      <DropdownMenuItem 
+                        onClick={handleLogout}
+                        className="text-red-500 focus:text-red-500"
+                      >
                         Log out
                       </DropdownMenuItem>
                     </DropdownMenuContent>

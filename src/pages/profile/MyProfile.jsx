@@ -7,28 +7,7 @@ import {
   Loader2,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-
-const ProfileService = {
-  getProfile: async () => {
-    const API_URL = "http://localhost:8000/api/auth/profile";
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(API_URL, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Gagal mengambil data dari server");
-    }
-
-    return await response.json();
-  },
-};
+import ProfileService from "@/services/ProfileService";
 
 export const MyProfile = () => {
   const [profileData, setProfileData] = useState(null);

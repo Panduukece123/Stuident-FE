@@ -25,13 +25,8 @@ function App() {
               <Route path="my-profile" element={<MyProfile />} />
               <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
             </Route>
-
             <Route path="scholarship" element={<ScholarshipPage />} >
-
-            
             </Route>
-
-
           </Route>
         </Routes>
       </BrowserRouter>

@@ -13,8 +13,8 @@ export const ProfileLayout = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await ProfileService.getMe();
-        setProfileData(result.data);
+        const result = await ProfileService.getProfile();
+        setProfileData(result.data || result);
       } catch (error) {
         console.error("Gagal load me:", error);
       } finally {
@@ -32,7 +32,7 @@ export const ProfileLayout = () => {
     );
   }
 
-  const user = profileData?.user;
+  const user = profileData?.user || profileData;
 
   return (
     <div className="flex min-h-screen flex-col gap-6 bg-neutral-50 p-6">
@@ -44,7 +44,7 @@ export const ProfileLayout = () => {
               alt={user?.name}
               className="h-full w-full object-cover"
             />
-            <AvatarFallback className="text-neutral-800 font-bold text-2xl">
+            <AvatarFallback className="text-neutral-800 font-medium text-5xl">
                 {user?.name ? user.name.split(" ").map((n)=>n[0]).join("").substring(0, 2) : "US"}
             </AvatarFallback>
           </Avatar>
