@@ -23,22 +23,18 @@ function App() {
 
           <Route path="elearning" element={<ElearningPage />} />
 
+          <Route path="elearning-detail" element={<CourseShowPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
 
-          
-            <Route path="profile" element={<ProfileLayout />}>
-              <Route path="my-profile" element={<MyProfile />} />
-              <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
-            </Route>
-
-            
-            <Route path="/course-detail" element={<CourseShowPage />} />
-              
-            <Route path="our-services" element={<OurServices />} />
-
-            <Route path="scholarship" element={<ScholarshipPage />}></Route>
+          <Route path="profile" element={<ProfileLayout />}>
+            <Route path="my-profile" element={<MyProfile />} />
+            <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
           </Route>
+
+          <Route path="our-services" element={<OurServices />} />
+
+          <Route path="scholarship" element={<ScholarshipPage />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
