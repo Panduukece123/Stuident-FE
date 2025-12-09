@@ -1,66 +1,58 @@
 import * as React from "react";
-
-import {
-  Carousel,
-  CarouselContent,
-  CarouselPrevious,
-  CarouselNext,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import { carouselItems } from "@/data/mockData";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { BookOpenCheck, Users, Award, MonitorPlay } from "lucide-react"; // Icon pendukung
 
 export function Header() {
-  const [api, setApi] = React.useState();
-  const [current, setCurrent] = React.useState(0);
-
-  React.useEffect(() => {
-    if (!api) return;
-
-    setCurrent(api.selectedScrollSnap());
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
+  const features = [
+    {
+      icon: <BookOpenCheck className="h-8 w-8 text-blue-600 mb-2" />,
+      title: "Kurikulum Terstruktur",
+      desc: "Materi disusun bertahap dari dasar hingga mahir, sesuai standar industri terkini.",
+    },
+    {
+      icon: <Users className="h-8 w-8 text-green-600 mb-2" />,
+      title: "Mentoring Eksklusif",
+      desc: "Bimbingan langsung dari praktisi ahli yang siap membantu kesulitan belajarmu.",
+    },
+    {
+      icon: <MonitorPlay className="h-8 w-8 text-purple-600 mb-2" />,
+      title: "Akses Seumur Hidup",
+      desc: "Bebas akses materi video dan modul pembelajaran kapan saja dan di mana saja.",
+    },
+    {
+      icon: <Award className="h-8 w-8 text-orange-600 mb-2" />,
+      title: "Sertifikat Kompetensi",
+      desc: "Dapatkan sertifikat resmi sebagai bukti keahlian untuk menunjang karirmu.",
+    },
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="w-full p-4 md:p-6">
-        <Carousel
-          setApi={setApi}
-          className="w-full relative group"
-          opts={{ loop: true }}
-        >
-          <CarouselContent>
-            {carouselItems.map((item) => (
-              <CarouselItem key={item.id}>
-                <div>
-                  <div className="relative w-full aspect-4/1 overflow-hidden rounded-lg">
-                    <img
-                      src={item.image} // Keep the original image source
-                      alt={`Slide ${item.id}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="cursor-pointer absolute left-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <CarouselNext className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </Carousel>
-        <div className="flex justify-center gap-2 mt-2">
-          {carouselItems.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => api?.scrollTo(index)}
-              className={`h-1 md:h-2 rounded-full transition-all ${
-                current === index ? "w-8 bg-primary" : "w-2 bg-muted"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
+    <div className="w-full px-6">
+      <div className="mx-auto max-w-7xl flex flex-col items-center">
+        
+
+        {/* --- KARTU KEUNGGULAN --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+          {features.map((item, index) => (
+            <Card 
+              key={index} 
+              className="border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white/80 backdrop-blur-sm"
+            >
+              <CardHeader>
+                {item.icon}
+                <CardTitle className="text-xl font-bold text-slate-800">
+                  {item.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  {item.desc}
+                </p>
+              </CardContent>
+            </Card>
           ))}
         </div>
+
       </div>
     </div>
   );

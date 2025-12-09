@@ -21,7 +21,7 @@ function App() {
         <Route path="/" element={<AppLayout />}>
           <Route index element={<HomePage />} />
 
-          <Route path="elearning" element={<ElearningPage />} />
+          <Route path="e-learning" element={<ElearningPage />} />
 
           <Route path="elearning-detail" element={<CourseShowPage />} />
           <Route path="login" element={<LoginPage />} />
@@ -29,12 +29,14 @@ function App() {
 
           <Route path="profile" element={<ProfileLayout />}>
             <Route path="my-profile" element={<MyProfile />} />
-            <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
+            <Route path="my-order-history" element={<MyProfileOrderHistory />} />
           </Route>
+
+          <Route path="course-detail" element={<CourseShowPage />} />
 
           <Route path="our-services" element={<OurServices />} />
 
-          <Route path="scholarship" element={<ScholarshipPage />}></Route>
+          <Route path="scholarship" element={<ScholarshipPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
