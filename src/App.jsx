@@ -12,6 +12,7 @@ import { MyProfileOrderHistory } from "./pages/profile/MyProfileOrderHistory";
 import CourseShowPage from "./pages/course/CourseShowPage";
 import ScholarshipPage from "./pages/scholarsip/ScholarshipPage";
 import { OurServices } from "./pages/OurServices";
+import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="profile" element={<ProfileLayout />}>
             <Route path="my-profile" element={<MyProfile />} />
             <Route path="my-order-history" element={<MyProfileOrderHistory />} />
+            <Route path="my-enrolled-course" element={<MyProfileEnrolledCourse />} />
           </Route>
 
           <Route path="course-detail" element={<CourseShowPage />} />
