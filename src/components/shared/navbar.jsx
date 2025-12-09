@@ -99,7 +99,7 @@ export const Navbar = () => {
         </Link>
 
         {/* SEARCH BAR */}
-        <div className="hidden md:flex flex-1 max-w-xs lg:max-w-md items-center relative">
+        <div className="hidden md:flex flex-1 max-w-xs lg:max-w-full items-center relative">
           <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
@@ -109,7 +109,7 @@ export const Navbar = () => {
         </div>
 
         {/* DESKTOP NAVIGATION */}
-        <div className="hidden md:flex md:flex-1 md:justify-start">
+        <div className="flex ">
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
               {/* HOME LINK */}
@@ -229,10 +229,10 @@ export const Navbar = () => {
               <NavigationMenuItem>
                 <NavigationMenuLink
                   asChild
-                  active={pathname === "/corporate"}
+                  active={pathname === "/our-services"}
                   className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary whitespace-nowrap cursor-pointer"
                 >
-                  <Link to="/corporate">Corporate Service</Link>
+                  <Link to="/our-services">Corporate Service</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 

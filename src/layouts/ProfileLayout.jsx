@@ -2,12 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GraduationCap, LogOut, Settings, ShoppingCart, User, Loader2, Edit } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { Outlet } from "react-router";
+import { Link, Outlet, useLocation } from "react-router";
 import ProfileService from "@/services/ProfileService";
 
 export const ProfileLayout = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const location = useLocation();
+  const pathname = location.pathname;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,10 +27,21 @@ export const ProfileLayout = () => {
     fetchData();
   }, []);
 
+  const getSidebarClass = (path) => {
+    // Cek apakah URL saat ini sama dengan path tombol
+    const isActive = pathname === path;
+    
+    return `w-full justify-start text-base h-10 px-4 ${
+      isActive 
+        ? "text-primary font-medium" // Style Kalo Aktif
+        : "font-light text-neutral-700 hover:bg-neutral-100 hover:text-primary" // Style Biasa
+    }`;
+  };
+
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-neutral-50">
-        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -73,22 +87,34 @@ export const ProfileLayout = () => {
           <div className="sticky top-20 flex flex-col gap-2 rounded-xl border border-neutral-300 bg-white p-4 shadow-sm">
             <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">Menu</h2>
             
-            <Button variant="ghost" className="w-full justify-start text-base font-light text-neutral-700 h-10 px-4 hover:bg-neutral-100 hover:text-primary">
-               <User className="mr-3 h-5 w-5" /> My Profile
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-base font-light text-neutral-700 h-10 px-4 hover:bg-neutral-100 hover:text-primary">
-               <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
-            </Button>
-            <Button variant="ghost" className="w-full justify-start text-base font-light text-neutral-700 h-10 px-4 hover:bg-neutral-100 hover:text-primary">
-               <ShoppingCart className="mr-3 h-5 w-5" /> Order History
-            </Button>
+            <Link to="/profile/my-profile">
+              <Button variant="ghost" className={getSidebarClass("/profile/my-profile")}>
+                 <User className="mr-3 h-5 w-5" /> My Profile
+              </Button>
+            </Link>
+
+            <Link to="/profile/enrolled-courses">
+              <Button variant="ghost" className={getSidebarClass("/profile/enrolled-courses")}>
+                 <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
+              </Button>
+            </Link>
+
+            <Link to="/profile/order-history">
+              <Button variant="ghost" className={getSidebarClass("/profile/order-history")}>
+                 <ShoppingCart className="mr-3 h-5 w-5" /> Order History
+              </Button>
+            </Link>
 
             <div className="my-2 h-px w-full bg-neutral-100" />
             
             <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2 mt-2">Account</h2>
-            <Button variant="ghost" className="w-full justify-start text-base font-light text-neutral-700 h-10 px-4 hover:bg-neutral-100 hover:text-primary">
-               <Settings className="mr-3 h-5 w-5" /> Settings
-            </Button>
+            
+            <Link to="/profile/settings">
+              <Button variant="ghost" className={getSidebarClass("/profile/settings")}>
+                 <Settings className="mr-3 h-5 w-5" /> Settings
+              </Button>
+            </Link>
+
             <Button variant="ghost" className="w-full justify-start text-base font-light text-red-500 hover:bg-red-50 hover:text-red-600 h-10 px-4">
                <LogOut className="mr-3 h-5 w-5" /> Logout
             </Button>
