@@ -2,6 +2,7 @@ import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { AppLayout } from "./layouts/AppLayout";
 import { HomePage } from "./pages/HomePage";
+import { ElearningPage } from "./pages/ElearningPage";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import ScrollToTop from "./components/ScrollToTop";
@@ -11,34 +12,37 @@ import { MyProfileOrderHistory } from "./pages/profile/MyProfileOrderHistory";
 import CourseShowPage from "./pages/course/CourseShowPage";
 import ScholarshipPage from "./pages/scholarsip/ScholarshipPage";
 import { OurServices } from "./pages/OurServices";
+import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
 
 function App() {
   return (
-    <>
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<AppLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
+    <BrowserRouter>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<AppLayout />}>
+          <Route index element={<HomePage />} />
 
-            <Route path="profile" element={<ProfileLayout />}>
-              <Route path="my-profile" element={<MyProfile />} />
-              <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
-            </Route>
-
-            <Route path="course">
-              <Route path="show/:id" element={<CourseShowPage />} />
-            </Route>
-              
-            <Route path="our-services" element={<OurServices />} />
-
-            <Route path="scholarship" element={<ScholarshipPage />}></Route>
+          <Route path="e-learning" element={<ElearningPage />}>
+            <Route path="show/:id" element={<CourseShowPage />} />
           </Route>
-        </Routes>
-      </BrowserRouter>
-    </>
+              
+          <Route path="our-services" element={<OurServices />} />
+
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+
+          <Route path="profile" element={<ProfileLayout />}>
+            <Route path="my-profile" element={<MyProfile />} />
+            <Route path="my-order-history" element={<MyProfileOrderHistory />} />
+            <Route path="my-enrolled-course" element={<MyProfileEnrolledCourse />} />
+          </Route>
+
+          <Route path="our-services" element={<OurServices />} />
+
+          <Route path="scholarship" element={<ScholarshipPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

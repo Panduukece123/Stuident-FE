@@ -61,7 +61,7 @@ export const LoginPage = () => {
           localStorage.setItem("user", JSON.stringify(responseData.user));
         }
 
-        navigate("/dashboard");
+        navigate("/");
       } else {
         console.error("Token tidak ditemukan.");
         setError("email", {
