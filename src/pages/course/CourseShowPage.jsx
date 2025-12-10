@@ -11,53 +11,9 @@ import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from "@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useParams } from "react-router";
 import courseService from "@/services/CourseService";
-
-function CourseReview({
-    userName = "Anonymous",
-    rating = 5.0,
-    comment = "Lorem Ipsum Dolor Sit Amet",
-}) {
-    return (
-        <article className="border rounded-xl p-4 m-2">
-            
-            {/* Header */}
-            <div className="w-full flex flex-row justify-between items-center mb-4">
-                <div className="flex flex-row gap-4 items-center">
-                    <Avatar>
-                        <AvatarImage
-                            src="https://github.com/shadcn.png"
-                            alt="@shadcn"
-                        />
-                        <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                    <p className="text-lg">{userName}</p>
-                </div>
-                <div className="flex flex-row gap-2 items-center">
-                    <Star size={24}/>
-                    <p className="font-medium">{rating}</p>
-                </div>
-            </div>
-
-            {/* Body */}
-            <div className="p-4 border rounded-lg">
-                <p>{comment}</p>
-            </div>
-
-            {/* Action Footer */}
-            <div className="mt-2 flex flex-row gap-2">
-                <Button variant={"outline"} size={"icon"}>
-                    <MessageSquareWarning  />
-                </Button>
-                <Button variant={"outline"} size={"icon"}>
-                    <Edit />
-                </Button>
-                <Button variant={"outline"} size={"icon"}>
-                    <X />
-                </Button>
-            </div>
-        </article>
-    )
-}
+import { Item, ItemContent } from "@/components/ui/item";
+import LevelBadge from "@/components/LevelBadge";
+import ReviewItem from "@/components/ReviewItem";
 
 export default function CourseShowPage() {
     const { id } = useParams();
@@ -71,26 +27,19 @@ export default function CourseShowPage() {
         fetchData();
     }, [id]);
 
-    const calculateTotalRating = () => {
-        if (!course.reviews || course.reviews.length === 0) {
+    const calculateRating = () => {
+        if (!course.reviews || course.reviews.length === 0)
             return { ratingAverage: 0, ratingTotal: 0 };
-        }
         
-        let sum = 0;
-        course.reviews.forEach(review => {
-            const rating = typeof review.rating === 'string' 
-                ? parseFloat(review.rating) // Convert to numbers from string
-                : review.rating;
-            sum += rating || 0;
-        });
-        
+        const sum = course.reviews.reduce((total, review) => total + review.rating, 0); // Each review is always integers (1-5)
         const average = sum / course.reviews.length;
+
         return { 
             ratingAverage: average.toFixed(1), // One decimal place
             ratingTotal: course.reviews.length 
         };
     };
-    const { ratingAverage, ratingTotal } = calculateTotalRating();
+    const { ratingAverage, ratingTotal } = calculateRating();
 
     return (
         <div className="max-w-7xl mx-auto p-4 py-8 md:p-6 flex flex-col md:flex-row gap-4 md:gap-8">
@@ -131,18 +80,15 @@ export default function CourseShowPage() {
                     <div className="grid grid-cols-2 mt-4 gap-2">
 
                         <div className="inline-flex gap-1" id="course_summary_badge">
-                            <Badge variant="default">
-                                {course.level}
-                                <Smile/>
-                            </Badge>
+                            <LevelBadge level={course.level}/>
                             <Badge variant="default">{course.category}</Badge>
                             <Badge variant="default">{course.type}</Badge>
                         </div>
 
                         <div className="inline-flex gap-1 justify-end" id="course_summary_participant">
                             <User />
-                            <p id="course_summary_participant-num">1024</p>
-                            <p className="text-muted-foreground font-light">pengikut</p>
+                            <p id="course_summary_participant-num">{course.enrollments?.length || 0}</p>
+                            <p className="text-muted-foreground font-light">pendaftar</p>
                         </div>
 
                         <div className="inline-flex gap-1" id="course_summary_author">
@@ -173,6 +119,10 @@ export default function CourseShowPage() {
                     <TabsContent value="overview">
                         <Card className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}>
                             <h1 className="text-xl md:text-2xl font-semibold w-full">
+                                Video Kilas
+                            </h1>
+                            <p>Lorem Ipsum</p>
+                            <h1 className="text-xl md:text-2xl font-semibold w-full">
                                 Deskripsi
                             </h1>
                             <p>
@@ -187,14 +137,45 @@ export default function CourseShowPage() {
                             <h1 className="text-xl md:text-2xl font-semibold w-full">
                                 Kurikulum
                             </h1>
-                            <ol className="list-decimal pl-4">
-                                {course.curriculums?.map((curriculum) => (
-                                    <li key={curriculum.id}>
-                                        {curriculum.title}
-                                        <p className="font-light">{curriculum.description}</p>
-                                    </li>
-                                ))}
-                            </ol>
+                            
+                            <div className="space-y-4">
+
+                                {(() => {
+                                    const sections = [...new Set(course.curriculums?.map(c => c.section) || [])]; {/* Get all unique sections */}
+
+                                    return sections.map((section, index) => (
+                                        <div key={index}>
+                                            {/* Section title */}
+                                            <h2 className="text-lg font-semibold mb-2">
+                                                {section}
+                                            </h2>
+
+                                            {/* Curriculums for one section */}
+                                            <div className="space-y-2 md:ml-4">
+                                                {course.curriculums
+                                                    ?.filter(curriculum => curriculum.section === section)
+                                                    ?.map(curriculum => (
+
+                                                        <Item key={curriculum.id} variant="outline" size="sm">
+                                                            <ItemContent>
+                                                                <h3 className="font-medium">
+                                                                    {curriculum.title}
+                                                                </h3>
+                                                                <p className="text-sm font-light mt-1">
+                                                                    {curriculum.description}
+                                                                </p>
+                                                            </ItemContent>
+                                                        </Item>
+
+                                                    ))}
+                                            </div>
+
+                                        </div>
+                                    ));
+                                })()}
+                                
+                            </div>
+
                         </Card>
                     </TabsContent>
 
@@ -231,9 +212,9 @@ export default function CourseShowPage() {
                                 <h1 className="text-xl md:text-2xl font-semibold w-full">
                                     Ulasan
                                 </h1>
-                                <div>
+                                <div className="space-y-4 py-4">
                                     {course.reviews?.map((review) => (
-                                        <CourseReview
+                                        <ReviewItem
                                             key={review.id}
                                             comment={review.comment}
                                             rating={review.rating}
