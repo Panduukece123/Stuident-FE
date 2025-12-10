@@ -108,7 +108,8 @@ export const ProfileLayout = () => {
 
   const getSidebarClass = (path) => {
     const isActive = pathname === path;
-    return `w-full justify-start text-base h-10 px-4 ${
+    
+    return `w-full justify-start text-base h-10 px-4 cursor-pointer ${
       isActive 
         ? "text-primary font-medium" 
         : "font-light text-neutral-700 hover:bg-neutral-100 hover:text-primary" 
@@ -202,8 +203,8 @@ export const ProfileLayout = () => {
               </Button>
             </Link>
 
-            <Link to="/profile/my-enrolled-courses">
-              <Button variant="ghost" className={getSidebarClass("/profile/enrolled-courses")}>
+            <Link to="/profile/my-enrolled-course">
+              <Button variant="ghost" className={getSidebarClass("/profile/my-enrolled-course")}>
                  <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
               </Button>
             </Link>

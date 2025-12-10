@@ -16,7 +16,7 @@ export const CourseCard = ({
   rating,
   reviews,
   description,
-  price,
+  price='0',
   image,
 }) => {
   return (
@@ -26,7 +26,7 @@ export const CourseCard = ({
         {image ? (
           <img src={image} alt={title} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600" />
+          <div className="w-full h-full bg-linear-to-br from-blue-400 to-blue-600" />
         )}
       </div>
       <CardContent className="flex-1 p-4 flex flex-col gap-2">
