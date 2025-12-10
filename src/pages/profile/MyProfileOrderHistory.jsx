@@ -1,133 +1,88 @@
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-} from "@/components/ui/navigation-menu";
-import { Card, CardContent } from "@/components/ui/card";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Trash, Eye, Loader2 } from "lucide-react";
+import TransactionService from "@/services/TransactionService";
 
 export const MyProfileOrderHistory = () => {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // fetching
+  const fetchTransactions = async () => {
+    try {
+      const response = await TransactionService.getAll();
+      setTransactions(response.data?.data || response.data || []);
+    } catch (error) {
+      console.error("Gagal mengambil transaksi:", error);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const formatIDR = (num) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+    }).format(num);
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-40">
+        <Loader2 className="animate-spin h-8 w-8" />
+      </div>
+    );
+
   return (
-    <div className="flex flex-col gap-6 w-full">
-      <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
-        <h1 className="text-xl">Order History</h1>
+    <div className="flex flex-col gap-6">
+      <div className="w-full flex items-center justify-center border-b-2 border-primary pb-2">
+        <h1 className="text-xl font-semibold">Order History</h1>
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
-        <NavigationMenu>
-          <NavigationMenuList className="space-x-6">
-            <NavigationMenuItem className="px-4">
-              Oktober
-            </NavigationMenuItem>
+      {transactions.length === 0 ? (
+        <div className="text-center text-neutral-500 italic">
+          Belum ada transaksi.
+        </div>
+      ) : (
+        transactions.map((trx) => (
+          <div
+            key={trx.id}
+            className="bg-white border p-4 rounded-xl flex flex-col gap-2 shadow-sm"
+          >
+            {/* Top Row (Status) */}
+            <div className="flex justify-between items-center">
+              <Badge
+                className={`${
+                  trx.status === "completed"
+                    ? "bg-green-500"
+                    : trx.status === "pending"
+                    ? "bg-yellow-500"
+                    : "bg-red-500"
+                }`}
+              >
+                {trx.status}
+              </Badge>
 
-            <NavigationMenuItem className="px-4">
-              November
-            </NavigationMenuItem>
+              <div className="flex gap-2">
+              </div>
+            </div>
 
-            <NavigationMenuItem className="px-4">
-              Desember
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+            {/* Middle Info */}
+            <div className="text-sm text-neutral-600">
+              <p>Order ID: {trx.code}</p>
+              <p>Date: {new Date(trx.created_at).toLocaleString("id-ID")}</p>
+            </div>
 
-        <Card className="w-full p-4 rounded-2xl shadow-md border flex flex-row gap-6">
-          {/* Image */}
-          <div className="w-1/3 flex items-center justify-center">
-            <img
-              src="https://placehold.co/300x200"
-              alt="Course Thumbnail"
-              className="rounded-xl w-full h-auto object-cover"
-            />
+            {/* Price */}
+            <div className="text-lg font-semibold">{formatIDR(trx.amount)}</div>
           </div>
-
-          {/* Content */}
-          <CardContent className="w-2/3 flex flex-col gap-2 p-0">
-            <h3 className="text-lg font-semibold">
-              Name Course/Bootcamp/Mentoring
-            </h3>
-
-            <p className="text-sm">Price : Rp 100.000</p>
-            <p className="text-sm">Method : QRIS</p>
-            <p className="text-sm">Payment Date : 08-08-2028</p>
-            <p className="text-sm">Duration : 6 months</p>
-            <p className="text-sm font-medium">Status : Complete</p>
-          </CardContent>
-        </Card>
-        <Card className="w-full p-4 rounded-2xl shadow-md border flex flex-row gap-6">
-          {/* Image */}
-          <div className="w-1/3 flex items-center justify-center">
-            <img
-              src="https://placehold.co/300x200"
-              alt="Course Thumbnail"
-              className="rounded-xl w-full h-auto object-cover"
-            />
-          </div>
-
-          {/* Content */}
-          <CardContent className="w-2/3 flex flex-col gap-2 p-0">
-            <h3 className="text-lg font-semibold">
-              Name Course/Bootcamp/Mentoring
-            </h3>
-
-            <p className="text-sm">Price : Rp 100.000</p>
-            <p className="text-sm">Method : QRIS</p>
-            <p className="text-sm">Payment Date : 08-08-2028</p>
-            <p className="text-sm">Duration : 6 months</p>
-            <p className="text-sm font-medium">Status : Complete</p>
-          </CardContent>
-        </Card>
-        <Card className="w-full p-4 rounded-2xl shadow-md border flex flex-row gap-6">
-          {/* Image */}
-          <div className="w-1/3 flex items-center justify-center">
-            <img
-              src="https://placehold.co/300x200"
-              alt="Course Thumbnail"
-              className="rounded-xl w-full h-auto object-cover"
-            />
-          </div>
-
-          {/* Content */}
-          <CardContent className="w-2/3 flex flex-col gap-2 p-0">
-            <h3 className="text-lg font-semibold">
-              Name Course/Bootcamp/Mentoring
-            </h3>
-
-            <p className="text-sm">Price : Rp 100.000</p>
-            <p className="text-sm">Method : QRIS</p>
-            <p className="text-sm">Payment Date : 08-08-2028</p>
-            <p className="text-sm">Duration : 6 months</p>
-            <p className="text-sm font-medium">Status : Complete</p>
-          </CardContent>
-        </Card>
-        <Card className="w-full p-4 rounded-2xl shadow-md border flex flex-row gap-6">
-          {/* Image */}
-          <div className="w-1/3 flex items-center justify-center">
-            <img
-              src="https://placehold.co/300x200"
-              alt="Course Thumbnail"
-              className="rounded-xl w-full h-auto object-cover"
-            />
-          </div>
-
-          {/* Content */}
-          <CardContent className="w-2/3 flex flex-col gap-2 p-0">
-            <h3 className="text-lg font-semibold">
-              Name Course/Bootcamp/Mentoring
-            </h3>
-
-            <p className="text-sm">Price : Rp 100.000</p>
-            <p className="text-sm">Method : QRIS</p>
-            <p className="text-sm">Payment Date : 08-08-2028</p>
-            <p className="text-sm">Duration : 6 months</p>
-            <p className="text-sm font-medium">Status : Complete</p>
-          </CardContent>
-        </Card>
-      </div>
+        ))
+      )}
     </div>
   );
 };

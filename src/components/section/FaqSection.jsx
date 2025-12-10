@@ -8,13 +8,17 @@ import {
 
 export const Faq = () => {
   return (
-    <div className="p-6 max-w-7xl">
-      <div className="mb-10 items-center">
-        <h1 className="text-2xl md:text-3xl font-semibold text-center mb-4">
+    <div className="p-6 w-full">
+      <div className="max-w-7xl mx-auto">
+        
+      
+      <div className="mb-10 text-center flex flex-col ">
+        <h1 className="text-2xl md:text-3xl font-semibold text-center mb-4 ">
           Pertanyaan yang Sering Diajukan (FAQ)
         </h1>
         <div className="mx-auto h-1 w-72 rounded-full bg-primary" />
       </div>
+      
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="item-1">
           <AccordionTrigger
@@ -109,6 +113,7 @@ export const Faq = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+      </div>
     </div>
   );
 };
