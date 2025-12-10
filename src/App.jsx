@@ -22,7 +22,9 @@ function App() {
         <Route path="/" element={<AppLayout />}>
           <Route index element={<HomePage />} />
 
-          <Route path="e-learning" element={<ElearningPage />}>
+          <Route path="e-learning" element={<ElearningPage />}/>
+
+          <Route path="course">
             <Route path="show/:id" element={<CourseShowPage />} />
           </Route>
               
