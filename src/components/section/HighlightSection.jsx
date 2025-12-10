@@ -18,10 +18,9 @@ export const Highlight = () => {
         </p>
       </div>
 
-      <div className="mx-auto max-w-7xl flex flex-col gap-16 md:gap-24">
+      <div className="mx-auto max-w-7xl flex flex-col gap-8 md:gap-12">
         
         {/* --- SECTION 1: E-LEARNING --- */}
-        {/* Normal: Gambar Kiri, Teks Kanan */}
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
           
           {/* Image */}

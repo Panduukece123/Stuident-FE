@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import authService from "@/services/AuthService";
+import Swal from "sweetalert2";
 
 // 1. Definisikan Schema Zod
 const registerSchema = z
@@ -24,9 +25,7 @@ const registerSchema = z
       .string()
       .min(1, "Password wajib diisi")
       .min(8, "Password minimal 8 karakter"),
-    confirmPassword: z
-      .string()
-      .min(1, "Konfirmasi password wajib diisi"),
+    confirmPassword: z.string().min(1, "Konfirmasi password wajib diisi"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Konfirmasi password tidak cocok",
@@ -64,17 +63,27 @@ export const RegisterPage = () => {
         email: data.email,
         password: data.password,
         password_confirmation: data.confirmPassword, // Mapping
-        role: "student", // Hardcode role
+        role: "student",
       };
 
       // 2. PANGGIL SERVICE (Ganti axios.post manual)
       const responseData = await authService.register(payload);
 
       console.log("Register Berhasil:", responseData);
-      
-      navigate("/login");
-      alert("Registrasi berhasil! Silakan login.");
 
+      navigate("/login");
+      Swal.fire({
+        toast: true,
+        position: "top",
+        showConfirmButton: false,
+        timer: 3000,
+        icon: "success",
+        iconColor: "#4c74ff",
+        title: "Registrasi berhasil! Silakan login.",
+        color: "#fff",
+        background: "#074799",
+        customClass: { popup: "border border-[#4c74ff]" },
+      });
     } catch (error) {
       console.error("Register Gagal:", error);
 

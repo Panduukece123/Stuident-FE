@@ -17,7 +17,7 @@ const partners = [
 
 export const Partner = () => {
   return (
-    <div className="w-full py-12 md:py-20 bg-background">
+    <div className="w-full py-8 md:py-6 bg-background">
       <div className="max-w-7xl mx-auto px-6 flex flex-col gap-10 md:gap-12">
         
         {/* --- HEADER SECTION --- */}
