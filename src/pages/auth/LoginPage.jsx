@@ -9,12 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import authService from "@/services/AuthService";
 
-// 1. Definisikan Schema Zod
+// 1. Schema Validasi
 const loginSchema = z.object({
   email: z
     .string()
     .min(1, "Email wajib diisi")
-    .email("Format email tidak valid") // String langsung lebih aman
+    .email("Format email tidak valid")
     .max(255, "Email maksimal 255 karakter"),
   password: z
     .string()
@@ -26,11 +26,11 @@ export const LoginPage = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
 
-  // 2. Setup React Hook Form
+  // 2. Setup Form
   const {
     register,
     handleSubmit,
-    setError, // <--- JANGAN LUPA INI!
+    setError,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
@@ -40,21 +40,18 @@ export const LoginPage = () => {
     },
   });
 
-  // 3. Fungsi submit
+  // 3. Submit Manual
   const onSubmit = async (data) => {
     setIsLoading(true);
 
     try {
       const responseData = await authService.login(data);
       
-      // Ambil token dari berbagai kemungkinan struktur response
       const token = responseData.data?.token || responseData.token || responseData.access_token;
 
       if (token) {
-        // Simpan token
         localStorage.setItem("token", token);
 
-        // Simpan user kalau ada
         if (responseData.data?.user) {
           localStorage.setItem("user", JSON.stringify(responseData.data.user));
         } else if (responseData.user) {
@@ -70,7 +67,6 @@ export const LoginPage = () => {
         });
       }
     } catch (error) {
-      // Handle Error 422 (Validasi)
       if (error.response && error.response.status === 422) {
         const validationErrors = error.response.data.errors;
         Object.keys(validationErrors).forEach((field) => {
@@ -79,22 +75,13 @@ export const LoginPage = () => {
             message: validationErrors[field][0],
           });
         });
-      } 
-      // Handle Error 401 (Salah Password/Email)
-      else if (error.response && error.response.status === 401) {
-        // Bikin Email Merah + Ada Pesan
-        setError("email", {
-          type: "manual",
-          message: "",
-        });
-
-        // Bikin Password Merah juga (Pesannya bisa dikosongin kalau gak mau double teks)
+      } else if (error.response && error.response.status === 401) {
+        setError("email", { type: "manual", message: "" });
         setError("password", {
           type: "manual",
-          message: "Email atau password salah", // Spasi kosong biar cuma border merah, atau tulis ulang pesannya
+          message: "Email atau password salah",
         });
       } else {
-        // Error lain (Server mati / koneksi putus)
         setError("email", {
             type: "manual",
             message: "Terjadi kesalahan server.",
@@ -103,6 +90,11 @@ export const LoginPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 4. Handle Google Login (Redirect Mode)
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:8000/api/auth/google/redirect?role=student";
   };
 
   return (
@@ -125,16 +117,14 @@ export const LoginPage = () => {
             </p>
           </div>
 
-          {/* EMAIL INPUT */}
+          {/* Email Input */}
           <div className="flex flex-col gap-3">
             <Label htmlFor="email">Email</Label>
             <Input
               type="email"
               id="email"
-              disabled={isLoading} // Disable pas loading
-              className={`h-10 ${
-                errors.email ? "border-red-500 focus-visible:ring-red-500" : ""
-              }`}
+              disabled={isLoading}
+              className={`h-10 ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               placeholder="contoh: email@domain.com"
               {...register("email")}
             />
@@ -145,18 +135,14 @@ export const LoginPage = () => {
             )}
           </div>
 
-          {/* PASSWORD INPUT */}
+          {/* Password Input */}
           <div className="flex flex-col gap-3">
             <Label htmlFor="password">Password</Label>
             <Input
               type="password"
               id="password"
-              disabled={isLoading} // Disable pas loading
-              className={`h-10 ${
-                errors.password
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
-              }`}
+              disabled={isLoading}
+              className={`h-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               placeholder="Masukkan password Anda"
               {...register("password")}
             />
@@ -175,25 +161,26 @@ export const LoginPage = () => {
             {isLoading ? "Memproses..." : "Masuk"}
           </Button>
 
-          {/* ... Sisa kode UI (Google Button, Link Register, Wave SVG) tetap sama ... */}
-           <div className="relative flex items-center justify-center text-xs text-muted-foreground">
+          <div className="relative flex items-center justify-center text-xs text-muted-foreground">
             <span className="absolute bg-background px-2">
               atau masuk dengan
             </span>
             <hr className="w-full border-t border-gray-300" />
           </div>
 
+          {/* TOMBOL GOOGLE */}
           <Button
             variant="outline"
             type="button"
+            onClick={handleGoogleLogin}
             className="w-full h-10 cursor-pointer"
           >
-            {/* SVG Google */}
-             <svg
+            <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 48 48"
               width="24"
               height="24"
+              className="mr-2"
             >
               <path
                 fill="#FFC107"
@@ -214,6 +201,7 @@ export const LoginPage = () => {
             </svg>
             Log In with Google
           </Button>
+
           <div className="text-center text-sm text-muted-foreground">
             Belum punya akun?{" "}
             <Link
@@ -225,6 +213,8 @@ export const LoginPage = () => {
           </div>
         </form>
       </div>
+      
+      {/* Wave Background */}
       <div className="w-full overflow-hidden leading-none">
         <svg
           viewBox="0 100 1440 220"

@@ -12,6 +12,7 @@ import { MyProfileOrderHistory } from "./pages/profile/MyProfileOrderHistory";
 import CourseShowPage from "./pages/course/CourseShowPage";
 import ScholarshipPage from "./pages/scholarsip/ScholarshipPage";
 import { OurServices } from "./pages/OurServices";
+import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="elearning-detail" element={<CourseShowPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
+          <Route path="auth/callback" element={<AuthCallbackPage />} />
 
           <Route path="profile" element={<ProfileLayout />}>
             <Route path="my-profile" element={<MyProfile />} />
