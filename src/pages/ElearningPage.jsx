@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Navbar } from "../components/shared/navbar";
+import { Navbar } from "../components/shared/Navbar";
 import { Footer } from "../components/shared/footer"; // Assuming Footer exists
 import { ElearningBanner } from "../components/section/ElearningBanner";
 import { ElearningCategories } from "../components/section/ElearningCategories";
 import { ElearningCourseList } from "../components/section/ElearningCourseList";
-import ElearningService from "../services/elearningService";
+import ElearningService from "@/services/elearningService";
 
 export const ElearningPage = () => {
   const [courses, setCourses] = useState([]);

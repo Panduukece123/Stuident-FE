@@ -12,6 +12,8 @@ import { MyProfileOrderHistory } from "./pages/profile/MyProfileOrderHistory";
 import CourseShowPage from "./pages/course/CourseShowPage";
 import ScholarshipPage from "./pages/scholarsip/ScholarshipPage";
 import { OurServices } from "./pages/OurServices";
+import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
+import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
 
 function App() {
   return (
@@ -21,24 +23,27 @@ function App() {
         <Route path="/" element={<AppLayout />}>
           <Route index element={<HomePage />} />
 
-          <Route path="elearning" element={<ElearningPage />} />
+          <Route path="e-learning" element={<ElearningPage />}/>
+
+          <Route path="course">
+            <Route path="show/:id" element={<CourseShowPage />} />
+          </Route>
+              
+          <Route path="our-services" element={<OurServices />} />
 
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
+          <Route path="auth/callback" element={<AuthCallbackPage />} />
 
-          
-            <Route path="profile" element={<ProfileLayout />}>
-              <Route path="my-profile" element={<MyProfile />} />
-              <Route path="my-orderhistory" element={<MyProfileOrderHistory />} />
-            </Route>
-
-            
-            <Route path="/course-detail" element={<CourseShowPage />} />
-              
-            <Route path="our-services" element={<OurServices />} />
-
-            <Route path="scholarship" element={<ScholarshipPage />}></Route>
+          <Route path="profile" element={<ProfileLayout />}>
+            <Route path="my-profile" element={<MyProfile />} />
+            <Route path="my-order-history" element={<MyProfileOrderHistory />} />
+            <Route path="my-enrolled-course" element={<MyProfileEnrolledCourse />} />
           </Route>
+
+          <Route path="our-services" element={<OurServices />} />
+
+          <Route path="scholarship" element={<ScholarshipPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

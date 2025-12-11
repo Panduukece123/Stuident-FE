@@ -1,9 +1,9 @@
-import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom"; // 1. Tambah useLocation
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, Search } from "lucide-react";
 import Logo from "../../assets/images/stuident-logo.svg";
+import ProfileService from "@/services/ProfileService"; 
 
-// Import Components
 import { Button } from "../ui/button";
 import {
   NavigationMenu,
@@ -27,7 +27,6 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { Input } from "../ui/input";
-
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   DropdownMenu,
@@ -39,24 +38,108 @@ import {
 } from "../ui/dropdown-menu";
 
 export const Navbar = () => {
-  // 2. Ambil lokasi URL saat ini
-  const location = useLocation();
+  const location = useLocation(); 
   const navigate = useNavigate();
   const pathname = location.pathname;
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  // 1. STATE USER (Ambil dari LocalStorage)
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-  // Helper function buat Mobile Menu (biar kodingan rapi)
+  // State tambahan buat maksa refresh gambar di navbar
+  const [imageHash, setImageHash] = useState(Date.now());
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    navigate("/login");
+  };
+
+  // 2. LISTENER UPDATE USER (Ini Kuncinya!)
+  // Fungsi ini mendengarkan sinyal 'user-updated' dari ProfileLayout
+  useEffect(() => {
+    const syncUserFromStorage = () => {
+      const savedUser = localStorage.getItem("user");
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+        setImageHash(Date.now()); // Update hash biar gambar ke-refresh
+      }
+    };
+
+    // Pasang telinga
+    window.addEventListener("user-updated", syncUserFromStorage);
+
+    // Copot telinga pas unmount (Cleanup)
+    return () => {
+      window.removeEventListener("user-updated", syncUserFromStorage);
+    };
+  }, []);
+
+  // 3. CEK USER SAAT PINDAH HALAMAN (Backup Logic)
+  useEffect(() => {
+    const checkUser = () => {
+      const savedUser = localStorage.getItem("user");
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        // Cek kalau ada perbedaan data (misal nama berubah)
+        if (JSON.stringify(user) !== JSON.stringify(parsedUser)) {
+            setUser(parsedUser);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+    checkUser();
+  }, [location, user]); 
+
+  // 4. CEK TOKEN VALIDITY
+  useEffect(() => {
+    const checkTokenValidity = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        await ProfileService.getMe(); 
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          handleLogout();
+        }
+      }
+    };
+    checkTokenValidity();
+  }, []); 
+
+  // --- HELPER: GET PHOTO URL ---
+  const getPhotoUrl = (userData) => {
+    if (!userData) return "";
+    
+    // Cek field mana yang dikirim backend
+    let url = userData.profile_photo_url || userData.profile_photo || userData.avatar_url;
+    
+    // Kalau backend kirim path relatif (misal: "profile-photos/abc.jpg")
+    // Tambahkan domain backend (sesuaikan port laravel kamu, misal 8000)
+    if (url && !url.startsWith("http")) {
+       url = `http://localhost:8000/storage/${url}`;
+    }
+    
+    // Tambah cache buster biar browser download ulang gambar baru
+    return url ? `${url}?t=${imageHash}` : ""; 
+  };
+
+  const photoUrl = getPhotoUrl(user);
+
   const getMobileLinkClass = (path) => {
     return pathname === path
-      ? "text-sm font-bold text-primary transition-colors" // Style Active
-      : "text-sm font-medium text-muted-foreground hover:text-primary transition-colors"; // Style Default
+      ? "text-sm font-bold text-primary transition-colors"
+      : "text-sm font-medium text-muted-foreground hover:text-primary transition-colors";
   };
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="mx-auto flex h-16 w-full items-center justify-between px-6 gap-4">
-        {/* --- 1. LOGO --- */}
+        {/* LOGO */}
         <Link to="/" className="flex items-center gap-3">
           <img src={Logo} alt="Stuident" width={36} height={36} />
           <div className="leading-tight">
@@ -64,8 +147,8 @@ export const Navbar = () => {
           </div>
         </Link>
 
-        {/* --- SEARCH BAR --- */}
-        <div className="hidden md:flex flex-1 max-w-xs lg:max-w-md items-center relative">
+        {/* SEARCH BAR */}
+        <div className="hidden md:flex flex-1 max-w-xs lg:max-w-full items-center relative">
           <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
@@ -74,145 +157,54 @@ export const Navbar = () => {
           />
         </div>
 
-        {/* --- 2. DESKTOP NAVIGATION --- */}
+        {/* DESKTOP NAVIGATION */}
         <div className="hidden md:flex md:flex-1 md:justify-start">
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
-              {/* HOME LINK */}
               <NavigationMenuItem>
-                {/* Gunakan asChild agar bisa pakai Link router */}
-                <NavigationMenuLink
-                  asChild
-                  active={pathname === "/"} // 3. Logic Active Desktop
-                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary focus:bg-transparent cursor-pointer"
-                >
+                <NavigationMenuLink asChild active={pathname === "/"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary focus:bg-transparent cursor-pointer">
                   <Link to="/">Home</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              {/* E-LEARNING */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger
-                  // Kalau diklik Trigger-nya, dia ke paling atas halaman E-Learning
-                  onClick={() => navigate("/e-learning")}
-                  className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! data-[state=open]:text-primary ${
-                    pathname === "/e-learning" ? "text-primary" : ""
-                  }`}
-                >
+                <NavigationMenuTrigger onClick={() => navigate("/e-learning")} className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! data-[state=open]:text-primary ${pathname === "/e-learning" ? "text-primary" : ""}`}>
                   E-Learning
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-2 w-56 lg:grid-rows-[.75fr_1fr]">
-                    <li>
-                      <NavigationMenuLink asChild>
-                        {/* PERUBAHAN DISINI: Tambah #course */}
-                        <Link
-                          to="/e-learning#course"
-                          className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
-                        >
-                          <div className="font-medium text-foreground">
-                            Course
-                          </div>
-                          <div className="text-muted-foreground text-xs">
-                            Belajar bareng mitra terbaik
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        {/* PERUBAHAN DISINI: Tambah #bootcamp */}
-                        <Link
-                          to="/e-learning#bootcamp"
-                          className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
-                        >
-                          <div className="font-medium text-foreground">
-                            Bootcamp
-                          </div>
-                          <div className="text-muted-foreground text-xs">
-                            Program intensif siap kerja
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
+                    <li><NavigationMenuLink asChild><Link to="/e-learning#course" className="block rounded-md px-3 py-2 transition hover:bg-accent/50"><div className="font-medium text-foreground">Course</div><div className="text-muted-foreground text-xs">Belajar bareng mitra terbaik</div></Link></NavigationMenuLink></li>
+                    <li><NavigationMenuLink asChild><Link to="/e-learning#bootcamp" className="block rounded-md px-3 py-2 transition hover:bg-accent/50"><div className="font-medium text-foreground">Bootcamp</div><div className="text-muted-foreground text-xs">Program intensif siap kerja</div></Link></NavigationMenuLink></li>
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* SCHOLARSHIP */}
               <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  active={pathname === "/scholarship"}
-                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer"
-                >
+                <NavigationMenuLink asChild active={pathname === "/scholarship"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer">
                   <Link to="/scholarship">Scholarship</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              {/* MY MENTOR */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:text-primary data-[state=open]:bg-accent/60!">
                   My Mentor
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-2 w-56 lg:grid-rows-[.75fr_1fr]">
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/life-plan"
-                          className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${
-                            pathname === "/life-plan"
-                              ? "bg-accent/50 text-primary"
-                              : ""
-                          }`}
-                        >
-                          <div className="font-medium text-foreground">
-                            Life Plan Mentoring
-                          </div>
-                          <div className="text-muted-foreground text-xs">
-                            Mentoring rencana hidup
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="#"
-                          className="block rounded-md px-3 py-2 transition hover:bg-accent/50"
-                        >
-                          <div className="font-medium text-foreground">
-                            Academic Mentoring
-                          </div>
-                          <div className="text-muted-foreground text-xs">
-                            Bimbingan akademik
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
+                    <li><NavigationMenuLink asChild><Link to="/life-plan" className={`block rounded-md px-3 py-2 transition hover:bg-accent/50 ${pathname === "/life-plan" ? "bg-accent/50 text-primary" : ""}`}><div className="font-medium text-foreground">Life Plan Mentoring</div><div className="text-muted-foreground text-xs">Mentoring rencana hidup</div></Link></NavigationMenuLink></li>
+                    <li><NavigationMenuLink asChild><Link to="#" className="block rounded-md px-3 py-2 transition hover:bg-accent/50"><div className="font-medium text-foreground">Academic Mentoring</div><div className="text-muted-foreground text-xs">Bimbingan akademik</div></Link></NavigationMenuLink></li>
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* CORPORATE */}
               <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  active={pathname === "/corporate"}
-                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary whitespace-nowrap cursor-pointer"
-                >
-                  <Link to="/corporate">Corporate Service</Link>
+                <NavigationMenuLink asChild active={pathname === "/our-services"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary whitespace-nowrap cursor-pointer">
+                  <Link to="/our-services">Corporate Service</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              {/* ARTICLE */}
               <NavigationMenuItem>
-                <NavigationMenuLink
-                  asChild
-                  active={pathname === "/article"}
-                  className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer"
-                >
+                <NavigationMenuLink asChild active={pathname === "/article"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer">
                   <Link to="/article">Article</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -220,18 +212,23 @@ export const Navbar = () => {
           </NavigationMenu>
         </div>
 
+        {/* USER MENU */}
         {user ? (
-          // Jika user sudah login
           <div className="hidden items-center gap-2 md:flex">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative bg-primary hover:bg-primary/50 flex flex-row gap-2 focus-visible:ring-0 cursor-pointer"
-                >
+                <Button variant="ghost" className="relative bg-primary hover:bg-primary/50 flex flex-row gap-2 focus-visible:ring-0 cursor-pointer">
+                  {/* AVATAR DESKTOP */}
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage 
+                      src={photoUrl} 
+                      alt={user.name} 
+                      className="object-cover"
+                    />
+                    <AvatarFallback>
+                        {/* Fallback Inisial Nama */}
+                        {user.name ? user.name.split(" ").map((n)=>n[0]).join("").substring(0, 2).toUpperCase() : "US"}
+                    </AvatarFallback>
                   </Avatar>
                   <h1 className="text-white">{user.name}</h1>
                 </Button>
@@ -239,40 +236,28 @@ export const Navbar = () => {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {user.name}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className={"cursor-pointer"}>
-                  <Link to="/profile">Profile</Link>
+                <DropdownMenuItem className={"cursor-pointer"} asChild>
+                  <Link to="/profile/my-profile">Profile</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className={"cursor-pointer"}>
+                <DropdownMenuItem className={"cursor-pointer text-red-500 focus:text-red-500"} onClick={handleLogout}>
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         ) : (
-          // Jika user belum login
           <div className="hidden items-center gap-2 md:flex">
-            <Link to="/login">
-              <Button variant={"outline"} size="sm" className="cursor-pointer">
-                Login
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button size="sm" className="cursor-pointer">
-                Register
-              </Button>
-            </Link>
+            <Link to="/login"><Button variant={"outline"} size="sm" className="cursor-pointer">Login</Button></Link>
+            <Link to="/register"><Button size="sm" className="cursor-pointer">Register</Button></Link>
           </div>
         )}
-        {/* --- MOBILE SHEET --- */}
+
+        {/* MOBILE SHEET */}
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:hidden">
@@ -291,107 +276,57 @@ export const Navbar = () => {
 
             <div className="flex flex-col gap-4 mt-4">
               <div className="flex flex-col space-y-3">
-                {/* 4. Logic Active Mobile */}
-                <Link to="/" className={getMobileLinkClass("/")}>
-                  Home
-                </Link>
-
+                <Link to="/" className={getMobileLinkClass("/")}>Home</Link>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="elearning" className="border-b-0">
-                    <AccordionTrigger
-                      className={`cursor-pointer text-sm hover:no-underline hover:text-primary ${
-                        pathname.includes("course")
-                          ? "text-primary font-bold"
-                          : "font-medium"
-                      }`}
-                    >
-                      E-Learning
-                    </AccordionTrigger>
+                    <AccordionTrigger className={`cursor-pointer text-sm hover:no-underline hover:text-primary ${pathname.includes("course") ? "text-primary font-bold" : "font-medium"}`}>E-Learning</AccordionTrigger>
                     <AccordionContent className="flex flex-col space-y-2 pl-4 border-l ml-2">
-                      <Link
-                        to="/course"
-                        className={getMobileLinkClass("/course")}
-                      >
-                        Course
-                      </Link>
-                      <Link
-                        to="/bootcamp"
-                        className={getMobileLinkClass("/bootcamp")}
-                      >
-                        Bootcamp
-                      </Link>
+                      <Link to="/course" className={getMobileLinkClass("/course")}>Course</Link>
+                      <Link to="/bootcamp" className={getMobileLinkClass("/bootcamp")}>Bootcamp</Link>
                     </AccordionContent>
                   </AccordionItem>
-                  {/* ... Accordion Mentor sama logikanya ... */}
                 </Accordion>
-
-                <Link
-                  to="/scholarship"
-                  className={getMobileLinkClass("/scholarship")}
-                >
-                  Scholarship
-                </Link>
-                <Link
-                  to="/corporate"
-                  className={getMobileLinkClass("/corporate")}
-                >
-                  Corporate Service
-                </Link>
-                <Link to="/article" className={getMobileLinkClass("/article")}>
-                  Article
-                </Link>
+                <Link to="/scholarship" className={getMobileLinkClass("/scholarship")}>Scholarship</Link>
+                <Link to="/corporate" className={getMobileLinkClass("/corporate")}>Corporate Service</Link>
+                <Link to="/article" className={getMobileLinkClass("/article")}>Article</Link>
               </div>
 
+              {/* MOBILE USER MENU */}
               {user ? (
-                // Jika user sudah login di mobile
                 <div className="mt-3 flex flex-col gap-3">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="relative h-8 w-8 rounded-full"
-                      >
+                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                        {/* AVATAR MOBILE */}
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-                          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage 
+                            src={photoUrl} 
+                            alt={user.name} 
+                            className="object-cover"
+                          />
+                          <AvatarFallback>
+                             {user.name ? user.name.split(" ").map((n)=>n[0]).join("").substring(0, 2).toUpperCase() : "US"}
+                          </AvatarFallback>
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-56"
-                      align="end"
-                      forceMount
-                    >
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
                       <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {user.name}
-                          </p>
-                          <p className="text-xs leading-none text-muted-foreground">
-                            {user.email}
-                          </p>
+                          <p className="text-sm font-medium leading-none">{user.name}</p>
+                          <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem>Profile</DropdownMenuItem>
-                      <DropdownMenuItem>Settings</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>Log out</DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link to="/profile/my-profile">Profile</Link></DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">Log out</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               ) : (
                 <div className="mt-3 flex flex-col gap-3">
-                  <Link to="/register">
-                    <Button className="w-full" size="sm">
-                      Register
-                    </Button>
-                  </Link>
-                  <Link to="/login">
-                    <Button variant="outline" className="w-full" size="sm">
-                      Login
-                    </Button>
-                  </Link>
+                  <Link to="/register"><Button className="w-full" size="sm">Register</Button></Link>
+                  <Link to="/login"><Button variant="outline" className="w-full" size="sm">Login</Button></Link>
                 </div>
               )}
             </div>
