@@ -111,24 +111,10 @@ export const Navbar = () => {
     checkTokenValidity();
   }, []); 
 
-  // --- HELPER: GET PHOTO URL ---
-  const getPhotoUrl = (userData) => {
-    if (!userData) return "";
-    
-    // Cek field mana yang dikirim backend
-    let url = userData.profile_photo_url || userData.profile_photo || userData.avatar_url;
-    
-    // Kalau backend kirim path relatif (misal: "profile-photos/abc.jpg")
-    // Tambahkan domain backend (sesuaikan port laravel kamu, misal 8000)
-    if (url && !url.startsWith("http")) {
-       url = `http://localhost:8000/storage/${url}`;
-    }
-    
-    // Tambah cache buster biar browser download ulang gambar baru
-    return url ? `${url}?t=${imageHash}` : ""; 
-  };
-
-  const photoUrl = getPhotoUrl(user);
+  // --- REFACTOR: PANGGIL SERVICE (Bersih & Rapi) ---
+  const avatarSrc = user 
+    ? `${ProfileService.getAvatarUrl(user)}?t=${imageHash}` 
+    : "";
 
   const getMobileLinkClass = (path) => {
     return pathname === path
@@ -221,7 +207,7 @@ export const Navbar = () => {
                   {/* AVATAR DESKTOP */}
                   <Avatar className="h-6 w-6">
                     <AvatarImage 
-                      src={photoUrl} 
+                      src={avatarSrc} 
                       alt={user.name} 
                       className="object-cover"
                     />
@@ -300,7 +286,7 @@ export const Navbar = () => {
                         {/* AVATAR MOBILE */}
                         <Avatar className="h-8 w-8">
                           <AvatarImage 
-                            src={photoUrl} 
+                            src={avatarSrc} 
                             alt={user.name} 
                             className="object-cover"
                           />
