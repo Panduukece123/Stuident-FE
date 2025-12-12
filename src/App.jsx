@@ -38,7 +38,7 @@ function App() {
           <Route path="profile" element={<ProfileLayout />}>
             <Route path="my-profile" element={<MyProfile />} />
             <Route path="my-order-history" element={<MyProfileOrderHistory />} />
-            <Route path="my-enrolled-course" element={<MyProfileEnrolledCourse />} />
+            <Route path="my-enrolled-courses" element={<MyProfileEnrolledCourse />} />
           </Route>
 
           <Route path="our-services" element={<OurServices />} />
