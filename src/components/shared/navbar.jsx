@@ -154,7 +154,7 @@ export const Navbar = () => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger onClick={() => navigate("/e-learning")} className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! data-[state=open]:text-primary ${pathname === "/e-learning" ? "text-primary" : ""}`}>
+                <NavigationMenuTrigger onClick={() => navigate("/e-learning")} className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! focus:bg-transparent data-[state=open]:text-primary ${pathname === "/e-learning" ? "text-primary" : ""}`}>
                   E-Learning
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>

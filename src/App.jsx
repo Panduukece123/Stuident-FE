@@ -23,9 +23,14 @@ function App() {
         <Route path="/" element={<AppLayout />}>
           <Route index element={<HomePage />} />
 
-          <Route path="e-learning" element={<ElearningPage />} />
+          <Route path="e-learning" element={<ElearningPage />}/>
 
-          <Route path="elearning-detail" element={<CourseShowPage />} />
+          <Route path="course">
+            <Route path="show/:id" element={<CourseShowPage />} />
+          </Route>
+              
+          <Route path="our-services" element={<OurServices />} />
+
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="auth/callback" element={<AuthCallbackPage />} />
@@ -35,8 +40,6 @@ function App() {
             <Route path="my-order-history" element={<MyProfileOrderHistory />} />
             <Route path="my-enrolled-course" element={<MyProfileEnrolledCourse />} />
           </Route>
-
-          <Route path="course-detail" element={<CourseShowPage />} />
 
           <Route path="our-services" element={<OurServices />} />
 

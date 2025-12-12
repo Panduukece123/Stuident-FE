@@ -1,94 +1,57 @@
-import { ElearningCourseList } from "@/components/section/ElearningCourseList";
-import { CourseCard } from "@/components/shared/CourseCard";
-import React from "react";
+import { EnrolledCourseList } from "@/components/section/EnrolledCourseList";
+import React, { useEffect, useState } from "react";
+import ProfileService from "@/services/ProfileService";
 
-const dummyCourses = [
-  {
-    title: "Intro to Web Development",
-    description: "Belajar HTML, CSS, dan JavaScript dari dasar.",
-    rating: 4.8,
-    price: 50000
-  },
-  {
-    title: "Mastering React",
-    description: "Belajar React Hooks, State, dan Components.",
-    rating: 4.9,
-    price: 50000
-  },
-  {
-    title: "UI/UX Fundamentals",
-    description: "Dasar-dasar desain antarmuka dan pengalaman pengguna.",
-    rating: 4.7,
-    price: 50000
-  },
-  {
-    title: "Backend dengan Node.js",
-    description: "Membangun API menggunakan Express.js.",
-    rating: 4.6,
-    price: 50000
-  },
-  {
-    title: "Intro to Web Development",
-    description: "Belajar HTML, CSS, dan JavaScript dari dasar.",
-    rating: 4.8,
-    price: 50000
-  },
-  {
-    title: "Mastering React",
-    description: "Belajar React Hooks, State, dan Components.",
-    rating: 4.9,
-    price: 50000
-  },
-  {
-    title: "UI/UX Fundamentals",
-    description: "Dasar-dasar desain antarmuka dan pengalaman pengguna.",
-    rating: 4.7,
-    price: 50000
-  },
-  {
-    title: "Backend dengan Node.js",
-    description: "Membangun API menggunakan Express.js.",
-    rating: 4.6,
-    price: 50000
-  },
-  {
-    title: "Intro to Web Development",
-    description: "Belajar HTML, CSS, dan JavaScript dari dasar.",
-    rating: 4.8,
-    price: 50000
-  },
-  {
-    title: "Mastering React",
-    description: "Belajar React Hooks, State, dan Components.",
-    rating: 4.9,
-    price: 50000
-  },
-  {
-    title: "UI/UX Fundamentals",
-    description: "Dasar-dasar desain antarmuka dan pengalaman pengguna.",
-    rating: 4.7,
-    price: 50000
-  },
-  {
-    title: "Backend dengan Node.js",
-    description: "Membangun API menggunakan Express.js.",
-    rating: 4.6,
-    price: 50000
-  },
-];
+export const MyProfileEnrolledCourse = () => {
+  // 1. State
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export const MyProfileEnrolledCourse = ({ title, subtitle, courses }) => {
-return (
-<div>   
-    <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
+  // 2. Fetch Data
+  useEffect(() => {
+    const fetchMyCourses = async () => {
+      try {
+        setLoading(true);
+        const data = await ProfileService.getEnrolledCourses();
+        setCourses(data);
+      } catch (error) {
+        console.error("Error fetching enrolled courses:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMyCourses();
+  }, []);
+
+  // 3. TAMPILAN LOADING (Early Return)
+  // Kode ini ditaruh di sini supaya kalau loading, yang bawah tidak dijalankan
+  if (loading) {
+    return (
+      // Saya ubah dikit jadi min-h-[50vh] biar pas di tengah area konten (tidak sepenuh layar browser)
+      // Tapi kalau mau full layar, kembalikan ke "min-h-screen"
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // 4. TAMPILAN UTAMA (Jika sudah tidak loading)
+  return (
+    <div>
+      <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
         <h1 className="text-xl">Enrolled Course</h1>
+      </div>
+      <div className="mt-4">
+        {/* Pengecekan data kosong */}
+        {courses.length > 0 ? (
+          <EnrolledCourseList courses={courses} />
+        ) : (
+          <div className="text-center py-10 text-muted-foreground">
+            Kamu belum mengikuti kursus apapun.
+          </div>
+        )}
+      </div>
     </div>
-    <div><ElearningCourseList
-        title="Kursus Populer"
-        subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
-        courses={dummyCourses}
-      />
-    </div>
-    </div>
-      );
-}
+  );
+};
