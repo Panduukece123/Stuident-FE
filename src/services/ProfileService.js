@@ -59,6 +59,22 @@ const ProfileService = {
     return response.data;
   },
 
+  getAvatarUrl: (user) => {
+    if (!user) return "";
+
+    // 1. Cek prioritas field gambar
+    let url = user.profile_photo_url || user.profile_photo || user.avatar_url;
+
+    // 2. Jika path relatif (bukan http), tambahkan domain backend + folder storage
+    if (url && !url.startsWith("http")) {
+      // Pastikan formatnya rapi (handle slash)
+      const cleanPath = url.startsWith("/") ? url.substring(1) : url;
+      url = `${BACKEND_URL}/storage/${cleanPath}`;
+    }
+
+    return url;
+  },
+
   // === EXPERIENCE SECTION (FIXED) ===
 
   // 5. ADD EXPERIENCE
