@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom"; // 1. Import Link
 import { CourseCard } from "../shared/CourseCard";
 
-export const ElearningCourseList = ({ title, subtitle, courses }) => {
+export const ElearningBootcampList = ({ title, subtitle, courses }) => {
   return (
     <section className="py-12 px-6 bg-background border-t">
       <div className="">

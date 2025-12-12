@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 export const ElearningCategories = ({ categories = [] }) => {
   return (
     <section className="py-12 px-6 bg-background">
-      <div className="container mx-auto text-center">
+      <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">Pilihan E-Learning</h2>
         <p className="text-muted-foreground mb-8">
           Temukan ribuan kursus pilihan yang diajarkan oleh instruktur terbaik
