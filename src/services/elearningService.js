@@ -25,6 +25,7 @@ const ElearningService = {
             id: course.id,
             title: course.title || "Untitled Course",
             level: course.level || "Beginner",
+            type : course.type || "course",
             rating: course.rating || 4.8,
             reviews: course.reviews_count || 120,
             description: course.description || "No description available.",
