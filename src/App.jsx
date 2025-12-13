@@ -14,6 +14,7 @@ import ScholarshipPage from "./pages/scholarsip/ScholarshipPage";
 import { OurServices } from "./pages/OurServices";
 import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
 import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
+import { EnrolledCourseShowPage } from "./pages/course/EnrolledCourseShowPage";
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
           <Route path="course">
             <Route path="show/:id" element={<CourseShowPage />} />
           </Route>
+
+          <Route path="enrolled" element={<EnrolledCourseShowPage />} />
               
           <Route path="our-services" element={<OurServices />} />
 

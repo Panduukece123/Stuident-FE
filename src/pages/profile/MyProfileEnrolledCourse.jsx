@@ -42,7 +42,7 @@ export const MyProfileEnrolledCourse = () => {
       <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
         <h1 className="text-xl">Enrolled Course</h1>
       </div>
-      <div className="mt-4">
+      <div>
         {/* Pengecekan data kosong */}
         {courses.length > 0 ? (
           <EnrolledCourseList courses={courses} />
