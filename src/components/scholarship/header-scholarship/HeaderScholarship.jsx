@@ -1,53 +1,77 @@
 import FilterDropdown from "@/components/shared/FilterDropdownSimple";
 import SearchInput from "@/components/shared/searchInput";
-import React, { useState } from "react";
-import {
-  scholarshipOptions,
-  fieldOptions,
-  companyOptions,
-} from "@/data/mockData";
+import React, { useEffect, useRef } from "react";
+import { fieldOptions, locationOptions, statusOptions } from "@/data/mockData";
+import { useScholarship } from "@/context/ScholarshipContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const HeaderScholarship = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+ const { filters, updateFilter, setShowAllList } = useScholarship();
+  
+  const queryClient = useQueryClient();
+  
+  const hasFilteredRef = useRef(false);
+
+  useEffect(() => {
+    // Cek apakah ada filter yang aktif
+    const isActive = 
+      filters.search !== "" || 
+      filters.location !== "" || 
+      filters.field !== "" || 
+      filters.status !== "";
+
+    if (isActive) {
+      hasFilteredRef.current = true;
+      setShowAllList(true); 
+    } else {
+      if (hasFilteredRef.current) {
+        
+        setShowAllList(false); 
+        
+        queryClient.cancelQueries({ queryKey: ['all-scholarships'] });
+        
+        queryClient.removeQueries({ queryKey: ['all-scholarships'] });
+
+        queryClient.invalidateQueries({ queryKey: ['popularity-scholarships'] });
+        queryClient.invalidateQueries({ queryKey: ['recommended-scholarships'] });
+
+        hasFilteredRef.current = false;
+      }
+    }
+  }, [filters, queryClient, setShowAllList]);
 
   const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-    console.log(`Filter ${key} diubah menjadi: ${value}`);
+    updateFilter(key, value);
   };
 
-  const [filters, setFilters] = useState({
-    scholarship: "",
-    field: "",
-    company: "",
-  });
+  const handleClearFilter = (key) => {
+    updateFilter(key, "");
+  };
 
   const handleSearchChange = (value) => {
-    setSearchTerm(value);
-    console.log("Current input:", searchTerm);
+    updateFilter("search", value);
   };
 
   const handleSearchSubmit = (value) => {
-    alert(
-      `Mencari Beasiswa untuk: ${value} Filter aktif: ${JSON.stringify(
-        filters
-      )}`
-    );
-    // logic panggil api atau filter data berdasarkan value
+    updateFilter("search", value);
   };
+
 
   return (
     <>
       <div className="flex flex-col items-center justify-center mb-24 mt-12 ">
         <h1 className="text-8xl font-bold mb-4 bg-clip-text text-transparent bg-linear-to-r from-black to-[#666666]">
-    FIND YOUR
-  </h1>
+          FIND YOUR
+        </h1>
 
         <div className="flex flex-row items-center justify-center text-6xl md:text-8xl font-bold">
           <span className="bg-[#ffda39] text-black px-4 py-1 rounded-xl shadow-lg mr-1 transform -rotate-1">
             SCHOLAR
           </span>
 
-          <span className="bg-clip-text text-transparent bg-linear-to-r from-black to-[#666666]">SHIP</span>
+          <span className="bg-clip-text text-transparent bg-linear-to-r from-black to-[#666666]">
+            SHIP
+          </span>
         </div>
         <div className="w-full max-w-4xl px-4 mb-6 mt-2.5">
           <SearchInput
@@ -59,19 +83,25 @@ const HeaderScholarship = () => {
 
         <div className="flex justify-center gap-4 w-full max-w-4xl px-4">
           <FilterDropdown
-            label="Scholarship"
-            options={scholarshipOptions}
-            onvalueChange={(value) => handleFilterChange("scholarship", value)}
+            label="Location"
+            options={locationOptions}
+            value={filters.location}
+            onValueChange={(value) => handleFilterChange("location", value)}
+            onClear={() => handleClearFilter("location")}
           />
           <FilterDropdown
-            label="Filed of Study"
+            label="Status"
+            options={statusOptions}
+            value={filters.status}
+            onValueChange={(value) => handleFilterChange("status", value)}
+            onClear={() => handleClearFilter("status")}
+          />
+          <FilterDropdown
+            label="Field of Study"
             options={fieldOptions}
-            onvalueChange={(value) => handleFilterChange("field", value)}
-          />
-          <FilterDropdown
-            label="Company"
-            options={companyOptions}
-            onvalueChange={(value) => handleFilterChange("company", value)}
+            value={filters.field}
+            onValueChange={(value) => handleFilterChange("field", value)}
+            onClear={() => handleClearFilter("field")}
           />
         </div>
       </div>
