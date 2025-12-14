@@ -14,6 +14,7 @@ import courseService from "@/services/CourseService";
 import { Item, ItemContent } from "@/components/ui/item";
 import LevelBadge from "@/components/LevelBadge";
 import ReviewItem from "@/components/ReviewItem";
+import { formatPrice, formatTimestamp } from "@/services/Format";
 
 export default function CourseShowPage() {
     const { id } = useParams();
@@ -74,12 +75,19 @@ export default function CourseShowPage() {
                     <h1 className="text-2xl md:text-3xl font-semibold w-full">
                         {course.title}
                     </h1>
+                    { course.image && (
+                        <img
+                            src={course.image}
+                            alt="Course Thumbnail"
+                            className="w-full h-48 md:h-64 object-cover rounded-lg my-4"
+                        />
+                    )}
                     <p className="text-base md:text-lg font-light text-muted-foreground w-full">
                         {course.description}
                     </p>
                     <div className="grid grid-cols-2 mt-4 gap-2">
 
-                        <div className="inline-flex gap-1" id="course_summary_badge">
+                        <div className="inline-flex flex-wrap gap-1" id="course_summary_badge">
                             <LevelBadge level={course.level}/>
                             <Badge variant="default">{course.category}</Badge>
                             <Badge variant="default">{course.type}</Badge>
@@ -118,16 +126,40 @@ export default function CourseShowPage() {
                     {/* Tab Content: Overview-Description */}
                     <TabsContent value="overview">
                         <Card className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}>
-                            <h1 className="text-xl md:text-2xl font-semibold w-full">
-                                Video Kilas
-                            </h1>
-                            <p>Lorem Ipsum</p>
-                            <h1 className="text-xl md:text-2xl font-semibold w-full">
-                                Deskripsi
-                            </h1>
-                            <p>
-                                {course.description}
-                            </p>
+
+                            {course.summary?.video_url ? (
+                                <section>
+                                    <h1 className="text-xl md:text-2xl font-semibold w-full pb-4">
+                                        Video Kilasan
+                                    </h1>
+                                    <iframe
+                                        src={course.summary.video_url}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        style={{ width: "100%", aspectRatio: "16/9" }}
+                                    ></iframe>
+                                    <p className="text-sm text-muted-foreground">
+                                        Durasi tonton: {course.summary.video_duration}
+                                    </p>
+                                </section>
+                            ) : null}
+
+                            <section>
+                                <h1 className="text-xl md:text-2xl font-semibold w-full pb-4">
+                                    Deskripsi
+                                </h1>
+                                <p>{course.summary?.description}</p>
+                            </section>
+
+                            <section>
+                                <p className="font-light text-muted-foreground">
+                                    Dibuat pada: {formatTimestamp(course.created_at)}
+                                </p>
+                                <p className="font-light text-muted-foreground">
+                                    Diupdate pada: {formatTimestamp(course.updated_at)}
+                                </p>
+                            </section>
+                            
                         </Card>
                     </TabsContent>
 
@@ -156,15 +188,15 @@ export default function CourseShowPage() {
                                                     ?.filter(curriculum => curriculum.section === section)
                                                     ?.map(curriculum => (
 
-                                                        <Item key={curriculum.id} variant="outline" size="sm">
-                                                            <ItemContent>
+                                                        <Item key={curriculum.id} variant="outline" size="sm" asChild>
+                                                            <a> <ItemContent>
                                                                 <h3 className="font-medium">
                                                                     {curriculum.title}
                                                                 </h3>
                                                                 <p className="text-sm font-light mt-1">
                                                                     {curriculum.description}
                                                                 </p>
-                                                            </ItemContent>
+                                                            </ItemContent> </a>
                                                         </Item>
 
                                                     ))}
@@ -182,7 +214,7 @@ export default function CourseShowPage() {
                     {/* Tab Content: Review */}
                     <TabsContent value="reviews">
                         <Card className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}>
-                            <section className="flex flex-col gap-2">
+                            <section className="flex flex-col gap-2 border-b pb-6">
                                 <h1 className="text-xl md:text-2xl font-semibold w-full">
                                     Buatkan Ulasan
                                 </h1>
@@ -194,11 +226,31 @@ export default function CourseShowPage() {
                                             <SelectValue placeholder="Pilih bintang" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="1">1</SelectItem>
-                                            <SelectItem value="2">2</SelectItem>
-                                            <SelectItem value="3">3</SelectItem>
-                                            <SelectItem value="4">4</SelectItem>
-                                            <SelectItem value="5">5</SelectItem>
+                                            <SelectItem value="1">
+                                                <Star size={24} fill="currentColor"/>
+                                            </SelectItem>
+                                            <SelectItem value="2">
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                            </SelectItem>
+                                            <SelectItem value="3">
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                            </SelectItem>
+                                            <SelectItem value="4">
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                            </SelectItem>
+                                            <SelectItem value="5">
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                                <Star size={24} fill="currentColor"/>
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -213,13 +265,20 @@ export default function CourseShowPage() {
                                     Ulasan
                                 </h1>
                                 <div className="space-y-4 py-4">
-                                    {course.reviews?.map((review) => (
+                                    {course.reviews?.length > 0 ? course.reviews.map((review) => (
                                         <ReviewItem
+                                            userName={review.user.name}
+                                            userProfilePic={review.user.profile_photo}
                                             key={review.id}
                                             comment={review.comment}
                                             rating={review.rating}
                                         />
-                                    ))}
+                                    )) : (
+                                        <p className="w-full text-muted-foreground">
+                                            Tidak ada ulasan
+                                        </p>
+                                    )
+                                    }
                                 </div>
                             </section>
                         </Card>
@@ -236,12 +295,12 @@ export default function CourseShowPage() {
                         <div>
                             <p className="text-muted-foreground font-light">Harga:</p>
                             <p className="text-2xl" id="price">
-                                Rp {course.price}
+                                {formatPrice(course.price)}
                             </p>
                         </div>
                         <div className="w-full flex flex-col gap-2 pt-2 pb-2">
                             <Button>Beli Sekarang</Button>
-                            <Button>Tambahkan ke Keranjang</Button>
+                            <Button>Tambahkan ke Favorit</Button>
                         </div>
                     </section>
 
