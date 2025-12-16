@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router-dom"; // Pastikan from 'react-router-dom'
 import { AppLayout } from "./layouts/AppLayout";
 import { HomePage } from "./pages/HomePage";
 import { ElearningPage } from "./pages/ElearningPage";
@@ -15,6 +15,7 @@ import { OurServices } from "./pages/OurServices";
 import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
 import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
 import { EnrolledCourseShowPage } from "./pages/course/EnrolledCourseShowPage";
+import { LearnLayout } from "./layouts/LearnLayout";
 
 function App() {
   return (
@@ -24,14 +25,12 @@ function App() {
         <Route path="/" element={<AppLayout />}>
           <Route index element={<HomePage />} />
 
-          <Route path="e-learning" element={<ElearningPage />}/>
+          <Route path="e-learning" element={<ElearningPage />} />
 
           <Route path="course">
             <Route path="show/:id" element={<CourseShowPage />} />
           </Route>
 
-          <Route path="enrolled" element={<EnrolledCourseShowPage />} />
-              
           <Route path="our-services" element={<OurServices />} />
 
           <Route path="login" element={<LoginPage />} />
@@ -40,13 +39,23 @@ function App() {
 
           <Route path="profile" element={<ProfileLayout />}>
             <Route path="my-profile" element={<MyProfile />} />
-            <Route path="my-order-history" element={<MyProfileOrderHistory />} />
-            <Route path="my-enrolled-courses" element={<MyProfileEnrolledCourse />} />
+            <Route
+              path="my-order-history"
+              element={<MyProfileOrderHistory />}
+            />
+            <Route
+              path="my-enrolled-courses"
+              element={<MyProfileEnrolledCourse />}
+            />
           </Route>
 
-          <Route path="our-services" element={<OurServices />} />
-
           <Route path="scholarship" element={<ScholarshipPage />} />
+        </Route>
+        <Route element={<LearnLayout />}>
+          <Route
+            path="my-courses/:id/learn"
+            element={<EnrolledCourseShowPage />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -44,7 +44,7 @@ export const EnrolledCourseCard = ({
           <img
             src={image}
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500"
           />
         ) : (
           <div className="w-full h-full bg-linear-to-br from-blue-400 to-blue-600" />
