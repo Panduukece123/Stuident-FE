@@ -97,11 +97,11 @@ export const EditEducationDialog = ({ open, onOpenChange, initialData, onSuccess
                     {/* Value = yang dikirim ke backend (wajib english) */}
                     {/* Label (di dalam tag) = yang dilihat user (bebas) */}
                     
-                    <SelectItem value="high_school">SMA / SMK</SelectItem>
-                    <SelectItem value="diploma">Diploma (D1 - D4)</SelectItem>
-                    <SelectItem value="bachelor">Sarjana (S1)</SelectItem>
-                    <SelectItem value="master">Magister (S2)</SelectItem>
-                    <SelectItem value="phd">Doktor (S3)</SelectItem>
+                    <SelectItem value="SMA/SMK">SMA / SMK</SelectItem>
+                    <SelectItem value="D1-D4">Diploma (D1 - D4)</SelectItem>
+                    <SelectItem value="S1">Sarjana (S1)</SelectItem>
+                    <SelectItem value="S2">Magister (S2)</SelectItem>
+                    <SelectItem value="S3">Doktor (S3)</SelectItem>
                   </SelectContent>
                 </Select>
             </div>
