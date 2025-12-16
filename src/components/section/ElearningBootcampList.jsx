@@ -2,10 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { CourseCard } from "../shared/CourseCard";
 
-export const ElearningCourseList = ({ title, subtitle, courses = [] }) => {
+export const ElearningBootcampList = ({ title, subtitle, courses = [] }) => {
   // 1. Filter dulu datanya di sini
   // Hanya ambil yang type-nya "course" (pastikan huruf kecil/besar sesuai API)
-  const filteredCourses = courses.filter((course) => course.type === 'course');
+  const filteredCourses = courses.filter((course) => course.type === 'bootcamp');
 
   // Opsional: Kalau mau cek apakah datanya kosong setelah difilter
   if (filteredCourses.length === 0) {

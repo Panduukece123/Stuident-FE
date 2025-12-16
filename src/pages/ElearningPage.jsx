@@ -5,6 +5,9 @@ import { ElearningBanner } from "../components/section/ElearningBanner";
 import { ElearningCategories } from "../components/section/ElearningCategories";
 import { ElearningCourseList } from "../components/section/ElearningCourseList";
 import ElearningService from "@/services/elearningService";
+import { ElearningList } from "@/components/section/ElearningList";
+import { InfoBootcamp } from "@/components/section/InfoBootcampSection";
+import { ElearningBootcampList } from "@/components/section/ElearningBootcampList";
 
 export const ElearningPage = () => {
   const [courses, setCourses] = useState([]);
@@ -13,7 +16,7 @@ export const ElearningPage = () => {
 
   // Client-side pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 4;
 
   const fetchCoursesData = async () => {
     try {
@@ -90,7 +93,7 @@ export const ElearningPage = () => {
           courses={courses.slice(0, 3)}
         />
 
-        <ElearningCourseList
+        <ElearningList
           title="Temukan Keahlian Baru"
           subtitle="Dunia terus berubah dan keahlian baru selalu dibutuhkan. Perluas wawasan Anda dengan mempelajari topik-topik relevan yang kami pilihkan ini."
           courses={currentCourses}
@@ -122,6 +125,14 @@ export const ElearningPage = () => {
         <ElearningCourseList
           title="Kursus Terpopuler"
           subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain. Ini adalah topik-topik terpanas di platform kami saat ini."
+          courses={courses}
+        />
+
+        <InfoBootcamp />
+
+        <ElearningBootcampList
+          title="Kursus Bootcamp"
+          subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
           courses={courses}
         />
       </main>

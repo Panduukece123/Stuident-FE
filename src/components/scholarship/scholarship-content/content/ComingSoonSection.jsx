@@ -10,7 +10,7 @@ const ComingSoonSection = () => {
 
   const scroll = (direction) => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 370; // 350px width + 20px gap
+      const scrollAmount = 370; 
       const newScrollPosition =
         scrollContainerRef.current.scrollLeft +
         (direction === "left" ? -scrollAmount : scrollAmount);
@@ -21,16 +21,11 @@ const ComingSoonSection = () => {
     }
   };
   return (
-    <div className="flex flex-col gap-6 mb-4">
+    <div className="flex flex-col gap-6  mt-12 mb-12">
       <div className="flex flex-row justify-between items-center mx-4 px-2">
         <h3 className="font-medium text-2xl">Coming Soon</h3>
 
-        <Link
-          to="/coming-soon-list"
-          className="text-lg font-medium opacity-75 text-sky-400 hover:text-sky-600 transition duration-150"
-        >
-          See More
-        </Link>
+       
       </div>
 
       {/* card */}

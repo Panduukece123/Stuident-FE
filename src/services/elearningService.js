@@ -1,85 +1,65 @@
 import api from "./Api";
 
-/**
- * Service untuk menangani API calls terkait e-learning
- */
-class ElearningService {
-  /**
-   * Mengambil semua kursus dari API
-   * @returns {Promise<Array>} Array of course objects
-   */
-  static async fetchCourses() {
+const ElearningService = {
+  // 1. Fungsi Utama
+  fetchCourses: async () => {
     try {
       console.log(`Fetching all courses...`);
       const response = await api.get("/courses");
-      console.log("Response received:", response);
-
       const responseData = response.data;
       const data = responseData.data || [];
+      
+      // Config URL Gambar (Sesuaikan port backendmu)
+      const BACKEND_URL = "http://localhost:8000"; 
+      const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
 
       if (Array.isArray(data)) {
-        const mappedCourses = data.map((course) => ({
-          title: course.title || "Untitled Course",
-          level: course.level || "Beginner",
-          rating: course.rating || 4.8,
-          reviews: course.reviews_count || 120,
-          description: course.description || "No description available.",
-          price: course.price ? Number(course.price) : 0,
-          image: course.image_url || null,
-          instructor: course.instructor,
-          category: course.category || "Umum",
-        }));
-
-        return mappedCourses;
+        return data.map((course) => {
+          // Logika perbaikan gambar
+          let imageUrl = course.image; // Cek kedua kemungkinan key
+          if (imageUrl && !imageUrl.startsWith('http')) {
+             imageUrl = `${BACKEND_URL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+          }
+          
+          return {
+            id: course.id,
+            title: course.title || "Untitled Course",
+            level: course.level || "Beginner",
+            type : course.type || "course",
+            rating: course.rating || 4.8,
+            reviews: course.reviews_count || 120,
+            description: course.description || "No description available.",
+            price: course.price ? Number(course.price) : 0,
+            image: imageUrl || DEFAULT_IMAGE, // Pakai hasil olahan tadi
+            instructor: course.instructor,
+            category: course.category || "Umum",
+          };
+        });
       } else {
-        console.error("API response is not an array:", data);
         return [];
       }
     } catch (err) {
       console.error("Error fetching courses:", err);
-      let errorMessage = "Gagal memuat data kursus.";
-
-      if (err.response) {
-        errorMessage += ` Server Error: ${err.response.status} ${err.response.statusText}`;
-      } else if (err.request) {
-        errorMessage += " Tidak ada respon dari server.";
-      } else {
-        errorMessage += ` ${err.message}`;
-      }
-
-      throw new Error(errorMessage);
+      throw err;
     }
-  }
+  },
 
-  /**
-   * Mengambil kursus berdasarkan kategori
-   * @param {string} category - Kategori kursus
-   * @returns {Promise<Array>} Array of course objects untuk kategori tertentu
-   */
-  static async fetchCoursesByCategory(category) {
-    const allCourses = await this.fetchCourses();
+  // 2. Fungsi Lainnya
+  // Perhatikan: Kita tidak pakai 'this.fetchCourses()', tapi 'ElearningService.fetchCourses()'
+  fetchCoursesByCategory: async (category) => {
+    const allCourses = await ElearningService.fetchCourses();
     return allCourses.filter((course) => course.category === category);
-  }
+  },
 
-  /**
-   * Mengambil kursus berdasarkan level
-   * @param {string} level - Level kursus (Beginner, Intermediate, Advanced)
-   * @returns {Promise<Array>} Array of course objects untuk level tertentu
-   */
-  static async fetchCoursesByLevel(level) {
-    const allCourses = await this.fetchCourses();
+  fetchCoursesByLevel: async (level) => {
+    const allCourses = await ElearningService.fetchCourses();
     return allCourses.filter((course) => course.level === level);
-  }
+  },
 
-  /**
-   * Mengambil kursus populer berdasarkan rating
-   * @param {number} limit - Jumlah maksimal kursus yang diambil
-   * @returns {Promise<Array>} Array of popular courses
-   */
-  static async fetchPopularCourses(limit = 10) {
-    const allCourses = await this.fetchCourses();
+  fetchPopularCourses: async (limit = 10) => {
+    const allCourses = await ElearningService.fetchCourses();
     return allCourses.sort((a, b) => b.rating - a.rating).slice(0, limit);
   }
-}
+};
 
 export default ElearningService;
