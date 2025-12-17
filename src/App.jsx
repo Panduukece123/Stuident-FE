@@ -14,6 +14,7 @@ import ScholarshipPage from "./pages/scholarsip/ScholarshipPage";
 import { OurServices } from "./pages/OurServices";
 import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
 import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
+import { EnrolledCourseShowPage } from "./pages/course/EnrolledCourseShowPage";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ScholarshipDetail from "./pages/scholarsip/ScholarshipDetailPage";
@@ -38,9 +39,13 @@ function App() {
 
             <Route path="e-learning" element={<ElearningPage />} />
 
-            <Route path="course">
-              <Route path="show/:id" element={<CourseShowPage />} />
-            </Route>
+          <Route path="course">
+            <Route path="show/:id" element={<CourseShowPage />} />
+          </Route>
+
+          <Route path="enrolled" element={<EnrolledCourseShowPage />} />
+              
+          <Route path="our-services" element={<OurServices />} />
 
             <Route path="our-services" element={<OurServices />} />
 
