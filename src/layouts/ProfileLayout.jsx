@@ -1,81 +1,95 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GraduationCap, LogOut, Settings, ShoppingCart, User, Loader2, Edit } from "lucide-react";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"; 
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // <--- 1. Import
 import ProfileService from "@/services/ProfileService";
 import authService from "@/services/AuthService";
 
 export const ProfileLayout = () => {
-  const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [imageHash, setImageHash] = useState(Date.now()); 
-
+  const queryClient = useQueryClient(); // Init Client
+  const [imageHash, setImageHash] = useState(Date.now());
+  const token = localStorage.getItem("token");
+  
   const location = useLocation();
   const navigate = useNavigate();
   const pathname = location.pathname;
-  
   const fileInputRef = useRef(null);
 
-  const fetchData = async () => {
-    try {
-      const result = await ProfileService.getProfile();
-      setProfileData(result.data || result);
-    } catch (error) {
-      console.error("Gagal load me:", error);
-      if (error.response && error.response.status === 401) {
-        handleLogout();
+  // --- 1. FETCH PROFILE (Ganti useEffect) ---
+  const { 
+    data: profileData, 
+    isLoading: loading 
+  } = useQuery({
+    queryKey: ["profile", token],
+    queryFn: async () => {
+      try {
+        const result = await ProfileService.getProfile();
+        return result.data || result;
+      } catch (error) {
+        // Handle 401 Unauthorized langsung di sini
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+        }
+        throw error;
       }
-    } finally {
-      setLoading(false);
+    },
+    staleTime: 1000 * 60 * 5, // Data fresh 5 menit
+  });
+
+  // --- 2. UPLOAD MUTATION (Ganti logic upload manual) ---
+  const uploadMutation = useMutation({
+    mutationFn: (file) => ProfileService.uploadAvatar(file),
+    onSuccess: async () => {
+      // A. Refresh data profile di TanStack Cache
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      
+      // B. Paksa browser reload gambar (bypass browser cache)
+      setImageHash(Date.now());
+
+      // C. Update LocalStorage & Event (Untuk sinkronisasi dengan Navbar jika perlu)
+      // Kita ambil data terbaru yang sudah di-invalidate
+      const updatedData = queryClient.getQueryData(["profile"]);
+      if (updatedData?.user) {
+        localStorage.setItem("user", JSON.stringify(updatedData.user));
+        window.dispatchEvent(new Event("user-updated"));
+      }
+
+      alert("Foto profil berhasil diperbarui!");
+    },
+    onError: (error) => {
+      console.error("Upload error:", error);
+      alert("Gagal upload foto profil.");
     }
-  };
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+  // --- HANDLERS ---
   const handleEditAvatarClick = () => {
     fileInputRef.current.click();
   };
 
-  const handleFileChange = async (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Validasi Ukuran (2MB)
     if (file.size > 2 * 1024 * 1024) {
       alert("File terlalu besar! Maksimal 2MB.");
       return;
     }
 
+    // Validasi Tipe
     if (!file.type.startsWith("image/")) {
       alert("Harap upload file gambar.");
       return;
     }
 
-    try {
-      setUploading(true);
-      await ProfileService.uploadAvatar(file);
-      
-      const result = await ProfileService.getProfile();
-      const freshData = result.data || result;
-      setProfileData(freshData);
-      
-      if (freshData.user) {
-        localStorage.setItem("user", JSON.stringify(freshData.user));
-        window.dispatchEvent(new Event("user-updated"));
-      }
-
-      setImageHash(Date.now());
-      alert("Foto profil berhasil diperbarui!");
-    } catch (error) {
-      console.error("Upload error:", error);
-      alert("Gagal upload foto profil.");
-    } finally {
-      setUploading(false);
-      e.target.value = null; 
-    }
+    // Jalankan Mutation
+    uploadMutation.mutate(file);
+    e.target.value = null; // Reset input
   };
 
   const handleLogout = async () => {
@@ -86,6 +100,8 @@ export const ProfileLayout = () => {
     } finally {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      // Clear TanStack Cache saat logout biar bersih
+      queryClient.clear(); 
       navigate("/login");
     }
   };
@@ -97,7 +113,8 @@ export const ProfileLayout = () => {
     }`;
   };
 
-  if (loading && !profileData) {
+  // --- UI ---
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -106,8 +123,9 @@ export const ProfileLayout = () => {
   }
 
   const user = profileData?.user || profileData;
+  const isUploading = uploadMutation.isPending; // Status loading dari mutation
 
-  // --- REFACTOR: PANGGIL SERVICE (Bersih & Rapi) ---
+  // URL Avatar + Hash Time biar browser gak cache gambar lama
   const avatarSrc = user 
     ? `${ProfileService.getAvatarUrl(user)}?t=${imageHash}` 
     : "";
@@ -118,7 +136,7 @@ export const ProfileLayout = () => {
         <div className="flex flex-col items-center gap-6 md:flex-row">
           <Avatar className="h-32 w-32 shadow-sm bg-white">
             <AvatarImage
-              src={avatarSrc} // <--- Pakai variabel yang sudah direfactor
+              src={avatarSrc}
               alt={user?.name}
               className="h-full w-full object-cover"
             />
@@ -151,10 +169,10 @@ export const ProfileLayout = () => {
             variant="outline" 
             className="border-white/40 bg-white/10 text-white hover:bg-white hover:text-[#074799] backdrop-blur-sm transition-all"
             onClick={handleEditAvatarClick}
-            disabled={uploading}
+            disabled={isUploading}
           >
-            {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Edit className="mr-2 h-4 w-4" />}
-            {uploading ? "Uploading..." : "Edit Avatar"}
+            {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Edit className="mr-2 h-4 w-4" />}
+            {isUploading ? "Uploading..." : "Edit Avatar"}
           </Button>
         </div>
       </div>
@@ -169,7 +187,7 @@ export const ProfileLayout = () => {
               </Button>
             </Link>
             <Link to="/profile/my-enrolled-courses">
-              <Button variant="ghost" className={getSidebarClass("/profile/enrolled-courses")}>
+              <Button variant="ghost" className={getSidebarClass("/profile/my-enrolled-courses")}>
                  <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
               </Button>
             </Link>
@@ -180,17 +198,13 @@ export const ProfileLayout = () => {
             </Link>
             <div className="my-2 h-px w-full bg-neutral-100" />
             <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2 mt-2">Account</h2>
-            <Link to="/profile/settings">
-              <Button variant="ghost" className={getSidebarClass("/profile/settings")}>
-                 <Settings className="mr-3 h-5 w-5" /> Settings
-              </Button>
-            </Link>
             <Button variant="ghost" onClick={handleLogout} className="w-full justify-start text-base font-light text-red-500 hover:bg-red-50 hover:text-red-600 h-10 px-4">
                <LogOut className="mr-3 h-5 w-5" /> Logout
             </Button>
           </div>
         </aside>
         <main className="w-full">
+            {/* Context profileData diteruskan ke children (MyProfile, dll) */}
             <Outlet context={profileData} />
         </main>
       </div>

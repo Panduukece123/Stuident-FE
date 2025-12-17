@@ -14,15 +14,17 @@ import ScholarshipPage from "./pages/scholarsip/ScholarshipPage";
 import { OurServices } from "./pages/OurServices";
 import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
 import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
+import { EnrolledCourseShowPage } from "./pages/course/EnrolledCourseShowPage";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ScholarshipDetail from "./pages/scholarsip/ScholarshipDetailPage";
+import { LearnLayout } from "./layouts/LearnLayout";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false, 
-      retry: 1, 
+      refetchOnWindowFocus: false,
+      retry: 1,
     },
   },
 });
@@ -55,7 +57,7 @@ function App() {
                 element={<MyProfileOrderHistory />}
               />
               <Route
-                path="my-enrolled-course"
+                path="my-enrolled-courses"
                 element={<MyProfileEnrolledCourse />}
               />
             </Route>
@@ -64,6 +66,13 @@ function App() {
             <Route
               path="scholarship/show/:id"
               element={<ScholarshipDetail />}
+            />
+          </Route>
+
+          <Route element={<LearnLayout />}>
+            <Route
+              path="my-courses/learn/:id"
+              element={<EnrolledCourseShowPage />}
             />
           </Route>
         </Routes>

@@ -36,6 +36,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import authService from "@/services/AuthService";
 
 export const Navbar = () => {
   const location = useLocation(); 
@@ -51,11 +52,21 @@ export const Navbar = () => {
   // State tambahan buat maksa refresh gambar di navbar
   const [imageHash, setImageHash] = useState(Date.now());
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await authService.logout(); 
+      console.log("Logout backend success");
+    } catch (error) {
+      console.warn("Logout backend failed (token might be expired):", error);
+    } finally {
+      // 3. Bersihkan Local Storage & State (Apapun hasil API-nya)
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      setUser(null);
+      
+      // 4. Redirect ke Login
+      navigate("/login");
+    }
   };
 
   // 2. LISTENER UPDATE USER (Ini Kuncinya!)
