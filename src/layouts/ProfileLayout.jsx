@@ -198,11 +198,6 @@ export const ProfileLayout = () => {
             </Link>
             <div className="my-2 h-px w-full bg-neutral-100" />
             <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2 mt-2">Account</h2>
-            <Link to="/profile/settings">
-              <Button variant="ghost" className={getSidebarClass("/profile/settings")}>
-                 <Settings className="mr-3 h-5 w-5" /> Settings
-              </Button>
-            </Link>
             <Button variant="ghost" onClick={handleLogout} className="w-full justify-start text-base font-light text-red-500 hover:bg-red-50 hover:text-red-600 h-10 px-4">
                <LogOut className="mr-3 h-5 w-5" /> Logout
             </Button>
