@@ -11,14 +11,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import {
   ChevronLeft,
-  Edit,
-  Link,
-  MessageSquareWarning,
-  Share,
-  Smile,
   Star,
   User,
-  X,
 } from "lucide-react";
 import * as React from "react";
 import { Tabs } from "@radix-ui/react-tabs";
@@ -38,15 +32,24 @@ import { Item, ItemContent } from "@/components/ui/item";
 import LevelBadge from "@/components/LevelBadge";
 import ReviewItem from "@/components/ReviewItem";
 import ShareActionButtons from "@/components/shared/ShareActionButtons";
+import { formatPrice, formatTimestamp } from "@/services/Format";
 
 export default function CourseShowPage() {
   const { id } = useParams();
+
   const [course, setCourse] = React.useState({});
+  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const courseData = await courseService.showCourse(id);
-      setCourse(courseData.data);
+      try {
+        const courseData = await courseService.showCourse(id);
+        setCourse(courseData.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, [id]);
@@ -68,12 +71,20 @@ export default function CourseShowPage() {
   };
   const { ratingAverage, ratingTotal } = calculateRating();
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-4 py-8 md:p-6 flex flex-col md:flex-row gap-4 md:gap-8">
       <div className="basis-full">
         {/* Legend Page */}
         <div className="w-full flex flex-row gap-4 items-center">
-          <Button className={"rounded-full"}>
+          <Button className={"rounded-full"} variant={"primary"}>
             <ChevronLeft />
             Back
           </Button>
@@ -100,11 +111,23 @@ export default function CourseShowPage() {
           <h1 className="text-2xl md:text-3xl font-semibold w-full">
             {course.title}
           </h1>
+
+          {course.image && (
+            <img
+              src={course.image}
+              alt="Course Thumbnail"
+              className="w-full h-48 md:h-64 object-cover rounded-lg my-4"
+            />
+          )}
+
           <p className="text-base md:text-lg font-light text-muted-foreground w-full">
             {course.description}
           </p>
           <div className="grid grid-cols-2 mt-4 gap-2">
-            <div className="inline-flex gap-1" id="course_summary_badge">
+            <div
+              className="inline-flex flex-wrap gap-1"
+              id="course_summary_badge"
+            >
               <LevelBadge level={course.level} />
               <Badge variant="default">{course.category}</Badge>
               <Badge variant="default">{course.type}</Badge>
@@ -153,14 +176,38 @@ export default function CourseShowPage() {
             <Card
               className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}
             >
-              <h1 className="text-xl md:text-2xl font-semibold w-full">
-                Video Kilas
-              </h1>
-              <p>Lorem Ipsum</p>
-              <h1 className="text-xl md:text-2xl font-semibold w-full">
-                Deskripsi
-              </h1>
-              <p>{course.description}</p>
+              {course.summary?.video_url ? (
+                <section>
+                  <h1 className="text-xl md:text-2xl font-semibold w-full pb-4">
+                    Video Kilasan
+                  </h1>
+                  <iframe
+                    src={course.summary.video_url}
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                    style={{ width: "100%", aspectRatio: "16/9" }}
+                  ></iframe>
+                  <p className="text-sm text-muted-foreground">
+                    Durasi tonton: {course.summary.video_duration}
+                  </p>
+                </section>
+              ) : null}
+
+              <section>
+                <h1 className="text-xl md:text-2xl font-semibold w-full pb-4">
+                  Deskripsi
+                </h1>
+                <p>{course.summary?.description}</p>
+              </section>
+
+              <section>
+                <p className="font-light text-muted-foreground">
+                  Dibuat pada: {formatTimestamp(course.created_at)}
+                </p>
+                <p className="font-light text-muted-foreground">
+                  Diupdate pada: {formatTimestamp(course.updated_at)}
+                </p>
+              </section>
             </Card>
           </TabsContent>
 
@@ -175,12 +222,10 @@ export default function CourseShowPage() {
 
               <div className="space-y-4">
                 {(() => {
+                  {/* Get all unique sections */}
                   const sections = [
                     ...new Set(course.curriculums?.map((c) => c.section) || []),
                   ];
-                  {
-                    /* Get all unique sections */
-                  }
 
                   return sections.map((section, index) => (
                     <div key={index}>
@@ -198,15 +243,18 @@ export default function CourseShowPage() {
                               key={curriculum.id}
                               variant="outline"
                               size="sm"
+                              asChild
                             >
-                              <ItemContent>
-                                <h3 className="font-medium">
-                                  {curriculum.title}
-                                </h3>
-                                <p className="text-sm font-light mt-1">
-                                  {curriculum.description}
-                                </p>
-                              </ItemContent>
+                              <a>
+                                <ItemContent>
+                                  <h3 className="font-medium">
+                                    {curriculum.title}
+                                  </h3>
+                                  <p className="text-sm font-light mt-1">
+                                    {curriculum.description}
+                                  </p>
+                                </ItemContent>
+                              </a>
                             </Item>
                           ))}
                       </div>
@@ -234,11 +282,31 @@ export default function CourseShowPage() {
                       <SelectValue placeholder="Pilih bintang" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="1">
+                        <Star size={24} fill="currentColor" />
+                      </SelectItem>
+                      <SelectItem value="2">
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                      </SelectItem>
+                      <SelectItem value="3">
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                      </SelectItem>
+                      <SelectItem value="4">
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                      </SelectItem>
+                      <SelectItem value="5">
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                        <Star size={24} fill="currentColor" />
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -253,13 +321,22 @@ export default function CourseShowPage() {
                   Ulasan
                 </h1>
                 <div className="space-y-4 py-4">
-                  {course.reviews?.map((review) => (
-                    <ReviewItem
-                      key={review.id}
-                      comment={review.comment}
-                      rating={review.rating}
-                    />
-                  ))}
+                  {course.reviews?.length > 0 ? (
+                    course.reviews.map((review) => (
+                      <ReviewItem
+                        userName={review.user.name}
+                        userProfilePic={review.user.profile_photo}
+                        key={review.id}
+                        comment={review.comment}
+                        rating={review.rating}
+                        editable={false}
+                      />
+                    ))
+                  ) : (
+                    <p className="w-full text-muted-foreground">
+                      Tidak ada ulasan...
+                    </p>
+                  )}
                 </div>
               </section>
             </Card>
@@ -275,19 +352,24 @@ export default function CourseShowPage() {
             <div>
               <p className="text-muted-foreground font-light">Harga:</p>
               <p className="text-2xl" id="price">
-                Rp {course.price}
+                {(course?.price <= 0 ?
+                    "Gratis"
+                    :
+                    formatPrice(course.price)
+                )}
               </p>
             </div>
             <div className="w-full flex flex-col gap-2 pt-2 pb-2">
-              <Button>Beli Sekarang</Button>
-              <Button>Tambahkan ke Keranjang</Button>
+              <Button variant={"default"}>Beli Sekarang</Button>
+              <Button variant={"default"}>Tambahkan ke Keranjang</Button>
+              <Button variant={"destructive"}>Tambahkan ke Favorit</Button>
             </div>
           </section>
 
           {/* Share Section */}
           <section>
             <p className="text-muted-foreground font-light mb-3">
-              Bagikan kursus ini : 
+              Bagikan kursus ini :
             </p>
             <ShareActionButtons
               title={course?.name}
