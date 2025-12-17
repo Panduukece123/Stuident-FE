@@ -244,19 +244,6 @@ const ProfileService = {
     return [];
   },
 
-  getOrderHistory: async () => {
-  const token = localStorage.getItem("token");
-
-  const response = await api.get("/transactions", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-    },
-  });
-
-  const data = response.data?.data || [];
-
-},
 };
 
 export default ProfileService;
