@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { GraduationCap, LogOut, Settings, ShoppingCart, User, Loader2, Edit } from "lucide-react";
 import React, { useEffect, useState, useRef } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"; // Pastikan pakai 'react-router-dom'
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"; 
 import ProfileService from "@/services/ProfileService";
 import authService from "@/services/AuthService";
 
@@ -10,8 +10,6 @@ export const ProfileLayout = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  
-  // State 'imageHash' buat maksa browser refresh gambar setelah upload
   const [imageHash, setImageHash] = useState(Date.now()); 
 
   const location = useLocation();
@@ -38,23 +36,19 @@ export const ProfileLayout = () => {
     fetchData();
   }, []);
 
-  // 1. Handle Klik Tombol Edit
   const handleEditAvatarClick = () => {
     fileInputRef.current.click();
   };
 
-  // 2. Handle File Dipilih (Upload & Update Storage)
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validasi Size (Max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       alert("File terlalu besar! Maksimal 2MB.");
       return;
     }
 
-    // Validasi Tipe
     if (!file.type.startsWith("image/")) {
       alert("Harap upload file gambar.");
       return;
@@ -62,27 +56,18 @@ export const ProfileLayout = () => {
 
     try {
       setUploading(true);
-      
-      // A. Upload ke Backend
       await ProfileService.uploadAvatar(file);
       
-      // B. Ambil data terbaru dari backend (biar dapet URL gambar baru)
       const result = await ProfileService.getProfile();
       const freshData = result.data || result;
-      
-      // C. Update State Lokal
       setProfileData(freshData);
       
-      // D. Update LocalStorage & Kirim Sinyal ke Navbar
       if (freshData.user) {
         localStorage.setItem("user", JSON.stringify(freshData.user));
-        // INI PENTING: Kasih tau Navbar buat refresh datanya
         window.dispatchEvent(new Event("user-updated"));
       }
 
-      // E. Update Hash biar gambar di layout ini juga berubah
       setImageHash(Date.now());
-      
       alert("Foto profil berhasil diperbarui!");
     } catch (error) {
       console.error("Upload error:", error);
@@ -93,7 +78,6 @@ export const ProfileLayout = () => {
     }
   };
 
-  // 3. Handle Logout (Pakai Service)
   const handleLogout = async () => {
     try {
       await authService.logout();
@@ -108,11 +92,8 @@ export const ProfileLayout = () => {
 
   const getSidebarClass = (path) => {
     const isActive = pathname === path;
-    
-    return `w-full justify-start text-base h-10 px-4 cursor-pointer ${
-      isActive 
-        ? "text-primary font-medium" 
-        : "font-light text-neutral-700 hover:bg-neutral-100 hover:text-primary" 
+    return `w-full justify-start text-base h-10 px-4 ${
+      isActive ? "text-primary font-medium" : "font-light text-neutral-700 hover:bg-neutral-100 hover:text-primary" 
     }`;
   };
 
@@ -126,24 +107,18 @@ export const ProfileLayout = () => {
 
   const user = profileData?.user || profileData;
 
-  // --- LOGIKA URL GAMBAR (Sama dengan Navbar) ---
-  let photoUrl = user?.profile_photo_url || user?.profile_photo || user?.avatar_url;
-
-  // Kalau backend kirim path relatif, tambahkan base URL storage
-  if (photoUrl && !photoUrl.startsWith("http")) {
-      photoUrl = `http://localhost:8000/storage/${photoUrl}`;
-  }
+  // --- REFACTOR: PANGGIL SERVICE (Bersih & Rapi) ---
+  const avatarSrc = user 
+    ? `${ProfileService.getAvatarUrl(user)}?t=${imageHash}` 
+    : "";
 
   return (
     <div className="flex min-h-screen flex-col gap-6 bg-neutral-50 p-6">
-      {/* HEADER PROFILE */}
       <div className="flex flex-col justify-between overflow-hidden rounded-xl bg-linear-to-r from-[#074799] to-[#3DBDC2] p-8 text-white shadow-md md:flex-row md:items-center">
         <div className="flex flex-col items-center gap-6 md:flex-row">
-          
           <Avatar className="h-32 w-32 shadow-sm bg-white">
             <AvatarImage
-              // Pakai URL Cerdas + Cache Buster
-              src={photoUrl ? `${photoUrl}?t=${imageHash}` : ""}
+              src={avatarSrc} // <--- Pakai variabel yang sudah direfactor
               alt={user?.name}
               className="h-full w-full object-cover"
             />
@@ -165,7 +140,6 @@ export const ProfileLayout = () => {
         </div>
 
         <div className="mt-6 md:mt-0">
-          {/* Input File Tersembunyi */}
           <input 
             type="file" 
             ref={fileInputRef} 
@@ -173,69 +147,49 @@ export const ProfileLayout = () => {
             className="hidden" 
             accept="image/png, image/jpeg, image/jpg, image/gif"
           />
-
-          {/* Tombol Edit */}
           <Button 
             variant="outline" 
             className="border-white/40 bg-white/10 text-white hover:bg-white hover:text-[#074799] backdrop-blur-sm transition-all"
             onClick={handleEditAvatarClick}
             disabled={uploading}
           >
-            {uploading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-                <Edit className="mr-2 h-4 w-4" />
-            )}
+            {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Edit className="mr-2 h-4 w-4" />}
             {uploading ? "Uploading..." : "Edit Avatar"}
           </Button>
         </div>
       </div>
 
-      {/* SIDEBAR & CONTENT */}
       <div className="flex flex-col gap-6 md:flex-row">
         <aside className="w-full shrink-0 md:w-64">
           <div className="sticky top-20 flex flex-col gap-2 rounded-xl border border-neutral-300 bg-white p-4 shadow-sm">
             <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">Menu</h2>
-            
             <Link to="/profile/my-profile">
               <Button variant="ghost" className={getSidebarClass("/profile/my-profile")}>
                  <User className="mr-3 h-5 w-5" /> My Profile
               </Button>
             </Link>
-
-            <Link to="/profile/my-enrolled-course">
-              <Button variant="ghost" className={getSidebarClass("/profile/my-enrolled-course")}>
+            <Link to="/profile/my-enrolled-courses">
+              <Button variant="ghost" className={getSidebarClass("/profile/my-enrolled-courses")}>
                  <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
               </Button>
             </Link>
-
             <Link to="/profile/my-order-history">
               <Button variant="ghost" className={getSidebarClass("/profile/my-order-history")}>
                  <ShoppingCart className="mr-3 h-5 w-5" /> Order History
               </Button>
             </Link>
-
             <div className="my-2 h-px w-full bg-neutral-100" />
-            
             <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2 mt-2">Account</h2>
-            
             <Link to="/profile/settings">
               <Button variant="ghost" className={getSidebarClass("/profile/settings")}>
                  <Settings className="mr-3 h-5 w-5" /> Settings
               </Button>
             </Link>
-
-            {/* Tombol Logout Pakai Fungsi */}
-            <Button 
-                variant="ghost" 
-                onClick={handleLogout} 
-                className="w-full justify-start text-base font-light text-red-500 hover:bg-red-50 hover:text-red-600 h-10 px-4"
-            >
+            <Button variant="ghost" onClick={handleLogout} className="w-full justify-start text-base font-light text-red-500 hover:bg-red-50 hover:text-red-600 h-10 px-4">
                <LogOut className="mr-3 h-5 w-5" /> Logout
             </Button>
           </div>
         </aside>
-
         <main className="w-full">
             <Outlet context={profileData} />
         </main>

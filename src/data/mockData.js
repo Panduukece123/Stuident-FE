@@ -1,62 +1,3 @@
-// Mock Data untuk Scholarship
-export const scholarshipData = [
-  {
-    id: 1,
-    name: "Beasiswa A",
-    deskripsi:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    img: "https://placehold.co/300x200",
-  },
-  {
-    id: 2,
-    name: "Beasiswa B",
-    deskripsi:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    img: "https://placehold.co/300x200",
-  },
-  {
-    id: 3,
-    name: "Beasiswa C",
-    deskripsi:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    img: "https://placehold.co/300x200",
-  },
-  {
-    id: 4,
-    name: "Beasiswa D",
-    deskripsi:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    img: "https://placehold.co/300x200",
-  },
-  {
-    id: 5,
-    name: "Beasiswa E",
-    deskripsi:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    img: "https://placehold.co/300x200",
-  },
-  {
-    id: 6,
-    name: "Beasiswa F",
-    deskripsi:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-    img: "https://placehold.co/300x200",
-  },
-];
-
-
-export const recomendScholarship = [
-    {
-      name: "Undergraduate Scholarship",
-      company: "Company",
-      description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum doloribus tempore inventore modi magnam, non animi ipsum in facere soluta dolorem, ratione laudantium dolores ut consectetur, veniam eum excepturi recusandae."
-    },
-    {
-      name: "Graduate Scholarship",
-      company: "Organization",
-      description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum doloribus tempore inventore modi magnam, non animi ipsum in facere soluta dolorem, ratione laudantium dolores ut consectetur, veniam eum excepturi recusandae."
-  },
-  ]
 
 // Mock Data untuk Coming Soon
 export const comingSoonData = [
@@ -69,20 +10,26 @@ export const comingSoonData = [
 ];
 
 // Mock Data untuk Scholarship Header
-export const scholarshipOptions = [
-  { label: "Undergraduate", value: "ug" },
-  { label: "Graduate", value: "gr" },
-  { label: "PhD", value: "phd" },
-];
+
 export const fieldOptions = [
-  { label: "Technology", value: "tech" },
-  { label: "Business", value: "biz" },
-  { label: "Arts & Humanities", value: "arts" },
+  { label: "General", value: "General" },
+  { label: "Technology", value: "Technology" },
+  { label: "Engineering", value: "Engineering" },
+  { label: "Business", value: "Business" },
+  { label: "Medical", value: "Medical" },
+  { label: "Arts & Humanities", value: "Arts & Humanities" },
 ];
-export const companyOptions = [
-  { label: "Microsoft", value: "ms" },
-  { label: "Google", value: "goog" },
-  { label: "Startup", value: "start" },
+
+export const locationOptions = [
+  { label: "Indonesia", value: "Indonesia" },
+  { label: "Jakarta", value: "Jakarta" },
+  { label: "Luar Negeri", value: "Luar Negeri" },
+  { label: "Indonesia dan Luar Negeri", value: "Indonesia dan Luar Negeri" },
+];
+export const statusOptions = [
+  { label: "Open", value: "open" },
+  { label: "Closed", value: "closed" },
+  { label: "Coming soon", value: "coming_soon" },
 ];
 
 // Mock Data untuk Carousel Header

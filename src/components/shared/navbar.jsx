@@ -36,6 +36,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import authService from "@/services/AuthService";
 
 export const Navbar = () => {
   const location = useLocation(); 
@@ -51,11 +52,21 @@ export const Navbar = () => {
   // State tambahan buat maksa refresh gambar di navbar
   const [imageHash, setImageHash] = useState(Date.now());
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await authService.logout(); 
+      console.log("Logout backend success");
+    } catch (error) {
+      console.warn("Logout backend failed (token might be expired):", error);
+    } finally {
+      // 3. Bersihkan Local Storage & State (Apapun hasil API-nya)
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      setUser(null);
+      
+      // 4. Redirect ke Login
+      navigate("/login");
+    }
   };
 
   // 2. LISTENER UPDATE USER (Ini Kuncinya!)
@@ -111,24 +122,10 @@ export const Navbar = () => {
     checkTokenValidity();
   }, []); 
 
-  // --- HELPER: GET PHOTO URL ---
-  const getPhotoUrl = (userData) => {
-    if (!userData) return "";
-    
-    // Cek field mana yang dikirim backend
-    let url = userData.profile_photo_url || userData.profile_photo || userData.avatar_url;
-    
-    // Kalau backend kirim path relatif (misal: "profile-photos/abc.jpg")
-    // Tambahkan domain backend (sesuaikan port laravel kamu, misal 8000)
-    if (url && !url.startsWith("http")) {
-       url = `http://localhost:8000/storage/${url}`;
-    }
-    
-    // Tambah cache buster biar browser download ulang gambar baru
-    return url ? `${url}?t=${imageHash}` : ""; 
-  };
-
-  const photoUrl = getPhotoUrl(user);
+  // --- REFACTOR: PANGGIL SERVICE (Bersih & Rapi) ---
+  const avatarSrc = user 
+    ? `${ProfileService.getAvatarUrl(user)}?t=${imageHash}` 
+    : "";
 
   const getMobileLinkClass = (path) => {
     return pathname === path
@@ -221,7 +218,7 @@ export const Navbar = () => {
                   {/* AVATAR DESKTOP */}
                   <Avatar className="h-6 w-6">
                     <AvatarImage 
-                      src={photoUrl} 
+                      src={avatarSrc} 
                       alt={user.name} 
                       className="object-cover"
                     />
@@ -300,7 +297,7 @@ export const Navbar = () => {
                         {/* AVATAR MOBILE */}
                         <Avatar className="h-8 w-8">
                           <AvatarImage 
-                            src={photoUrl} 
+                            src={avatarSrc} 
                             alt={user.name} 
                             className="object-cover"
                           />
