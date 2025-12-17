@@ -21,6 +21,35 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// --- DATA DUMMY ---
+const courseData = [
+  {
+    id: 1,
+    title: "Bab 1: Pengenalan Dasar",
+    modules: [
+      { id: 101, title: "Apa itu React?", type: "video", duration: "10:00", completed: true },
+      { id: 102, title: "Setup Environment", type: "video", duration: "15:30", completed: true },
+      { id: 103, title: "Hello World", type: "video", duration: "05:00", completed: false },
+    ],
+  },
+  {
+    id: 2,
+    title: "Bab 2: Komponen & Props",
+    modules: [
+      { id: 201, title: "Membuat Komponen", type: "video", duration: "12:00", completed: false },
+      { id: 202, title: "Menggunakan Props", type: "video", duration: "14:20", completed: false },
+    ],
+  },
+  {
+    id: 3,
+    title: "Bab 3: State Management",
+    modules: [
+      { id: 301, title: "useState Hook", type: "video", duration: "20:00", completed: false },
+      { id: 302, title: "useEffect Hook", type: "video", duration: "18:00", completed: false },
+    ],
+  },
+];
+
 export const EnrolledCourseShowPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -210,8 +239,8 @@ export const EnrolledCourseShowPage = () => {
   const totalCount = flatCurriculum.length;
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-      {/* HEADER & BREADCRUMB */}
+    <div className="max-w-7xl mx-auto p-6 space-y-4">
+      {/* --- HEADER & BREADCRUMB --- */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
           <Button className={"rounded-full"} onClick={() => navigate(-1)}>
@@ -224,9 +253,13 @@ export const EnrolledCourseShowPage = () => {
                 <BreadcrumbLink href="/my-courses">Kursus Saya</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="#">Frontend Development</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
               <BreadcrumbItem aria-current="page">
-                <BreadcrumbPage className="font-semibold text-primary truncate max-w-[200px]">
-                  {activeModule?.title || "Memuat..."}
+                <BreadcrumbPage className="font-semibold text-primary">
+                  Hello World
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -234,8 +267,9 @@ export const EnrolledCourseShowPage = () => {
         </div>
       </div>
 
+      {/* --- MAIN LAYOUT (Grid) --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
-        {/* --- LEFT COLUMN: PLAYER --- */}
+        {/* --- LEFT COLUMN: VIDEO PLAYER & CONTENT --- */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="bg-white border shadow-sm rounded-2xl p-6 flex flex-col gap-4">
             <div>
@@ -265,7 +299,13 @@ export const EnrolledCourseShowPage = () => {
             </div>
 
             <div className="text-gray-600 leading-relaxed text-justify space-y-2">
-              <p>{activeModule?.description}</p>
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quos
+                maiores voluptatem temporibus quia, consequatur laudantium.
+              </p>
+              <p>
+                Di materi ini kita akan mempelajari struktur dasar React component dan bagaimana cara me-render elemen ke DOM.
+              </p>
             </div>
 
             {/* --- BAGIAN TOMBOL DINAMIS --- */}

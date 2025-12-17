@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom"; // Pastikan from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from "react-router";
 import { AppLayout } from "./layouts/AppLayout";
 import { HomePage } from "./pages/HomePage";
 import { ElearningPage } from "./pages/ElearningPage";
@@ -27,7 +27,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-import { LearnLayout } from "./layouts/LearnLayout";
 
 function App() {
   return (

@@ -1,5 +1,4 @@
 import api from "./Api";
-const token = localStorage.getItem("token");
 
 const courseService = {
   // Course Detail

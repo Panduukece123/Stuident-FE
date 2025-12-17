@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "../components/shared/Navbar";
+import { Footer } from "../components/shared/footer"; // Assuming Footer exists
 import { ElearningBanner } from "../components/section/ElearningBanner";
 import { ElearningCategories } from "../components/section/ElearningCategories";
 import { ElearningCourseList } from "../components/section/ElearningCourseList";
 import ElearningService from "@/services/elearningService";
-import ProfileService from "@/services/ProfileService";
 import { ElearningList } from "@/components/section/ElearningList";
 import { InfoBootcamp } from "@/components/section/InfoBootcampSection";
 import { ElearningBootcampList } from "@/components/section/ElearningBootcampList";
@@ -87,12 +87,10 @@ export const ElearningPage = () => {
     );
   }
 
-  if (isCoursesError) {
+  if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
-        <p className="text-red-500 font-medium">
-          {coursesError?.message || "Gagal memuat katalog kursus."}
-        </p>
+        <p className="text-red-500 font-medium">{error}</p>
         <button
           onClick={() => window.location.reload()}
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
@@ -130,6 +128,12 @@ export const ElearningPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Navbar is usually handled by Layout, but if this page is standalone or needs specific navbar state, we might need to adjust. 
+          For now, I'll assume AppLayout handles Navbar and Footer, but the user asked for a specific look.
+          If I put Navbar here, it might duplicate if AppLayout also has it. 
+          I will check AppLayout first.
+      */}
+
       <main className="flex-1">
         <ElearningBanner />
         <ElearningCategories categories={uniqueCategories} />
@@ -169,7 +173,7 @@ export const ElearningPage = () => {
         {/* --- SECTION 2: TEMUKAN KEAHLIAN BARU --- */}
         <ElearningList
           title="Temukan Keahlian Baru"
-          subtitle="Perluas wawasan Anda dengan mempelajari topik-topik relevan."
+          subtitle="Dunia terus berubah dan keahlian baru selalu dibutuhkan. Perluas wawasan Anda dengan mempelajari topik-topik relevan yang kami pilihkan ini."
           courses={currentCourses}
         />
         <PaginationControl 
@@ -197,14 +201,8 @@ export const ElearningPage = () => {
         <ElearningBootcampList
           title="Kursus Bootcamp"
           subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
-          courses={currentBootcampCourses}
+          courses={courses}
         />
-        <PaginationControl 
-          page={bootcampPage} 
-          total={totalBootcampPages} 
-          onPageChange={setBootcampPage} 
-        />
-
       </main>
     </div>
   );
