@@ -1,4 +1,5 @@
 import api from "./Api";
+const BACKEND_URL = "http://localhost:8000";
 
 const ProfileService = {
   // 1. GET PROFILE
@@ -39,6 +40,28 @@ const ProfileService = {
     });
 
     return response.data;
+  },
+
+  updateSpecializations: async (specializationsArray) => {
+    try {
+      const payload = {
+        specialization: specializationsArray 
+      };
+
+      const token = localStorage.getItem("token");
+
+      const response = await api.put( "/auth/profile", payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   },
 
   // 4. UPLOAD AVATAR
@@ -208,6 +231,7 @@ const ProfileService = {
           category: courseData.category || "Umum",
           progress: courseData.progress || 0,
           completed: courseData.completed || false,
+          certificate: courseData.certificate_url || null,
 
           // --- DATA PENTING DARI ENROLLMENT (Parent Object) ---
           progress: item.progress || 0, // Ambil dari item, bukan courseData
