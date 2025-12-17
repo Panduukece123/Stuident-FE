@@ -9,7 +9,8 @@ import { EditBioDialog } from "@/components/EditBioDialog";
 import { EditEducationDialog } from "@/components/EditEduDialog";
 import { EditPersonalDialog } from "@/components/EditPersonalDialog";
 import { ExperienceDialog } from "@/components/ExperienceDialog";
-import { AchievementDialog } from "@/components/AchievementDialog"; // <--- TAMBAHAN BARU
+import { AchievementDialog } from "@/components/AchievementDialog";
+import { EditSpecializationDialog } from "@/components/EditSpecializationDialog";
 
 export const MyProfile = () => {
   const [profileData, setProfileData] = useState(null);
@@ -27,6 +28,8 @@ export const MyProfile = () => {
   // 4. STATE ACHIEVEMENT (BARU)
   const [openAch, setOpenAch] = useState(false);
   const [selectedAch, setSelectedAch] = useState(null);
+
+  const [openSpec, setOpenSpec] = useState(false);
 
   // --- HANDLER EXPERIENCE ---
   const handleAddExp = () => {
@@ -67,6 +70,19 @@ export const MyProfile = () => {
   }, []);
 
   const { user, achievements, experiences } = profileData || {};
+  
+    const rawSpec = user?.specialization; 
+  
+  let specializationArray = [];
+
+  if (Array.isArray(rawSpec)) {
+
+    specializationArray = rawSpec;
+  } else if (typeof rawSpec === 'string') {
+    specializationArray = rawSpec.split(',').map(item => item.trim());
+  } else {
+    specializationArray = [];
+  }
 
   const formatDate = (dateString) => {
     if (!dateString) return "Present";
@@ -287,22 +303,38 @@ export const MyProfile = () => {
             </div>
           )}
 
-          {/* --- SPECIALIZATION (STATIC) --- */}
+          {/* === SPECIALIZATION SECTION === */}
           <div className="flex flex-row justify-between">
             <h2 className="text-2xl">Specialization</h2>
-            <Button variant="outline" className={"rounded-full"}>
+            <Button 
+              variant="outline" 
+              className={"rounded-full"}
+              onClick={() => setOpenSpec(true)}
+            >
               <Edit /> Edit
             </Button>
+
+            {/* Dialog Component */}
+            <EditSpecializationDialog
+              open={openSpec}
+              onOpenChange={setOpenSpec}
+              initialData={specializationArray} // Kirim ARRAY hasil konversi
+              onSuccess={fetchData} 
+            />
           </div>
+
           <div className="bg-white p-4 border border-neutral-300 rounded-xl flex flex-wrap gap-2">
-            <Badge> Web Development </Badge>
-            <Badge> Data Science </Badge>
-            <Badge> Mobile Development </Badge>
-            <Badge> UI/UX Design </Badge>
-            <Badge> Cybersecurity </Badge>
-            <Badge> Cloud Computing </Badge>
-            <Badge> Artificial Intelligence </Badge>
-            <Badge> DevOps </Badge>
+            {specializationArray.length > 0 ? (
+              specializationArray.map((item, index) => (
+                <Badge key={index} className="bg-primary hover:bg-primary/90">
+                  {item}
+                </Badge>
+              ))
+            ) : (
+              <span className="text-neutral-500 italic text-sm">
+                Belum ada spesialisasi.
+              </span>
+            )}
           </div>
 
           {/* --- ATTACHMENT (STATIC) --- */}

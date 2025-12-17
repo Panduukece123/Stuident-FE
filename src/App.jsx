@@ -16,15 +16,28 @@ import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
 import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
 import { EnrolledCourseShowPage } from "./pages/course/EnrolledCourseShowPage";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import ScholarshipDetail from "./pages/scholarsip/ScholarshipDetailPage";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
 function App() {
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<AppLayout />}>
-          <Route index element={<HomePage />} />
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<AppLayout />}>
+            <Route index element={<HomePage />} />
 
-          <Route path="e-learning" element={<ElearningPage />}/>
+            <Route path="e-learning" element={<ElearningPage />} />
 
           <Route path="course">
             <Route path="show/:id" element={<CourseShowPage />} />
@@ -34,22 +47,33 @@ function App() {
               
           <Route path="our-services" element={<OurServices />} />
 
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-          <Route path="auth/callback" element={<AuthCallbackPage />} />
+            <Route path="our-services" element={<OurServices />} />
 
-          <Route path="profile" element={<ProfileLayout />}>
-            <Route path="my-profile" element={<MyProfile />} />
-            <Route path="my-order-history" element={<MyProfileOrderHistory />} />
-            <Route path="my-enrolled-courses" element={<MyProfileEnrolledCourse />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="auth/callback" element={<AuthCallbackPage />} />
+
+            <Route path="profile" element={<ProfileLayout />}>
+              <Route path="my-profile" element={<MyProfile />} />
+              <Route
+                path="my-order-history"
+                element={<MyProfileOrderHistory />}
+              />
+              <Route
+                path="my-enrolled-courses"
+                element={<MyProfileEnrolledCourse />}
+              />
+            </Route>
+
+            <Route path="scholarship" element={<ScholarshipPage />} />
+            <Route
+              path="scholarship/show/:id"
+              element={<ScholarshipDetail />}
+            />
           </Route>
-
-          <Route path="our-services" element={<OurServices />} />
-
-          <Route path="scholarship" element={<ScholarshipPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
