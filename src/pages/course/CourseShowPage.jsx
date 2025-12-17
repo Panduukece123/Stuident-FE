@@ -26,33 +26,51 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import courseService from "@/services/CourseService";
 import { Item, ItemContent } from "@/components/ui/item";
 import LevelBadge from "@/components/LevelBadge";
 import ReviewItem from "@/components/ReviewItem";
 import ShareActionButtons from "@/components/shared/ShareActionButtons";
 import { formatPrice, formatTimestamp } from "@/services/Format";
+import ProfileService from "@/services/ProfileService";
 
 export default function CourseShowPage() {
   const { id } = useParams();
 
   const [course, setCourse] = React.useState({});
+  const [profileData, setProfileData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     const fetchData = async () => {
+      // Fetch Course Data
       try {
         const courseData = await courseService.showCourse(id);
-        setCourse(courseData.data);
+        setCourse(courseData.data || courseData);
+
+        // Fetch User Data
+        try {
+          const profileRes = await ProfileService.getProfile();
+          setProfileData(profileRes.data || profileRes);
+        } catch (profileError) {
+          console.warn("User belum login atau profil gagal dimuat");
+          console.error("Terdapat error profile:", profileError);
+          setProfileData(null); // Null juga = tidak login
+        }
+
       } catch (error) {
-        console.error(error);
+        console.error("Terdapat error course:", error);
       } finally {
         setIsLoading(false);
       }
     };
     fetchData();
   }, [id]);
+
+  const user = profileData?.user || profileData;
+
+  console.log(user?.name);
 
   const calculateRating = () => {
     if (!course.reviews || course.reviews.length === 0)
@@ -139,7 +157,7 @@ export default function CourseShowPage() {
             >
               <User />
               <p id="course_summary_participant-num">
-                {course.enrollments?.length || 0}
+                {course.enrollments?.length || "Belum ada"}
               </p>
               <p className="text-muted-foreground font-light">pendaftar</p>
             </div>
@@ -222,7 +240,9 @@ export default function CourseShowPage() {
 
               <div className="space-y-4">
                 {(() => {
-                  {/* Get all unique sections */}
+                  {
+                    /* Get all unique sections */
+                  }
                   const sections = [
                     ...new Set(course.curriculums?.map((c) => c.section) || []),
                   ];
@@ -244,6 +264,9 @@ export default function CourseShowPage() {
                               variant="outline"
                               size="sm"
                               asChild
+                              className={
+                                "transition-transform hover:scale-[1.01]"
+                              }
                             >
                               <a>
                                 <ItemContent>
@@ -270,52 +293,65 @@ export default function CourseShowPage() {
             <Card
               className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}
             >
-              <section className="flex flex-col gap-2">
-                <h1 className="text-xl md:text-2xl font-semibold w-full">
-                  Buatkan Ulasan
-                </h1>
-                {/* TO-DO: Bentuk pilih rating sebagai icon slider */}
-                <div className="inline-flex gap-2 items-center">
-                  <p>Silahkan pilih bintang: </p>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih bintang" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">
-                        <Star size={24} fill="currentColor" />
-                      </SelectItem>
-                      <SelectItem value="2">
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                      </SelectItem>
-                      <SelectItem value="3">
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                      </SelectItem>
-                      <SelectItem value="4">
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                      </SelectItem>
-                      <SelectItem value="5">
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                        <Star size={24} fill="currentColor" />
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Textarea placeholder="Tulis detail ulasan kamu (saran, kritik, dan lainnya) di sini." />
-                <p className="text-muted-foreground text-sm">
-                  Pastikan ulasan tidak melanggar kebijakan dan ketentuan kami.
-                </p>
-                <Button>Kirim ulasan</Button>
-              </section>
+              {user ? (
+                <section className="flex flex-col gap-2">
+                  <h1 className="text-xl md:text-2xl font-semibold w-full">
+                    Buatkan Ulasan
+                  </h1>
+                  {/* TO-DO: Bentuk pilih rating sebagai icon slider */}
+                  <div className="inline-flex gap-2 items-center">
+                    <p>Silahkan pilih bintang: </p>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih bintang" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">
+                          <Star size={24} fill="currentColor" />
+                        </SelectItem>
+                        <SelectItem value="2">
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                        </SelectItem>
+                        <SelectItem value="3">
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                        </SelectItem>
+                        <SelectItem value="4">
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                        </SelectItem>
+                        <SelectItem value="5">
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                          <Star size={24} fill="currentColor" />
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Textarea placeholder="Tulis detail ulasan kamu (saran, kritik, dan lainnya) di sini." />
+                  <p className="text-muted-foreground text-sm">
+                    Pastikan ulasan tidak melanggar kebijakan dan ketentuan
+                    kami.
+                  </p>
+                  <Button>Kirim ulasan</Button>
+                </section>
+              ) : (
+                <section className="flex flex-col gap-2">
+                  <h1 className="text-xl md:text-2xl font-semibold w-full">
+                    Buatkan Ulasan
+                  </h1>
+                  <Button variant={"link"} asChild>
+                    <Link to="/login">Anda belum login. Login untuk memberikan ulasan!</Link>
+                  </Button>
+                </section>
+              )}
+
               <section>
                 <h1 className="text-xl md:text-2xl font-semibold w-full">
                   Ulasan
@@ -329,7 +365,9 @@ export default function CourseShowPage() {
                         key={review.id}
                         comment={review.comment}
                         rating={review.rating}
-                        editable={false}
+                        editable={
+                          user?.name === review.user.name ? true : false
+                        }
                       />
                     ))
                   ) : (
@@ -352,24 +390,20 @@ export default function CourseShowPage() {
             <div>
               <p className="text-muted-foreground font-light">Harga:</p>
               <p className="text-2xl" id="price">
-                {(course?.price <= 0 ?
-                    "Gratis"
-                    :
-                    formatPrice(course.price)
-                )}
+                {course?.price <= 0 ? "Gratis" : formatPrice(course.price)}
               </p>
             </div>
             <div className="w-full flex flex-col gap-2 pt-2 pb-2">
               <Button variant={"default"}>Beli Sekarang</Button>
-              <Button variant={"default"}>Tambahkan ke Keranjang</Button>
-              <Button variant={"destructive"}>Tambahkan ke Favorit</Button>
+              <Button variant={"outline"}>Tambahkan ke Keranjang</Button>
+              <Button variant={"outline"}>Tambahkan ke Favorit</Button>
             </div>
           </section>
 
           {/* Share Section */}
           <section>
             <p className="text-muted-foreground font-light mb-3">
-              Bagikan kursus ini :
+              Bagikan kursus ini:
             </p>
             <ShareActionButtons
               title={course?.name}
