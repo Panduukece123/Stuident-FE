@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "../components/shared/Navbar";
 import { Footer } from "../components/shared/footer"; // Assuming Footer exists
 import { ElearningBanner } from "../components/section/ElearningBanner";
@@ -8,50 +9,77 @@ import ElearningService from "@/services/elearningService";
 import { ElearningList } from "@/components/section/ElearningList";
 import { InfoBootcamp } from "@/components/section/InfoBootcampSection";
 import { ElearningBootcampList } from "@/components/section/ElearningBootcampList";
+import { ElearningEnrolledList } from "@/components/section/ElearningEnrolledList";
+import { BookOpen } from "lucide-react"; // Import icon tambahan biar cantik
 
 export const ElearningPage = () => {
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // --- CEK LOGIN STATUS ---
+  // Kita cek manual token di localStorage untuk menentukan apakah user "Guest" atau "Member"
+  const token = localStorage.getItem("token");
+  const isLoggedIn = !!localStorage.getItem("token");
 
-  // Client-side pagination state
+  // --- PAGINATION STATE ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
-  const fetchCoursesData = async () => {
-    try {
-      setLoading(true);
-      const data = await ElearningService.fetchCourses();
-      setCourses(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [popularPage, setPopularPage] = useState(1);
+  const popularLimit = 10;
 
-  useEffect(() => {
-    fetchCoursesData();
-  }, []);
+  const [bootcampPage, setBootcampPage] = useState(1);
+  const bootcampLimit = 10;
 
-  // Calculate pagination values
+  // --- QUERY 1: KATALOG ---
+  const { 
+    data: courses = [], 
+    isLoading: loadingCourses, 
+    isError: isCoursesError,
+    error: coursesError 
+  } = useQuery({
+    queryKey: ["courses"],
+    queryFn: ElearningService.fetchCourses,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // --- QUERY 2: ENROLLED COURSES ---
+  const { data: enrolledCourses = [] } = useQuery({
+    queryKey: ["enrolled-courses", token],
+    queryFn: async () => {
+      // Kalau gak ada token, gak usah fetch, langsung return kosong
+      if (!isLoggedIn) return []; 
+      
+      try {
+        const res = await ProfileService.getEnrolledCourses();
+        return Array.isArray(res) ? res : (res.data || []);
+      } catch (err) {
+        return [];
+      }
+    },
+    enabled: isLoggedIn, // Query cuma jalan kalau user sudah login
+    staleTime: 1000 * 60 * 2,
+  });
+
+  // --- LOGIC PAGINATION (Sama) ---
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentCourses = courses.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(courses.length / itemsPerPage);
 
-  // Extract unique categories
+  const idxLastPop = popularPage * popularLimit;
+  const idxFirstPop = idxLastPop - popularLimit;
+  const currentPopularCourses = courses.slice(idxFirstPop, idxLastPop);
+  const totalPopularPages = Math.ceil(courses.length / popularLimit);
+
+  const idxLastBoot = bootcampPage * bootcampLimit;
+  const idxFirstBoot = idxLastBoot - bootcampLimit;
+  const currentBootcampCourses = courses.slice(idxFirstBoot, idxLastBoot);
+  const totalBootcampPages = Math.ceil(courses.length / bootcampLimit);
+
   const uniqueCategories = [
     ...new Set(courses.map((course) => course.category)),
   ];
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    // Scroll to top of the list section (optional, or keep top of page)
-    // window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  if (loading && courses.length === 0) {
+  // --- UI ---
+  if (loadingCourses) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -64,7 +92,7 @@ export const ElearningPage = () => {
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
         <p className="text-red-500 font-medium">{error}</p>
         <button
-          onClick={() => fetchCoursesData()}
+          onClick={() => window.location.reload()}
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
         >
           Coba Lagi
@@ -72,6 +100,31 @@ export const ElearningPage = () => {
       </div>
     );
   }
+
+  const PaginationControl = ({ page, total, onPageChange }) => {
+    if (total <= 1) return null;
+    return (
+      <div className="container mx-auto px-6 py-4 flex justify-center items-center gap-4">
+        <button
+          onClick={() => onPageChange(page - 1)}
+          disabled={page === 1}
+          className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent cursor-pointer"
+        >
+          Previous
+        </button>
+        <span className="text-sm font-medium">
+          Page {page} of {total}
+        </span>
+        <button
+          onClick={() => onPageChange(page + 1)}
+          disabled={page === total}
+          className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent cursor-pointer"
+        >
+          Next
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -84,52 +137,67 @@ export const ElearningPage = () => {
       <main className="flex-1">
         <ElearningBanner />
         <ElearningCategories categories={uniqueCategories} />
+        
+        {isLoggedIn && (
+           enrolledCourses.length > 0 ? (
+            // KONDISI A: SUDAH PUNYA KURSUS
+            <ElearningEnrolledList
+              title="Kursus yang Sedang Diikuti"
+              subtitle="Lanjutkan progres belajar Anda."
+              courses={enrolledCourses} 
+            />
+           ) : (
+            // KONDISI B: LOGIN TAPI BELUM PUNYA KURSUS
+            <section className="px-6 py-12">
+               <div className="mb-6">
+                  <h2 className="text-2xl font-bold mb-2">Kursus yang Sedang Diikuti</h2>
+                  <p className="text-muted-foreground">Lanjutkan progres belajar Anda.</p>
+               </div>
+               
+               {/* Tampilan Empty State yang Cantik */}
+               <div className="w-full py-12 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-center gap-4 bg-gray-50/50">
+                  <div className="bg-white p-4 rounded-full shadow-sm">
+                    <BookOpen className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Belum ada kursus yang diikuti</h3>
+                    <p className="text-sm text-gray-500 max-w-sm mx-auto mt-1">
+                      Anda belum mendaftar di kursus manapun. Yuk, mulai perjalanan belajar Anda sekarang!
+                    </p>
+                  </div>
+               </div>
+            </section>
+           )
+        )}
 
-        {/* Using the same fetched courses for demonstration.  
-            In a real app, you might filter these based on user enrollment or popularity. */}
-        <ElearningCourseList
-          title="Kursus yang Sedang Diikuti"
-          subtitle="Ini adalah daftar kursus yang sedang aktif Anda pelajari. Selesaikan semuanya untuk mendapatkan sertifikat dan keahlian baru."
-          courses={courses.slice(0, 3)}
-        />
-
+        {/* --- SECTION 2: TEMUKAN KEAHLIAN BARU --- */}
         <ElearningList
           title="Temukan Keahlian Baru"
           subtitle="Dunia terus berubah dan keahlian baru selalu dibutuhkan. Perluas wawasan Anda dengan mempelajari topik-topik relevan yang kami pilihkan ini."
           courses={currentCourses}
         />
-
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="container mx-auto px-6 py-4 flex justify-center items-center gap-4">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent cursor-pointer"
-            >
-              Previous
-            </button>
-            <span className="text-sm font-medium">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent cursor-pointer"
-            >
-              Next
-            </button>
-          </div>
-        )}
-
-        <ElearningCourseList
-          title="Kursus Terpopuler"
-          subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain. Ini adalah topik-topik terpanas di platform kami saat ini."
-          courses={courses}
+        <PaginationControl 
+          page={currentPage} 
+          total={totalPages} 
+          onPageChange={setCurrentPage} 
         />
 
+        {/* --- SECTION 3: TERPOPULER --- */}
+        <ElearningCourseList
+          title="Kursus Terpopuler"
+          subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain."
+          courses={currentPopularCourses}
+        />
+        <PaginationControl 
+          page={popularPage} 
+          total={totalPopularPages} 
+          onPageChange={setPopularPage} 
+        />
+
+        {/* --- SECTION 4: INFO BOOTCAMP --- */}
         <InfoBootcamp />
 
+        {/* --- SECTION 5: BOOTCAMP LIST --- */}
         <ElearningBootcampList
           title="Kursus Bootcamp"
           subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
