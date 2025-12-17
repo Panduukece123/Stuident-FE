@@ -169,7 +169,7 @@ export const ProfileLayout = () => {
               </Button>
             </Link>
             <Link to="/profile/my-enrolled-courses">
-              <Button variant="ghost" className={getSidebarClass("/profile/enrolled-courses")}>
+              <Button variant="ghost" className={getSidebarClass("/profile/my-enrolled-courses")}>
                  <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
               </Button>
             </Link>

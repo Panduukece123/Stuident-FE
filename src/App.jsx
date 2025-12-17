@@ -21,8 +21,8 @@ import ScholarshipDetail from "./pages/scholarsip/ScholarshipDetailPage";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false, 
-      retry: 1, 
+      refetchOnWindowFocus: false,
+      retry: 1,
     },
   },
 });
@@ -55,7 +55,7 @@ function App() {
                 element={<MyProfileOrderHistory />}
               />
               <Route
-                path="my-enrolled-course"
+                path="my-enrolled-courses"
                 element={<MyProfileEnrolledCourse />}
               />
             </Route>
