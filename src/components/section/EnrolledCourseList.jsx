@@ -14,11 +14,10 @@ export const EnrolledCourseList = ({ title, subtitle, courses }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course, index) => (
-            <Link
-              // Ganti link tujuan biar cocok sama route baru
-              to={`/my-courses/${course.id}/learn`}
-              key={course.id || index}
-              className="block h-full transition-transform hover:scale-[1.02]"
+            <Link 
+              to={`/course/show/${course.id}`} 
+              key={course.id || index} 
+              className="block h-full transition-transform hover:scale-[1.02]" 
             >
               <EnrolledCourseCard {...course} />
             </Link>
