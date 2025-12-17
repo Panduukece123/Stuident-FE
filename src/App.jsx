@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom"; // Pastikan from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from "react-router";
 import { AppLayout } from "./layouts/AppLayout";
 import { HomePage } from "./pages/HomePage";
 import { ElearningPage } from "./pages/ElearningPage";
@@ -27,7 +27,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-import { LearnLayout } from "./layouts/LearnLayout";
 
 function App() {
   return (
@@ -64,10 +63,6 @@ function App() {
                 path="my-enrolled-courses"
                 element={<MyProfileEnrolledCourse />}
               />
-            </Route>
-
-            <Route path="learn" element={<LearnLayout />}>
-              <Route path=":id" element={<ElearningPage />} />
             </Route>
 
             <Route path="scholarship" element={<ScholarshipPage />} />
