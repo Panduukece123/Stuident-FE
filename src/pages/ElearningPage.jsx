@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query"; // <--- IMPORT PENTING
 import { Navbar } from "../components/shared/Navbar";
 import { ElearningBanner } from "../components/section/ElearningBanner";
 import { ElearningCategories } from "../components/section/ElearningCategories";
@@ -11,85 +12,72 @@ import { ElearningBootcampList } from "@/components/section/ElearningBootcampLis
 import { ElearningEnrolledList } from "@/components/section/ElearningEnrolledList";
 
 export const ElearningPage = () => {
-  // --- STATE DATA ---
-  const [courses, setCourses] = useState([]);
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // --- PAGINATION STATE (DIPISAH SUPAYA TIDAK BENTROK) ---
-  
-  // 1. Pagination: Temukan Keahlian Baru (4 item)
+  // --- PAGINATION STATE (Tetap pakai useState) ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
-  // 2. Pagination: Kursus Terpopuler (8 item)
   const [popularPage, setPopularPage] = useState(1);
   const popularLimit = 10;
 
-  // 3. Pagination: Bootcamp (8 item)
   const [bootcampPage, setBootcampPage] = useState(1);
   const bootcampLimit = 10;
 
-  // --- FETCH DATA ---
-  const fetchCoursesData = async () => {
-    try {
-      setLoading(true);
+  // --- 1. QUERY: AMBIL SEMUA KURSUS (KATALOG) ---
+  const { 
+    data: courses = [], // Default empty array biar gak error map
+    isLoading: loadingCourses, 
+    isError: isCoursesError,
+    error: coursesError 
+  } = useQuery({
+    queryKey: ["courses"], // Key unik untuk cache
+    queryFn: ElearningService.fetchCourses,
+    staleTime: 1000 * 60 * 5, // Data dianggap segar selama 5 menit
+  });
 
-      // 1. Ambil Katalog
-      const allCoursesData = await ElearningService.fetchCourses();
-      setCourses(allCoursesData);
-
-      // 2. Ambil Enrolled (Optional)
+  // --- 2. QUERY: AMBIL ENROLLED COURSES (USER LOGGED IN) ---
+  const { data: enrolledCourses = [] } = useQuery({
+    queryKey: ["enrolled-courses"],
+    queryFn: async () => {
       try {
-        const myEnrolledData = await ProfileService.getEnrolledCourses();
-        const safeEnrolledData = Array.isArray(myEnrolledData) 
-            ? myEnrolledData 
-            : (myEnrolledData.data || []);
-        setEnrolledCourses(safeEnrolledData);
-      } catch (enrolledError) {
-        console.warn("User belum login atau tidak ada enrolled courses.");
-        setEnrolledCourses([]); 
+        // Logic safe fetch seperti sebelumnya
+        const res = await ProfileService.getEnrolledCourses();
+        return Array.isArray(res) ? res : (res.data || []);
+      } catch (err) {
+        // Kalau error (401 Guest), kembalikan array kosong (silent fail)
+        return [];
       }
+    },
+    retry: false, // Jangan coba ulang kalau gagal (biar gak spam 401)
+    staleTime: 1000 * 60 * 2, // 2 menit
+  });
 
-    } catch (err) {
-      console.error("Critical Error:", err);
-      setError("Gagal memuat katalog kursus.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCoursesData();
-  }, []);
-
-  // --- LOGIC PAGINATION 1: TEMUKAN KEAHLIAN BARU ---
+  // --- LOGIC PAGINATION (Sama Persis) ---
+  // Pagination 1: Temukan Keahlian Baru
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentCourses = courses.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(courses.length / itemsPerPage);
 
-  // --- LOGIC PAGINATION 2: TERPOPULER ---
+  // Pagination 2: Terpopuler
   const idxLastPop = popularPage * popularLimit;
   const idxFirstPop = idxLastPop - popularLimit;
-  // (Opsional) Kalau mau diurutkan berdasarkan rating, tambahkan .sort() sebelum slice
   const currentPopularCourses = courses.slice(idxFirstPop, idxLastPop);
   const totalPopularPages = Math.ceil(courses.length / popularLimit);
 
-  // --- LOGIC PAGINATION 3: BOOTCAMP ---
+  // Pagination 3: Bootcamp
   const idxLastBoot = bootcampPage * bootcampLimit;
   const idxFirstBoot = idxLastBoot - bootcampLimit;
   const currentBootcampCourses = courses.slice(idxFirstBoot, idxLastBoot);
   const totalBootcampPages = Math.ceil(courses.length / bootcampLimit);
 
-  // --- KATEGORI UNIK ---
+  // Kategori Unik
   const uniqueCategories = [
     ...new Set(courses.map((course) => course.category)),
   ];
 
-  // --- LOADING & ERROR UI ---
-  if (loading && courses.length === 0) {
+  // --- UI LOADING & ERROR ---
+  // Cukup cek loadingCourses karena enrolledCourses sifatnya opsional/silent
+  if (loadingCourses) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -97,12 +85,14 @@ export const ElearningPage = () => {
     );
   }
 
-  if (error) {
+  if (isCoursesError) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
-        <p className="text-red-500 font-medium">{error}</p>
+        <p className="text-red-500 font-medium">
+          {coursesError?.message || "Gagal memuat katalog kursus."}
+        </p>
         <button
-          onClick={() => fetchCoursesData()}
+          onClick={() => window.location.reload()} // Reload manual atau invalidate query
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
         >
           Coba Lagi
@@ -111,7 +101,7 @@ export const ElearningPage = () => {
     );
   }
 
-  // --- HELPER UNTUK RENDER TOMBOL PAGINATION (BIAR RAPI) ---
+  // --- HELPER COMPONENT ---
   const PaginationControl = ({ page, total, onPageChange }) => {
     if (total <= 1) return null;
     return (
@@ -143,7 +133,7 @@ export const ElearningPage = () => {
         <ElearningBanner />
         <ElearningCategories categories={uniqueCategories} />
 
-        {/* SECTION 1: ENROLLED COURSES */}
+        {/* SECTION 1: ENROLLED COURSES (Otomatis muncul jika ada data) */}
         {enrolledCourses.length > 0 && (
           <ElearningEnrolledList
             title="Kursus yang Sedang Diikuti"
@@ -152,7 +142,7 @@ export const ElearningPage = () => {
           />
         )}
 
-        {/* SECTION 2: TEMUKAN KEAHLIAN BARU (4 Item/Page) */}
+        {/* SECTION 2: TEMUKAN KEAHLIAN BARU */}
         <ElearningList
           title="Temukan Keahlian Baru"
           subtitle="Perluas wawasan Anda dengan mempelajari topik-topik relevan."
@@ -164,7 +154,7 @@ export const ElearningPage = () => {
           onPageChange={setCurrentPage} 
         />
 
-        {/* SECTION 3: TERPOPULER (8 Item/Page) */}
+        {/* SECTION 3: TERPOPULER */}
         <ElearningCourseList
           title="Kursus Terpopuler"
           subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain."
@@ -176,10 +166,10 @@ export const ElearningPage = () => {
           onPageChange={setPopularPage} 
         />
 
-        {/* SECTION 4: INFO BOOTCAMP (Static) */}
+        {/* SECTION 4: INFO BOOTCAMP */}
         <InfoBootcamp />
 
-        {/* SECTION 5: BOOTCAMP LIST (8 Item/Page) */}
+        {/* SECTION 5: BOOTCAMP LIST */}
         <ElearningBootcampList
           title="Kursus Bootcamp"
           subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
