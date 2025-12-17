@@ -18,6 +18,7 @@ import { EnrolledCourseShowPage } from "./pages/course/EnrolledCourseShowPage";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ScholarshipDetail from "./pages/scholarsip/ScholarshipDetailPage";
+import { LearnLayout } from "./layouts/LearnLayout";
 
 const queryClient = new QueryClient({
   defaultOptions: {
