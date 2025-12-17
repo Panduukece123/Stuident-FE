@@ -25,11 +25,10 @@ export const ElearningEnrolledList = ({ title, subtitle, courses = [] }) => {
 
             return (
               <Link 
-                to={`/my-courses/${courseId}/learn`} 
+                to={`/my-courses/learn/${courseId}`} 
                 key={item.id || index} 
                 className="block h-full transition-transform hover:scale-[1.02]" 
               >
-                {/* Kita kirim seluruh object item ke Card */}
                 <EnrolledCourseCard {...item} />
               </Link>
             );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import CourseService from "@/services/CourseService";
 
 import {
@@ -19,12 +19,12 @@ import {
   PlayCircle,
   CheckCircle2,
   Circle,
-  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const EnrolledCourseShowPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   // --- STATE ---
   const [loading, setLoading] = useState(true);
@@ -33,54 +33,96 @@ export const EnrolledCourseShowPage = () => {
   const [activeModule, setActiveModule] = useState(null);
   const [expandedChapters, setExpandedChapters] = useState([]);
 
-  // Kita set default progress kosong dulu karena backend error 500
+  // State Progress
   const [progressData, setProgressData] = useState({
     percentage: 0,
-    completedIds: [],
+    completedIds: [], 
   });
 
-  // --- 1. FETCH DATA (Hanya Curriculum) ---
+  // --- 1. FETCH DATA (Curriculum + Progress + Auto Open Logic) ---
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const curriculumPromise = CourseService.getCurriculum(id);
+        const progressPromise = CourseService.getProgress(id);
 
-        // Panggil API Curriculum saja
-        const curriculumRes = await CourseService.getCurriculum(id);
+        const [curriculumRes, progressRes] = await Promise.all([
+            curriculumPromise,
+            progressPromise
+        ]);
 
-        // Cek struktur JSON kamu: { sukses: true, pesan: "...", data: [...] }
-        // Jadi array materinya ada di curriculumRes.data
-        const rawData = curriculumRes.data || [];
+        // --- A. SIAPKAN DATA MENTAH ---
+        const rawCurriculum = curriculumRes.data || [];
+        const progressRoot = progressRes.data || {};
+        const progressList = progressRoot.progress || []; // Sesuaikan field backendmu
+        const statistics = progressRoot.statistics || {}; // Jika ada
 
-        console.log("Data Materi:", rawData); // Debugging di Console
+        // Ambil ID yang selesai (Pastikan jadi Number)
+        const completedIdsArray = progressList
+            .filter(item => item.completed === true)
+            .map(item => Number(item.curriculum_id));
 
-        if (rawData.length > 0) {
-          // A. Grouping Data (Flat -> Nested by Section)
-          const groups = rawData.reduce((acc, item) => {
+        // --- B. PROSES GROUPING KURIKULUM ---
+        let groupedArray = [];
+        if (Array.isArray(rawCurriculum) && rawCurriculum.length > 0) {
+          const groups = rawCurriculum.reduce((acc, item) => {
             const sectionName = item.section;
-            if (!acc[sectionName]) {
-              acc[sectionName] = [];
-            }
+            if (!acc[sectionName]) acc[sectionName] = [];
             acc[sectionName].push(item);
             return acc;
           }, {});
 
-          const groupedArray = Object.keys(groups).map((section, index) => ({
+          groupedArray = Object.keys(groups).map((section, index) => ({
             id: index,
             title: section,
             modules: groups[section],
           }));
 
-          // B. Set State
           setGroupedCurriculum(groupedArray);
-          setFlatCurriculum(rawData);
-
-          // C. PENTING: Set Default Materi Pertama biar Player Gak Kosong
-          setActiveModule(rawData[0]);
-          setExpandedChapters([0]); // Buka accordion pertama otomatis
+          setFlatCurriculum(rawCurriculum);
         }
+
+        // --- C. LOGIC AUTO-OPEN (FITUR YANG KAMU MINTA) ---
+        if (rawCurriculum.length > 0) {
+            let targetModule = null;
+
+            // 1. Cari materi pertama yang BELUM ada di completedIdsArray
+            const firstUnfinished = rawCurriculum.find(
+                (m) => !completedIdsArray.includes(Number(m.id))
+            );
+
+            if (firstUnfinished) {
+                // Kalo ada yang belum beres, buka yang itu
+                targetModule = firstUnfinished;
+            } else {
+                // Kalo semua sudah beres (undefined), buka materi PALING TERAKHIR
+                targetModule = rawCurriculum[rawCurriculum.length - 1];
+            }
+
+            // Set Video Aktif
+            setActiveModule(targetModule);
+
+            // Set Accordion supaya ngebuka Section dari targetModule tsb
+            if (targetModule) {
+                const targetGroup = groupedArray.find((group) => 
+                    group.modules.some((m) => m.id === targetModule.id)
+                );
+                
+                if (targetGroup) {
+                    setExpandedChapters([targetGroup.id]);
+                }
+            }
+        }
+
+        // --- D. SIMPAN PROGRESS KE STATE ---
+        setProgressData({
+            percentage: statistics.percentage || 0, // Sesuaikan field backend
+            completedIds: completedIdsArray,
+        });
+
       } catch (error) {
-        console.error("Gagal mengambil data materi:", error);
+        console.error("Gagal mengambil data:", error);
       } finally {
         setLoading(false);
       }
@@ -89,12 +131,12 @@ export const EnrolledCourseShowPage = () => {
     if (id) fetchData();
   }, [id]);
 
+  // useEffect untuk Auto-Expand Accordion saat ganti materi
   useEffect(() => {
     if (activeModule && groupedCurriculum.length > 0) {
       const activeChapter = groupedCurriculum.find((chapter) =>
         chapter.modules.some((mod) => mod.id === activeModule.id)
       );
-
       if (activeChapter) {
         setExpandedChapters((prev) => {
           if (prev.includes(activeChapter.id)) return prev;
@@ -104,27 +146,57 @@ export const EnrolledCourseShowPage = () => {
     }
   }, [activeModule, groupedCurriculum]);
 
-  // --- 2. HANDLER: NEXT / PREV MATERI ---
+  const toggleChapter = (chapterId) => {
+    setExpandedChapters((prev) =>
+      prev.includes(chapterId) ? prev.filter((id) => id !== chapterId) : [...prev, chapterId]
+    );
+  };
+
+  // Handler Navigasi Manual (Prev/Next tanpa save ke DB)
   const handleNavigate = (direction) => {
     if (!activeModule || flatCurriculum.length === 0) return;
-
-    const currentIndex = flatCurriculum.findIndex(
-      (m) => m.id === activeModule.id
-    );
+    const currentIndex = flatCurriculum.findIndex((m) => m.id === activeModule.id);
     let nextIndex = direction === "next" ? currentIndex + 1 : currentIndex - 1;
-
     if (nextIndex >= 0 && nextIndex < flatCurriculum.length) {
       setActiveModule(flatCurriculum[nextIndex]);
     }
   };
 
-  // --- 3. ACCORDION TOGGLE ---
-  const toggleChapter = (chapterId) => {
-    setExpandedChapters((prev) =>
-      prev.includes(chapterId)
-        ? prev.filter((id) => id !== chapterId)
-        : [...prev, chapterId]
-    );
+  // --- 4. HANDLER KHUSUS TOMBOL NEXT / SELESAI (WITH SAVE) ---
+  const handleNextStep = async () => {
+    if (!activeModule) return;
+
+    // Cek Index Materi Saat Ini
+    const currentIndex = flatCurriculum.findIndex(m => m.id === activeModule.id);
+    const isLastModule = currentIndex === flatCurriculum.length - 1;
+
+    // --- LOGIC SIMPAN PROGRESS ---
+    const isAlreadyCompleted = progressData.completedIds.includes(activeModule.id);
+
+    if (!isAlreadyCompleted) {
+      try {
+        await CourseService.markComplete(activeModule.id);
+
+        setProgressData((prev) => {
+            const newCompletedIds = [...prev.completedIds, activeModule.id];
+            const newPercentage = Math.round((newCompletedIds.length / flatCurriculum.length) * 100);
+
+            return { percentage: newPercentage, completedIds: newCompletedIds };
+        });
+      } catch (error) {
+        console.error("Gagal update progress:", error);
+      }
+    }
+
+    // --- LOGIC NAVIGASI ---
+    if (isLastModule) {
+      // Kalo materi terakhir, ucapkan selamat & balik ke list kursus
+      alert("Selamat! Anda telah menyelesaikan seluruh materi kursus ini! 🎉");
+      navigate("/profile/my-enrolled-courses"); 
+    } else {
+      // Kalo belum, lanjut ke next video
+      handleNavigate("next");
+    }
   };
 
   if (loading) {
@@ -135,17 +207,17 @@ export const EnrolledCourseShowPage = () => {
     );
   }
 
+  const completedCount = progressData.completedIds.length;
+  const totalCount = flatCurriculum.length;
+
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
       {/* HEADER & BREADCRUMB */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
-          <Link to="/my-courses">
-            <Button className={"rounded-full"}>
-              <ChevronLeft />
-              Back
-            </Button>
-          </Link>
+          <Button className={"rounded-full"} onClick={() => navigate(-1)}>
+            <ChevronLeft /> Back
+          </Button>
 
           <Breadcrumb>
             <BreadcrumbList>
@@ -167,18 +239,14 @@ export const EnrolledCourseShowPage = () => {
         {/* --- LEFT COLUMN: PLAYER --- */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="bg-white border shadow-sm rounded-2xl p-6 flex flex-col gap-4">
-            {/* Judul Materi Aktif */}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {activeModule?.title}
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">{activeModule?.title}</h1>
               <p className="text-sm text-muted-foreground mt-1">
                 {activeModule?.section} • Durasi: {activeModule?.duration}
               </p>
             </div>
-
             <hr className="border-gray-100" />
-
+            
             {/* VIDEO PLAYER */}
             <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-lg relative">
               {activeModule?.video_url ? (
@@ -197,56 +265,67 @@ export const EnrolledCourseShowPage = () => {
               )}
             </div>
 
-            {/* Deskripsi */}
             <div className="text-gray-600 leading-relaxed text-justify space-y-2">
               <p>{activeModule?.description}</p>
             </div>
 
-            {/* Tombol Navigasi */}
+            {/* --- BAGIAN TOMBOL DINAMIS --- */}
             <div className="flex flex-row justify-between w-full mt-4 pt-4 border-t">
               <Button
                 variant="outline"
                 className="gap-2"
                 onClick={() => handleNavigate("prev")}
-                disabled={
-                  !activeModule || flatCurriculum.indexOf(activeModule) === 0
-                }
+                disabled={!activeModule || flatCurriculum.indexOf(activeModule) === 0}
               >
                 <ChevronLeft className="h-4 w-4" /> Sebelumnya
               </Button>
 
-              <Button
-                className="bg-cyan-600 hover:bg-cyan-700 text-white gap-2"
-                onClick={() => handleNavigate("next")}
-                disabled={
-                  !activeModule ||
-                  flatCurriculum.indexOf(activeModule) ===
-                    flatCurriculum.length - 1
-                }
-              >
-                Selanjutnya <ChevronRight className="h-4 w-4" />
-              </Button>
+              {(() => {
+                 const currentIndex = flatCurriculum.findIndex(m => m.id === activeModule?.id);
+                 const isLastModule = currentIndex === flatCurriculum.length - 1;
+
+                 return (
+                   <Button
+                     className={cn(
+                       "text-white gap-2 transition-colors",
+                       isLastModule 
+                         ? "bg-green-600 hover:bg-green-700" // Warna Hijau kalo Selesai
+                         : "bg-cyan-600 hover:bg-cyan-700"   // Warna Cyan kalo Next
+                     )}
+                     onClick={handleNextStep}
+                     // Disabled HANYA jika data belum siap. JANGAN disable kalau last module.
+                     disabled={!activeModule} 
+                   >
+                     {isLastModule ? (
+                       <>Selesai <CheckCircle2 className="h-4 w-4" /></>
+                     ) : (
+                       <>Selanjutnya <ChevronRight className="h-4 w-4" /></>
+                     )}
+                   </Button>
+                 );
+              })()}
             </div>
           </div>
         </div>
 
         {/* --- RIGHT COLUMN: SIDEBAR --- */}
         <div className="lg:col-span-1 lg:sticky lg:top-20 space-y-4">
-          {/* Progress Card (Dummy karena backend error) */}
+          
+          {/* CARD PROGRESS */}
           <div className="bg-white border shadow-sm rounded-2xl p-5 flex flex-col gap-4">
             <h1 className="text-lg font-bold text-gray-800">Progres Belajar</h1>
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-semibold">
                 <span className="text-gray-500">
-                  0 dari {flatCurriculum.length} Materi Selesai
+                  {completedCount} dari {totalCount} Materi Selesai
                 </span>
-                <span className="text-cyan-600">0%</span>
+                <span className="text-cyan-600">{Math.round(progressData.percentage)}%</span>
               </div>
-              <Progress value={0} className="h-2 bg-gray-100" />
+              <Progress value={progressData.percentage} className="h-2 bg-gray-100" />
             </div>
           </div>
 
-          {/* List Materi (Dynamic Accordion) */}
+          {/* LIST MATERI */}
           <div className="bg-white sticky top-20 max-h-[calc(100vh-8rem)] border shadow-sm rounded-2xl overflow-hidden overflow-y-auto">
             <div className="p-4 border-b bg-gray-50/50">
               <h2 className="font-bold text-gray-800">Daftar Materi</h2>
@@ -254,45 +333,29 @@ export const EnrolledCourseShowPage = () => {
 
             <div className="flex flex-col divide-y">
               {groupedCurriculum.length === 0 ? (
-                <div className="p-4 text-center text-sm text-gray-500">
-                  Belum ada materi.
-                </div>
+                <div className="p-4 text-center text-sm text-gray-500">Belum ada materi.</div>
               ) : (
                 groupedCurriculum.map((chapter) => {
                   const isExpanded = expandedChapters.includes(chapter.id);
-
                   return (
                     <div key={chapter.id} className="flex flex-col">
-                      {/* Header Bab */}
                       <button
                         onClick={() => toggleChapter(chapter.id)}
                         className="flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors text-left relative z-10"
                       >
-                        <h3 className="font-semibold text-gray-700 text-sm">
-                          {chapter.title}
-                        </h3>
-                        <ChevronDown
-                          className={cn(
-                            "h-4 w-4 text-gray-400 transition-transform duration-300 ease-in-out",
-                            isExpanded ? "rotate-180" : ""
-                          )}
-                        />
+                        <h3 className="font-semibold text-gray-700 text-sm">{chapter.title}</h3>
+                        <ChevronDown className={cn("h-4 w-4 text-gray-400 transition-transform duration-300 ease-in-out", isExpanded ? "rotate-180" : "")} />
                       </button>
 
-                      {/* Content Bab */}
-                      <div
-                        className={cn(
-                          "grid transition-[grid-template-rows] duration-300 ease-in-out",
-                          isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                        )}
-                      >
+                      <div className={cn("grid transition-[grid-template-rows] duration-300 ease-in-out", isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}>
                         <div className="overflow-hidden">
                           <div className="bg-gray-50/30 flex flex-col gap-1 p-2 border-t">
                             {chapter.modules.map((module) => {
                               const isActive = activeModule?.id === module.id;
-
-                              // Logika completed kita matikan dulu karena backend error
-                              const isCompleted = false;
+                              
+                              // --- KUNCI UTAMA DISINI ---
+                              // Cek apakah ID modul ini ada di dalam list completedIds
+                              const isCompleted = progressData.completedIds.includes(module.id);
 
                               return (
                                 <div
@@ -305,6 +368,7 @@ export const EnrolledCourseShowPage = () => {
                                       : "text-gray-600 hover:bg-cyan-50/50 hover:text-cyan-600 border border-transparent"
                                   )}
                                 >
+                                  {/* ICON LOGIC: Prioritaskan Checklist kalau Completed */}
                                   {isCompleted ? (
                                     <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
                                   ) : isActive ? (
@@ -314,12 +378,7 @@ export const EnrolledCourseShowPage = () => {
                                   )}
 
                                   <div className="flex flex-col gap-0.5">
-                                    <span
-                                      className={cn(
-                                        "font-medium",
-                                        isActive && "font-semibold"
-                                      )}
-                                    >
+                                    <span className={cn("font-medium", isActive && "font-semibold")}>
                                       {module.title}
                                     </span>
                                     <span className="text-[10px] text-muted-foreground">

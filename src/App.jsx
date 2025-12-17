@@ -40,13 +40,9 @@ function App() {
 
             <Route path="e-learning" element={<ElearningPage />} />
 
-          <Route path="course">
-            <Route path="show/:id" element={<CourseShowPage />} />
-          </Route>
-
-          <Route path="enrolled" element={<EnrolledCourseShowPage />} />
-              
-          <Route path="our-services" element={<OurServices />} />
+            <Route path="course">
+              <Route path="show/:id" element={<CourseShowPage />} />
+            </Route>
 
             <Route path="our-services" element={<OurServices />} />
 
@@ -66,14 +62,17 @@ function App() {
               />
             </Route>
 
-            <Route path="learn" element={<LearnLayout />}>
-              <Route path=":id" element={<ElearningPage />} />
-            </Route>
-
             <Route path="scholarship" element={<ScholarshipPage />} />
             <Route
               path="scholarship/show/:id"
               element={<ScholarshipDetail />}
+            />
+          </Route>
+
+          <Route element={<LearnLayout />}>
+            <Route
+              path="my-courses/learn/:id"
+              element={<EnrolledCourseShowPage />}
             />
           </Route>
         </Routes>

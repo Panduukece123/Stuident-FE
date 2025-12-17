@@ -13,8 +13,9 @@ const courseService = {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
-    }});
-    
+      },
+    });
+
     return response.data;
   },
   getProgress: async (courseId) => {
@@ -26,14 +27,24 @@ const courseService = {
     });
     return response.data;
   },
+
   markComplete: async (curriculumId) => {
-    return await api.post(`/curriculums/${curriculumId}/complete`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-  },
+    const token = localStorage.getItem("token"); // <--- Harus ambil dulu!
+
+    const response = await api.post(
+      `/curriculums/${curriculumId}/complete`, 
+      {
+        completed: true
+      }, 
+      {  
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      }
+    );
+    return response.data;
+},
 };
 
 export default courseService;
