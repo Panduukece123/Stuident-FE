@@ -5,9 +5,9 @@ import { EnrolledCourseCard } from "../shared/EnrolledCourseCard";
 
 export const EnrolledCourseList = ({ title, subtitle, courses }) => {
   return (
-    <section className="bg-background border-t">
-      <div className="">
-        <div className="mb-8">
+    <section className="bg-background">
+      <div>
+        <div>
           <h2 className="text-2xl font-bold mb-2">{title}</h2>
           <p className="text-muted-foreground">{subtitle}</p>
         </div>

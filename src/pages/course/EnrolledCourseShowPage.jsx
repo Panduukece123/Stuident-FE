@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import CourseService from "@/services/CourseService";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
