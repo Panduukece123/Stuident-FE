@@ -28,11 +28,11 @@ const authService = {
     // Ambil token manual karena kita tidak set global
     const token = localStorage.getItem("token");
 
-    const response = await api.post("/logout", {}, { // Body kosong {}
+    const response = await api.post("/auth/logout", {}, { // Body kosong {}
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": `Bearer ${token}` // Masukkan token manual di sini
+        "Authorization": `Bearer ${token}` 
       },
     });
     return response.data;

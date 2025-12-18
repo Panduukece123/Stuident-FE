@@ -1,32 +1,19 @@
-// src/components/section/MyProfileOrderHistory.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import TransactionService from "@/services/TransactionService";
 import { OrderHistoryList } from "@/components/section/OrderHistoryList";
-import { Input } from "@/components/ui/input"; // ShadCN Input (optional)
-
-const BACKEND_URL = "http://localhost:8000";
-const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
+import { Input } from "@/components/ui/input"; 
 
 export const MyProfileOrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch orders dan mapping supaya selalu ada title & image
   useEffect(() => {
     const fetchOrders = async () => {
       try {
+        // Data yang keluar dari sini sudah bersih (ada item_name, item_image, dll)
         const data = await TransactionService.getAll();
-        const mapped = data.map((trx) => ({
-          ...trx,
-          title: trx.item_name || trx.type_label || "-", // pastikan title selalu ada
-          image: trx.item_details?.image
-            ? trx.item_details.image.startsWith("http")
-              ? trx.item_details.image
-              : `${BACKEND_URL}${trx.item_details.image}`
-            : DEFAULT_IMAGE,
-        }));
-        setOrders(mapped);
+        setOrders(data);
       } catch (error) {
         console.error("Gagal mengambil transaksi:", error);
       } finally {
@@ -36,12 +23,14 @@ export const MyProfileOrderHistory = () => {
 
     fetchOrders();
   }, []);
+
   const filteredOrders = useMemo(() => {
     if (!searchQuery) return orders;
-
     const query = searchQuery.toLowerCase();
+    // Filter berdasarkan item_name atau transaction_code
     return orders.filter((order) =>
-      order.title?.toLowerCase().includes(query)
+      (order.item_name || "").toLowerCase().includes(query) ||
+      (order.transaction_code || "").toLowerCase().includes(query)
     );
   }, [orders, searchQuery]);
 
@@ -53,30 +42,27 @@ export const MyProfileOrderHistory = () => {
     );
   }
 
-  const noResultText =
-    orders.length > 0 && searchQuery
+  const noResultText = orders.length > 0 && searchQuery
       ? "Tidak ada transaksi yang cocok."
       : "Belum ada transaksi.";
 
   return (
     <div className="space-y-6">
-      {/* Header & Search */}
       <div className="w-full flex flex-col items-center border-b-2 border-b-primary p-2">
         <h1 className="text-xl font-semibold mb-3">Order History</h1>
       </div>
       <Input
           type="text"
-          placeholder="Cari Order History mu..."
+          placeholder="Cari Riwayat (Nama Kursus / Kode Transaksi)..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full max-w-md p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
         />
 
-      {/* Order List */}
       {filteredOrders.length > 0 ? (
         <OrderHistoryList orders={filteredOrders} />
       ) : (
-        <p className="text-muted-foreground text-center">{noResultText}</p>
+        <p className="text-muted-foreground text-center py-8">{noResultText}</p>
       )}
     </div>
   );

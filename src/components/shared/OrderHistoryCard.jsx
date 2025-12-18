@@ -35,50 +35,41 @@ export const OrderHistoryCard = ({
 
   return (
     <div className="bg-white border rounded-xl p-4 shadow-sm space-y-3">
-      
-      {/* ⏫ TYPE (Paling atas - Kanan) */}
-      <div className="flex justify-end items-center text-xs pb-2"> 
-        <span className="text-muted-foreground">{type}</span>
-      </div>
-
       {/* 🖼️ IMAGE + DATA (Layout Utama) */}
       <div className="flex gap-4">
-        
         {/* Kiri: IMAGE & DURATION */}
-        <div className="flex flex-col items-center flex-shrink-0">
+        <div className="flex flex-col items-center shrink-0">
           <img
-            src={image || "https://via.placeholder.com/64x64?text=No+Image"} 
+            src={image || "https://via.placeholder.com/64x64?text=No+Image"}
             alt={title}
             // PERUBAHAN DI SINI: border diubah menjadi border-2 dan ditambahkan border-gray-200
-            className="w-50 h-50 object-cover rounded-lg border-2 border-gray-200" 
+            className="w-50 h-50 object-cover rounded-lg border-2 border-gray-200"
           />
-          {/* Durasi diletakkan di bawah gambar dengan jarak kecil */}
-          <p className="text-xs mt-1 text-gray-500">{duration}</p>
         </div>
 
         {/* Kanan: DETAIL DATA */}
         <div className="flex-1 space-y-1">
           {/* Judul dan Kode */}
           <div>
-            <h3 className="font-semibold text-sm">{title}</h3>
-            <p className="text-xs text-gray-500">Kode: {code}</p>
+            <h3 className="font-semibold">{title}</h3>
+            <p className=" text-gray-500">Kode: {code}</p>
           </div>
 
           {/* Detail Pembayaran & Instruktur */}
           <div className="space-y-0.5 mt-1">
-            <p className="text-xs">
+            <p className="">
               <strong>Instructor:</strong> {instructor || "-"}
             </p>
-            <p className="text-xs">
+            <p className="">
               <strong>Metode Bayar:</strong> {payment_method}
             </p>
             {formattedDate && (
-              <p className="text-xs">
+              <p className="">
                 <strong>Dibayar:</strong> {formattedDate}
               </p>
             )}
             {/* 💰 AMOUNT/PRICE */}
-            <p className="text-xs">
+            <p className="">
               <strong>Total Bayar:</strong>{" "}
               <span className="font-bold text-blue-600">
                 {formatRupiah(amount)}
@@ -86,17 +77,24 @@ export const OrderHistoryCard = ({
             </p>
           </div>
         </div>
-      </div>
-      
-      {/* ⏬ STATUS (Kanan Bawah) */}
-      <div className="flex justify-end pt-3">
-        <span
-          className={`text-xs px-3 py-1 rounded-full font-medium ${
-            statusStyle[status] || "bg-gray-300 text-black"
-          }`}
-        >
-          {status}
-        </span>
+
+        <div className="flex flex-col justify-between">
+          {/* ⏫ TYPE (Paling atas - Kanan) */}
+          <div className="flex justify-end items-center text-xs pb-2">
+            <span className="text-muted-foreground">{type}</span>
+          </div>
+
+          {/* ⏬ STATUS (Kanan Bawah) */}
+          <div className="flex justify-end pt-3">
+            <span
+              className={`text-xs px-3 py-1 rounded-full font-medium ${
+                statusStyle[status] || "bg-gray-300 text-black"
+              }`}
+            >
+              {status}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
