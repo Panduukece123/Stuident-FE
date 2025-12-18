@@ -90,7 +90,7 @@ export default function CourseShowPage() {
     <div className="max-w-7xl mx-auto p-4 py-8 md:p-6 flex flex-col md:flex-row gap-4 md:gap-8">
       <div className="basis-full">
         {/* Legend Page */}
-        <div className="w-full flex flex-row gap-4 items-center">
+        <div className="w-full flex flex-row gap-4 items-center border-b">
           <Button className={"rounded-full"} variant={"primary"}>
             <ChevronLeft />
             Back
@@ -194,7 +194,7 @@ export default function CourseShowPage() {
       </div>
 
       {/* Side Page */}
-      <Card className={"basis-lg h-fit"}>
+      <Card className={"md:basis-lg h-fit md:sticky md:top-23"}>
         <CardContent>
           {/* Payment Section */}
           <section className="mb-4 pb-4 border-b">

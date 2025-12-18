@@ -31,7 +31,7 @@ export const TabReview = ({ course, user, onReviewCreated }) => {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schemaRating),
-    defaultValues: { rating: undefined, comment: "" },
+    defaultValues: { rating: "", comment: "" },
   });
 
   const onSubmitRating = async (data) => {
