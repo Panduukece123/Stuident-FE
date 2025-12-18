@@ -7,18 +7,16 @@ export const OrderHistoryList = ({ orders }) => {
       {orders.map((order) => (
         <OrderHistoryCard
           key={order.id}
-          // Pakai field standar hasil normalisasi Service
-          title={order.item_name}
-          image={order.item_image}
-          instructor={order.item_instructor}
-          
-          // Field bawaan transaksi
+          title={order.item_name || order.type_label}
           type={order.type_label}
           status={order.status_label}
           amount={Number(order.amount)}
           payment_method={order.payment_method}
           paid_at={order.paid_at}
           code={order.transaction_code}
+          instructor={order.item_details?.instructor || "-"}
+          duration={order.item_details?.duration || "-"}
+          image={order.image} // sudah ada di TransactionService
         />
       ))}
     </section>

@@ -134,7 +134,7 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
+    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="mx-auto flex h-16 w-full items-center justify-between px-6 gap-4">
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-3">
@@ -159,13 +159,13 @@ export const Navbar = () => {
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
               <NavigationMenuItem>
-                <NavigationMenuLink asChild active={pathname === "/"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary focus:bg-transparent cursor-pointer focus:text-primary">
+                <NavigationMenuLink asChild active={pathname === "/"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary focus:bg-transparent cursor-pointer">
                   <Link to="/">Home</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger onClick={() => navigate("/e-learning")} className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! focus:bg-transparent data-[state=open]:text-primary focus:text-primary ${pathname === "/e-learning" ? "text-primary" : ""}`}>
+                <NavigationMenuTrigger onClick={() => navigate("/e-learning")} className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! focus:bg-transparent data-[state=open]:text-primary ${pathname === "/e-learning" ? "text-primary" : ""}`}>
                   E-Learning
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>

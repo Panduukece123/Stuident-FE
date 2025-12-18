@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react"; // Tambah useEffect
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "react-router-dom"; // <--- WAJIB IMPORT INI
 import { Navbar } from "../components/shared/Navbar";
 import { ElearningBanner } from "../components/section/ElearningBanner";
 import { ElearningCategories } from "../components/section/ElearningCategories";
@@ -11,69 +10,55 @@ import { ElearningList } from "@/components/section/ElearningList";
 import { InfoBootcamp } from "@/components/section/InfoBootcampSection";
 import { ElearningBootcampList } from "@/components/section/ElearningBootcampList";
 import { ElearningEnrolledList } from "@/components/section/ElearningEnrolledList";
-import { BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react"; // Import icon tambahan biar cantik
 
 export const ElearningPage = () => {
-  // --- 1. SETUP SCROLL LOGIC ---
-  const { hash } = useLocation(); // Ambil hash dari URL (misal: #course)
-
-  // ... (State Login & Pagination Tetap Sama) ...
+  // --- CEK LOGIN STATUS ---
+  // Kita cek manual token di localStorage untuk menentukan apakah user "Guest" atau "Member"
   const token = localStorage.getItem("token");
   const isLoggedIn = !!localStorage.getItem("token");
 
+  // --- PAGINATION STATE ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+
   const [popularPage, setPopularPage] = useState(1);
   const popularLimit = 10;
+
   const [bootcampPage, setBootcampPage] = useState(1);
   const bootcampLimit = 10;
 
-  // ... (Query Tetap Sama) ...
-  const {
-    data: courses = [],
-    isLoading: loadingCourses,
+  // --- QUERY 1: KATALOG ---
+  const { 
+    data: courses = [], 
+    isLoading: loadingCourses, 
     isError: isCoursesError,
-    error: coursesError,
+    error: coursesError 
   } = useQuery({
     queryKey: ["courses"],
     queryFn: ElearningService.fetchCourses,
     staleTime: 1000 * 60 * 5,
   });
 
+  // --- QUERY 2: ENROLLED COURSES ---
   const { data: enrolledCourses = [] } = useQuery({
     queryKey: ["enrolled-courses", token],
     queryFn: async () => {
-      if (!isLoggedIn) return [];
+      // Kalau gak ada token, gak usah fetch, langsung return kosong
+      if (!isLoggedIn) return []; 
+      
       try {
         const res = await ProfileService.getEnrolledCourses();
-        return Array.isArray(res) ? res : res.data || [];
+        return Array.isArray(res) ? res : (res.data || []);
       } catch (err) {
         return [];
       }
     },
-    enabled: isLoggedIn,
+    enabled: isLoggedIn, // Query cuma jalan kalau user sudah login
     staleTime: 1000 * 60 * 2,
   });
 
-  // --- 2. EFFECT UNTUK SCROLL OTOMATIS ---
-  // Dijalankan setiap kali loading selesai atau hash berubah
-  useEffect(() => {
-    // Cek jika tidak loading DAN ada hash di URL
-    if (!loadingCourses && hash) {
-      // Hapus tanda pagar '#' jadi tinggal 'course' atau 'bootcamp'
-      const id = hash.replace("#", "");
-      const element = document.getElementById(id);
-
-      if (element) {
-        // Beri sedikit timeout agar render UI benar-benar selesai
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 100);
-      }
-    }
-  }, [loadingCourses, hash]); // Dependency: Jalankan saat loading selesai
-
-  // ... (Logic Pagination Tetap Sama) ...
+  // --- LOGIC PAGINATION (Sama) ---
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentCourses = courses.slice(indexOfFirstItem, indexOfLastItem);
@@ -93,7 +78,7 @@ export const ElearningPage = () => {
     ...new Set(courses.map((course) => course.category)),
   ];
 
-  // ... (Loading & Error UI Tetap Sama) ...
+  // --- UI ---
   if (loadingCourses) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -148,85 +133,78 @@ export const ElearningPage = () => {
       <main className="flex-1">
         <ElearningBanner />
         <ElearningCategories categories={uniqueCategories} />
-
-        {isLoggedIn &&
-          (enrolledCourses.length > 0 ? (
+        
+        {isLoggedIn && (
+           enrolledCourses.length > 0 ? (
+            // KONDISI A: SUDAH PUNYA KURSUS
             <ElearningEnrolledList
               title="Kursus yang Sedang Diikuti"
               subtitle="Lanjutkan progres belajar Anda."
-              courses={enrolledCourses}
+              courses={enrolledCourses} 
             />
-          ) : (
+           ) : (
+            // KONDISI B: LOGIN TAPI BELUM PUNYA KURSUS
             <section className="px-6 py-12">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-2">
-                  Kursus yang Sedang Diikuti
-                </h2>
-                <p className="text-muted-foreground">
-                  Lanjutkan progres belajar Anda.
-                </p>
-              </div>
-              <div className="w-full py-12 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-center gap-4 bg-gray-50/50">
-                <div className="bg-white p-4 rounded-full shadow-sm">
-                  <BookOpen className="h-8 w-8 text-gray-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Belum ada kursus yang diikuti
-                  </h3>
-                  <p className="text-sm text-gray-500 max-w-sm mx-auto mt-1">
-                    Anda belum mendaftar di kursus manapun. Yuk, mulai
-                    perjalanan belajar Anda sekarang!
-                  </p>
-                </div>
-              </div>
+               <div className="mb-6">
+                  <h2 className="text-2xl font-bold mb-2">Kursus yang Sedang Diikuti</h2>
+                  <p className="text-muted-foreground">Lanjutkan progres belajar Anda.</p>
+               </div>
+               
+               {/* Tampilan Empty State yang Cantik */}
+               <div className="w-full py-12 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-center gap-4 bg-gray-50/50">
+                  <div className="bg-white p-4 rounded-full shadow-sm">
+                    <BookOpen className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Belum ada kursus yang diikuti</h3>
+                    <p className="text-sm text-gray-500 max-w-sm mx-auto mt-1">
+                      Anda belum mendaftar di kursus manapun. Yuk, mulai perjalanan belajar Anda sekarang!
+                    </p>
+                  </div>
+               </div>
             </section>
-          ))}
+           )
+        )}
 
-        {/* --- 3. PASANG ID UNTUK COURSE --- */}
-        {/* Tambahkan div wrapper dengan ID 'course' dan class scroll-mt biar gak ketutup navbar */}
-        <div>
-          <ElearningList
-            title="Temukan Keahlian Baru"
-            subtitle="Perluas wawasan Anda dengan mempelajari topik-topik relevan."
-            courses={currentCourses}
-          />
-          <PaginationControl
-            page={currentPage}
-            total={totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </div>
+        {/* --- SECTION 2: TEMUKAN KEAHLIAN BARU --- */}
+        <ElearningList
+          title="Temukan Keahlian Baru"
+          subtitle="Perluas wawasan Anda dengan mempelajari topik-topik relevan."
+          courses={currentCourses}
+        />
+        <PaginationControl 
+          page={currentPage} 
+          total={totalPages} 
+          onPageChange={setCurrentPage} 
+        />
 
         {/* --- SECTION 3: TERPOPULER --- */}
-        <div id="course" className="scroll-mt-10">
-          <ElearningCourseList
-            title="Kursus Terpopuler"
-            subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain."
-            courses={currentPopularCourses}
-          />
-          <PaginationControl
-            page={popularPage}
-            total={totalPopularPages}
-            onPageChange={setPopularPage}
-          />
-        </div>
+        <ElearningCourseList
+          title="Kursus Terpopuler"
+          subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain."
+          courses={currentPopularCourses}
+        />
+        <PaginationControl 
+          page={popularPage} 
+          total={totalPopularPages} 
+          onPageChange={setPopularPage} 
+        />
 
+        {/* --- SECTION 4: INFO BOOTCAMP --- */}
         <InfoBootcamp />
 
-        {/* --- 4. PASANG ID UNTUK BOOTCAMP --- */}
-        <div id="bootcamp" className="scroll-mt-10">
-          <ElearningBootcampList
-            title="Kursus Bootcamp"
-            subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
-            courses={currentBootcampCourses}
-          />
-          <PaginationControl
-            page={bootcampPage}
-            total={totalBootcampPages}
-            onPageChange={setBootcampPage}
-          />
-        </div>
+        {/* --- SECTION 5: BOOTCAMP LIST --- */}
+        <ElearningBootcampList
+          title="Kursus Bootcamp"
+          subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
+          courses={currentBootcampCourses}
+        />
+        <PaginationControl 
+          page={bootcampPage} 
+          total={totalBootcampPages} 
+          onPageChange={setBootcampPage} 
+        />
+
       </main>
     </div>
   );
