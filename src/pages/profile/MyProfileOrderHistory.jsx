@@ -40,9 +40,7 @@ export const MyProfileOrderHistory = () => {
     if (!searchQuery) return orders;
 
     const query = searchQuery.toLowerCase();
-    return orders.filter((order) =>
-      order.title?.toLowerCase().includes(query)
-    );
+    return orders.filter((order) => order.title?.toLowerCase().includes(query));
   }, [orders, searchQuery]);
 
   if (loading) {
@@ -61,16 +59,16 @@ export const MyProfileOrderHistory = () => {
   return (
     <div className="space-y-6">
       {/* Header & Search */}
-      <div className="w-full flex flex-col items-center border-b-2 border-b-primary p-2">
-        <h1 className="text-xl font-semibold mb-3">Order History</h1>
+      <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
+        <h1 className="text-xl">My Order History</h1>
       </div>
       <Input
-          type="text"
-          placeholder="Cari Order History mu..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full max-w-md p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-        />
+        type="text"
+        placeholder="Cari Order History mu..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+      />
 
       {/* Order List */}
       {filteredOrders.length > 0 ? (
