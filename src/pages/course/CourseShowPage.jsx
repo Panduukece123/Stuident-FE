@@ -17,23 +17,15 @@ import {
 import * as React from "react";
 import { Tabs } from "@radix-ui/react-tabs";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-  SelectItem,
-} from "@/components/ui/select";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import courseService from "@/services/CourseService";
-import { Item, ItemContent } from "@/components/ui/item";
 import LevelBadge from "@/components/LevelBadge";
-import ReviewItem from "@/components/ReviewItem";
 import ShareActionButtons from "@/components/shared/ShareActionButtons";
-import { formatPrice, formatTimestamp } from "@/services/Format";
+import { formatPrice } from "@/services/Format";
 import ProfileService from "@/services/ProfileService";
+import { TabCurriculum } from "@/components/section/CourseShow/TabCurriculum";
+import { TabOverview } from "@/components/section/CourseShow/TabOverview";
+import { TabReview } from "@/components/section/CourseShow/TabReview";
 
 export default function CourseShowPage() {
   const { id } = useParams();
@@ -42,35 +34,32 @@ export default function CourseShowPage() {
   const [profileData, setProfileData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      // Fetch Course Data
+  const fetchData = React.useCallback( async () => {
+    try {
+      const courseData = await courseService.showCourse(id);
+      setCourse(courseData.data || courseData);
+
       try {
-        const courseData = await courseService.showCourse(id);
-        setCourse(courseData.data || courseData);
-
-        // Fetch User Data
-        try {
-          const profileRes = await ProfileService.getProfile();
-          setProfileData(profileRes.data || profileRes);
-        } catch (profileError) {
-          console.warn("User belum login atau profil gagal dimuat");
-          console.error("Terdapat error profile:", profileError);
-          setProfileData(null); // Null juga = tidak login
-        }
-
-      } catch (error) {
-        console.error("Terdapat error course:", error);
-      } finally {
-        setIsLoading(false);
+        const profileRes = await ProfileService.getProfile();
+        setProfileData(profileRes.data || profileRes);
+      } catch (profileError) {
+        console.error("Terdapat error profile:", profileError);
+        setProfileData(null);
       }
-    };
-    fetchData();
+    } catch (error) {
+      console.error("Terdapat error course:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [id]);
 
-  const user = profileData?.user || profileData;
+  // Panggil saat pertama kali load
+  React.useEffect(() => {
+    fetchData();
+  }, [id, fetchData]);
 
-  console.log(user?.name);
+  const user = profileData?.user || profileData;
+  // console.log(user?.name);
 
   const calculateRating = () => {
     if (!course.reviews || course.reviews.length === 0)
@@ -183,201 +172,23 @@ export default function CourseShowPage() {
         {/* Detail Page */}
         <Tabs defaultValue="overview">
           {/* Tabs Selector */}
-          <TabsList className={"w-full rounded-b-none border"}>
+          <TabsList className={"w-full md:h-12 rounded-b-none border"}>
             <TabsTrigger value="overview">Kilasan</TabsTrigger>
             <TabsTrigger value="curriculum">Kurikulum</TabsTrigger>
             <TabsTrigger value="reviews">Ulasan</TabsTrigger>
           </TabsList>
 
-          {/* Tab Content: Overview-Description */}
+          {/* Tab Contents */}
           <TabsContent value="overview">
-            <Card
-              className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}
-            >
-              {course.summary?.video_url ? (
-                <section>
-                  <h1 className="text-xl md:text-2xl font-semibold w-full pb-4">
-                    Video Kilasan
-                  </h1>
-                  <iframe
-                    src={course.summary.video_url}
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
-                    style={{ width: "100%", aspectRatio: "16/9" }}
-                  ></iframe>
-                  <p className="text-sm text-muted-foreground">
-                    Durasi tonton: {course.summary.video_duration}
-                  </p>
-                </section>
-              ) : null}
-
-              <section>
-                <h1 className="text-xl md:text-2xl font-semibold w-full pb-4">
-                  Deskripsi
-                </h1>
-                <p>{course.summary?.description}</p>
-              </section>
-
-              <section>
-                <p className="font-light text-muted-foreground">
-                  Dibuat pada: {formatTimestamp(course.created_at)}
-                </p>
-                <p className="font-light text-muted-foreground">
-                  Diupdate pada: {formatTimestamp(course.updated_at)}
-                </p>
-              </section>
-            </Card>
+            <TabOverview course={course} />
           </TabsContent>
 
-          {/* Tab Content: Curriculum */}
           <TabsContent value="curriculum">
-            <Card
-              className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}
-            >
-              <h1 className="text-xl md:text-2xl font-semibold w-full">
-                Kurikulum
-              </h1>
-
-              <div className="space-y-4">
-                {(() => {
-                  {
-                    /* Get all unique sections */
-                  }
-                  const sections = [
-                    ...new Set(course.curriculums?.map((c) => c.section) || []),
-                  ];
-
-                  return sections.map((section, index) => (
-                    <div key={index}>
-                      {/* Section title */}
-                      <h2 className="text-lg font-semibold mb-2">{section}</h2>
-
-                      {/* Curriculums for one section */}
-                      <div className="space-y-2 md:ml-4">
-                        {course.curriculums
-                          ?.filter(
-                            (curriculum) => curriculum.section === section
-                          )
-                          ?.map((curriculum) => (
-                            <Item
-                              key={curriculum.id}
-                              variant="outline"
-                              size="sm"
-                              asChild
-                              className={
-                                "transition-transform hover:scale-[1.01]"
-                              }
-                            >
-                              <a>
-                                <ItemContent>
-                                  <h3 className="font-medium">
-                                    {curriculum.title}
-                                  </h3>
-                                  <p className="text-sm font-light mt-1">
-                                    {curriculum.description}
-                                  </p>
-                                </ItemContent>
-                              </a>
-                            </Item>
-                          ))}
-                      </div>
-                    </div>
-                  ));
-                })()}
-              </div>
-            </Card>
+            <TabCurriculum course={course} />
           </TabsContent>
 
-          {/* Tab Content: Review */}
           <TabsContent value="reviews">
-            <Card
-              className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}
-            >
-              {user ? (
-                <section className="flex flex-col gap-2">
-                  <h1 className="text-xl md:text-2xl font-semibold w-full">
-                    Buatkan Ulasan
-                  </h1>
-                  {/* TO-DO: Bentuk pilih rating sebagai icon slider */}
-                  <div className="inline-flex gap-2 items-center">
-                    <p>Silahkan pilih bintang: </p>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih bintang" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">
-                          <Star size={24} fill="currentColor" />
-                        </SelectItem>
-                        <SelectItem value="2">
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                        </SelectItem>
-                        <SelectItem value="3">
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                        </SelectItem>
-                        <SelectItem value="4">
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                        </SelectItem>
-                        <SelectItem value="5">
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                          <Star size={24} fill="currentColor" />
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Textarea placeholder="Tulis detail ulasan kamu (saran, kritik, dan lainnya) di sini." />
-                  <p className="text-muted-foreground text-sm">
-                    Pastikan ulasan tidak melanggar kebijakan dan ketentuan
-                    kami.
-                  </p>
-                  <Button>Kirim ulasan</Button>
-                </section>
-              ) : (
-                <section className="flex flex-col gap-2">
-                  <h1 className="text-xl md:text-2xl font-semibold w-full">
-                    Buatkan Ulasan
-                  </h1>
-                  <Button variant={"link"} asChild>
-                    <Link to="/login">Anda belum login. Login untuk memberikan ulasan!</Link>
-                  </Button>
-                </section>
-              )}
-
-              <section>
-                <h1 className="text-xl md:text-2xl font-semibold w-full">
-                  Ulasan
-                </h1>
-                <div className="space-y-4 py-4">
-                  {course.reviews?.length > 0 ? (
-                    course.reviews.map((review) => (
-                      <ReviewItem
-                        userName={review.user.name}
-                        userProfilePic={review.user.profile_photo}
-                        key={review.id}
-                        comment={review.comment}
-                        rating={review.rating}
-                        editable={
-                          user?.name === review.user.name ? true : false
-                        }
-                      />
-                    ))
-                  ) : (
-                    <p className="w-full text-muted-foreground">
-                      Tidak ada ulasan...
-                    </p>
-                  )}
-                </div>
-              </section>
-            </Card>
+            <TabReview course={course} user={user} onReviewCreated={fetchData} />
           </TabsContent>
         </Tabs>
       </div>
