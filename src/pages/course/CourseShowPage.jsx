@@ -11,45 +11,55 @@ import {
 } from "@/components/ui/breadcrumb";
 import {
   ChevronLeft,
-  Edit,
-  Link,
-  MessageSquareWarning,
-  Share,
-  Smile,
   Star,
   User,
-  X,
 } from "lucide-react";
 import * as React from "react";
 import { Tabs } from "@radix-ui/react-tabs";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-  SelectItem,
-} from "@/components/ui/select";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useParams } from "react-router";
 import courseService from "@/services/CourseService";
-import { Item, ItemContent } from "@/components/ui/item";
 import LevelBadge from "@/components/LevelBadge";
-import ReviewItem from "@/components/ReviewItem";
 import ShareActionButtons from "@/components/shared/ShareActionButtons";
+import { formatPrice } from "@/services/Format";
+import ProfileService from "@/services/ProfileService";
+import { TabCurriculum } from "@/components/section/CourseShow/TabCurriculum";
+import { TabOverview } from "@/components/section/CourseShow/TabOverview";
+import { TabReview } from "@/components/section/CourseShow/TabReview";
 
 export default function CourseShowPage() {
   const { id } = useParams();
-  const [course, setCourse] = React.useState({});
 
-  React.useEffect(() => {
-    const fetchData = async () => {
+  const [course, setCourse] = React.useState({});
+  const [profileData, setProfileData] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  const fetchData = React.useCallback( async () => {
+    try {
       const courseData = await courseService.showCourse(id);
-      setCourse(courseData.data);
-    };
-    fetchData();
+      setCourse(courseData.data || courseData);
+
+      try {
+        const profileRes = await ProfileService.getProfile();
+        setProfileData(profileRes.data || profileRes);
+      } catch (profileError) {
+        console.error("Terdapat error profile:", profileError);
+        setProfileData(null);
+      }
+    } catch (error) {
+      console.error("Terdapat error course:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [id]);
+
+  // Panggil saat pertama kali load
+  React.useEffect(() => {
+    fetchData();
+  }, [id, fetchData]);
+
+  const user = profileData?.user || profileData;
+  // console.log(user?.name);
 
   const calculateRating = () => {
     if (!course.reviews || course.reviews.length === 0)
@@ -68,12 +78,20 @@ export default function CourseShowPage() {
   };
   const { ratingAverage, ratingTotal } = calculateRating();
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-4 py-8 md:p-6 flex flex-col md:flex-row gap-4 md:gap-8">
       <div className="basis-full">
         {/* Legend Page */}
-        <div className="w-full flex flex-row gap-4 items-center">
-          <Button className={"rounded-full"}>
+        <div className="w-full flex flex-row gap-4 items-center border-b">
+          <Button className={"rounded-full"} variant={"primary"}>
             <ChevronLeft />
             Back
           </Button>
@@ -100,11 +118,23 @@ export default function CourseShowPage() {
           <h1 className="text-2xl md:text-3xl font-semibold w-full">
             {course.title}
           </h1>
+
+          {course.image && (
+            <img
+              src={course.image}
+              alt="Course Thumbnail"
+              className="w-full h-48 md:h-64 object-cover rounded-lg my-4"
+            />
+          )}
+
           <p className="text-base md:text-lg font-light text-muted-foreground w-full">
             {course.description}
           </p>
           <div className="grid grid-cols-2 mt-4 gap-2">
-            <div className="inline-flex gap-1" id="course_summary_badge">
+            <div
+              className="inline-flex flex-wrap gap-1"
+              id="course_summary_badge"
+            >
               <LevelBadge level={course.level} />
               <Badge variant="default">{course.category}</Badge>
               <Badge variant="default">{course.type}</Badge>
@@ -116,7 +146,7 @@ export default function CourseShowPage() {
             >
               <User />
               <p id="course_summary_participant-num">
-                {course.enrollments?.length || 0}
+                {course.enrollments?.length || "Belum ada"}
               </p>
               <p className="text-muted-foreground font-light">pendaftar</p>
             </div>
@@ -142,152 +172,49 @@ export default function CourseShowPage() {
         {/* Detail Page */}
         <Tabs defaultValue="overview">
           {/* Tabs Selector */}
-          <TabsList className={"w-full rounded-b-none border"}>
+          <TabsList className={"w-full md:h-12 rounded-b-none border"}>
             <TabsTrigger value="overview">Kilasan</TabsTrigger>
             <TabsTrigger value="curriculum">Kurikulum</TabsTrigger>
             <TabsTrigger value="reviews">Ulasan</TabsTrigger>
           </TabsList>
 
-          {/* Tab Content: Overview-Description */}
+          {/* Tab Contents */}
           <TabsContent value="overview">
-            <Card
-              className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}
-            >
-              <h1 className="text-xl md:text-2xl font-semibold w-full">
-                Video Kilas
-              </h1>
-              <p>Lorem Ipsum</p>
-              <h1 className="text-xl md:text-2xl font-semibold w-full">
-                Deskripsi
-              </h1>
-              <p>{course.description}</p>
-            </Card>
+            <TabOverview course={course} />
           </TabsContent>
 
-          {/* Tab Content: Curriculum */}
           <TabsContent value="curriculum">
-            <Card
-              className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}
-            >
-              <h1 className="text-xl md:text-2xl font-semibold w-full">
-                Kurikulum
-              </h1>
-
-              <div className="space-y-4">
-                {(() => {
-                  const sections = [
-                    ...new Set(course.curriculums?.map((c) => c.section) || []),
-                  ];
-                  {
-                    /* Get all unique sections */
-                  }
-
-                  return sections.map((section, index) => (
-                    <div key={index}>
-                      {/* Section title */}
-                      <h2 className="text-lg font-semibold mb-2">{section}</h2>
-
-                      {/* Curriculums for one section */}
-                      <div className="space-y-2 md:ml-4">
-                        {course.curriculums
-                          ?.filter(
-                            (curriculum) => curriculum.section === section
-                          )
-                          ?.map((curriculum) => (
-                            <Item
-                              key={curriculum.id}
-                              variant="outline"
-                              size="sm"
-                            >
-                              <ItemContent>
-                                <h3 className="font-medium">
-                                  {curriculum.title}
-                                </h3>
-                                <p className="text-sm font-light mt-1">
-                                  {curriculum.description}
-                                </p>
-                              </ItemContent>
-                            </Item>
-                          ))}
-                      </div>
-                    </div>
-                  ));
-                })()}
-              </div>
-            </Card>
+            <TabCurriculum course={course} />
           </TabsContent>
 
-          {/* Tab Content: Review */}
           <TabsContent value="reviews">
-            <Card
-              className={"p-4 md:p-8 rounded-t-none border-t-0 shadow-none"}
-            >
-              <section className="flex flex-col gap-2">
-                <h1 className="text-xl md:text-2xl font-semibold w-full">
-                  Buatkan Ulasan
-                </h1>
-                {/* TO-DO: Bentuk pilih rating sebagai icon slider */}
-                <div className="inline-flex gap-2 items-center">
-                  <p>Silahkan pilih bintang: </p>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih bintang" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Textarea placeholder="Tulis detail ulasan kamu (saran, kritik, dan lainnya) di sini." />
-                <p className="text-muted-foreground text-sm">
-                  Pastikan ulasan tidak melanggar kebijakan dan ketentuan kami.
-                </p>
-                <Button>Kirim ulasan</Button>
-              </section>
-              <section>
-                <h1 className="text-xl md:text-2xl font-semibold w-full">
-                  Ulasan
-                </h1>
-                <div className="space-y-4 py-4">
-                  {course.reviews?.map((review) => (
-                    <ReviewItem
-                      key={review.id}
-                      comment={review.comment}
-                      rating={review.rating}
-                    />
-                  ))}
-                </div>
-              </section>
-            </Card>
+            <TabReview course={course} user={user} onReviewCreated={fetchData} />
           </TabsContent>
         </Tabs>
       </div>
 
       {/* Side Page */}
-      <Card className={"basis-lg h-fit"}>
+      <Card className={"md:basis-lg h-fit md:sticky md:top-23"}>
         <CardContent>
           {/* Payment Section */}
           <section className="mb-4 pb-4 border-b">
             <div>
               <p className="text-muted-foreground font-light">Harga:</p>
               <p className="text-2xl" id="price">
-                Rp {course.price}
+                {course?.price <= 0 ? "Gratis" : formatPrice(course.price)}
               </p>
             </div>
             <div className="w-full flex flex-col gap-2 pt-2 pb-2">
-              <Button>Beli Sekarang</Button>
-              <Button>Tambahkan ke Keranjang</Button>
+              <Button variant={"default"}>Beli Sekarang</Button>
+              <Button variant={"outline"}>Tambahkan ke Keranjang</Button>
+              <Button variant={"outline"}>Tambahkan ke Favorit</Button>
             </div>
           </section>
 
           {/* Share Section */}
           <section>
             <p className="text-muted-foreground font-light mb-3">
-              Bagikan kursus ini : 
+              Bagikan kursus ini:
             </p>
             <ShareActionButtons
               title={course?.name}

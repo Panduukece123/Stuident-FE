@@ -167,6 +167,8 @@ export const ElearningPage = () => {
            )
         )}
 
+        {/* --- 3. PASANG ID UNTUK COURSE --- */}
+        {/* Tambahkan div wrapper dengan ID 'course' dan class scroll-mt biar gak ketutup navbar */}
         <div id="course" className="scroll-mt-10">
           <ElearningList
             title="Temukan Keahlian Baru"
@@ -185,6 +187,7 @@ export const ElearningPage = () => {
 
         <InfoBootcamp />
 
+        {/* --- 4. PASANG ID UNTUK BOOTCAMP --- */}
         <div id="bootcamp" className="scroll-mt-10">
           <ElearningBootcampList
             title="Kursus Bootcamp"

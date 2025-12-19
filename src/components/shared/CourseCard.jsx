@@ -9,6 +9,7 @@ import {
 } from "../ui/card";
 import { Button } from "../ui/button";
 import { Star } from "lucide-react";
+import LevelBadge from "../LevelBadge";
 
 export const CourseCard = ({
   title,
@@ -32,9 +33,7 @@ export const CourseCard = ({
       <CardContent className="flex-1 p-4 flex flex-col gap-2">
         <CardTitle className="text-lg line-clamp-1">{title}</CardTitle>
         <div className="flex items-center gap-2 text-xs">
-          <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded font-medium">
-            {level}
-          </span>
+          <LevelBadge level={level} /> {/* Ubah menjadi komponen LevelBadge dinamis (Zidan) */}
           <div className="flex items-center text-yellow-500 gap-0.5">
             <Star className="w-3 h-3 fill-current" />
             <span className="font-medium text-foreground">{rating}</span>
