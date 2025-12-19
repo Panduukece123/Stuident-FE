@@ -13,6 +13,8 @@ import { ExperienceDialog } from "@/components/ExperienceDialog";
 import { AchievementDialog } from "@/components/AchievementDialog";
 import { EditSpecializationDialog } from "@/components/EditSpecializationDialog";
 
+import { MyProfileSkeleton } from "@/components/ProfileSkeleton";
+
 export const MyProfile = () => {
   const queryClient = useQueryClient();
   const token = localStorage.getItem("token");
@@ -69,11 +71,7 @@ export const MyProfile = () => {
 
   // --- 5. LOADING STATE ---
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <MyProfileSkeleton />
   }
 
   if (isError) {

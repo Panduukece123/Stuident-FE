@@ -6,6 +6,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // <--- 1. Import
 import ProfileService from "@/services/ProfileService";
 import authService from "@/services/AuthService";
+import { ProfileLayoutSkeleton } from "@/components/ProfileSkeleton";
 
 export const ProfileLayout = () => {
   const queryClient = useQueryClient(); // Init Client
@@ -115,11 +116,7 @@ export const ProfileLayout = () => {
 
   // --- UI ---
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <ProfileLayoutSkeleton />
   }
 
   const user = profileData?.user || profileData;
