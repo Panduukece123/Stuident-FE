@@ -244,6 +244,109 @@ const ProfileService = {
     return [];
   },
 
+  uploadCv: async (file) => {
+    // 1. AMBIL TOKEN DULU DARI LOCALSTORAGE
+    const token = localStorage.getItem("token"); 
+
+    const formData = new FormData();
+    formData.append("cv", file);
+
+    const response = await api.post("/auth/profile/cv", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        // 2. Pastikan token dipakai di sini
+        "Authorization": `Bearer ${token}`, 
+      },
+    });
+    return response.data;
+  },
+
+  getPortfolio: async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await api.get("/auth/portfolio", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  uploadAchievementCertificate: async (id, file) => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append('certificate', file); // Pastikan key-nya sesuai request Laravel ('certificate' atau 'file')
+    
+    // Endpoint: /achievements/{id}/certificate
+    const response = await api.post(`/achievements/${id}/certificate`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  },
+
+  deleteAchievementCertificate: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/achievements/${id}/certificate`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  // --- EXPERIENCE CERTIFICATE ---
+  uploadExperienceCertificate: async (id, file) => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append('certificate', file); // Sesuaikan key backend ('certificate' atau 'file')
+    
+    const response = await api.post(`/experiences/${id}/certificate`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  },
+
+  deleteExperienceCertificate: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/experiences/${id}/certificate`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  getPortfolio: async () => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/auth/portfolio", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  getRecommendations: async () => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/auth/recommendations", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+  
 };
 
 export default ProfileService;

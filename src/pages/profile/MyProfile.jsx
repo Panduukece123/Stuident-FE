@@ -1,8 +1,18 @@
-import React, { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query"; // <--- 1. Import TanStack
+import React, { useState, useRef } from "react"; // Tambah useRef
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // Tambah useMutation
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, SquareArrowOutUpRight, Trash } from "lucide-react";
+import {
+  Edit,
+  SquareArrowOutUpRight,
+  Trash,
+  Upload,
+  Loader2,
+  FileText,
+  Briefcase,
+  Award,
+  ArrowRight,
+} from "lucide-react"; // Tambah Icon
 import ProfileService from "@/services/ProfileService";
 
 // IMPORT SEMUA DIALOG
@@ -12,16 +22,20 @@ import { EditPersonalDialog } from "@/components/EditPersonalDialog";
 import { ExperienceDialog } from "@/components/ExperienceDialog";
 import { AchievementDialog } from "@/components/AchievementDialog";
 import { EditSpecializationDialog } from "@/components/EditSpecializationDialog";
+import { Link } from "react-router";
 
 export const MyProfile = () => {
   const queryClient = useQueryClient();
   const token = localStorage.getItem("token");
 
-  // --- STATE UNTUK DIALOG (Tetap pakai useState) ---
+  // Ref untuk input file CV
+  const cvInputRef = useRef(null);
+
+  // --- STATE UNTUK DIALOG ---
   const [openBio, setOpenBio] = useState(false);
   const [openEdu, setOpenEdu] = useState(false);
   const [openPersonal, setOpenPersonal] = useState(false);
-  
+
   const [openExp, setOpenExp] = useState(false);
   const [selectedExp, setSelectedExp] = useState(null);
 
@@ -30,44 +44,94 @@ export const MyProfile = () => {
 
   const [openSpec, setOpenSpec] = useState(false);
 
-  // --- 3. FETCH DATA DENGAN TANSTACK QUERY ---
-  const { 
-    data: profileData, 
-    isLoading, 
-    isError 
+  // --- FETCH DATA ---
+  const {
+    data: profileData,
+    isLoading,
+    isError,
   } = useQuery({
-    queryKey: ["profile", token], // Key unik
+    queryKey: ["profile", token],
     queryFn: async () => {
       const result = await ProfileService.getProfile();
-      return result.data || result; // Handle wrapper data
+      return result.data || result;
     },
-    // Data dianggap "fresh" selama 5 menit (optional)
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
   });
 
-  // --- 4. FUNGSI REFRESH (Dipanggil setelah Edit/Simpan) ---
+  // --- MUTATION UPLOAD CV ---
+  const uploadCvMutation = useMutation({
+    mutationFn: (file) => ProfileService.uploadCv(file),
+    onSuccess: () => {
+      // Refresh data profil setelah sukses upload
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      alert("CV berhasil diunggah!");
+    },
+    onError: (error) => {
+      console.error(error);
+      alert("Gagal mengunggah CV. Pastikan format PDF dan ukuran sesuai.");
+    },
+  });
+
+  // --- HANDLER UPLOAD CV ---
+  const handleCvClick = () => {
+    cvInputRef.current.click();
+  };
+
+  const handleCvChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validasi sederhana (opsional)
+    if (file.type !== "application/pdf") {
+      alert("Harap unggah file PDF.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      // 2MB
+      alert("Ukuran file maksimal 2MB.");
+      return;
+    }
+
+    uploadCvMutation.mutate(file);
+    e.target.value = null; // Reset input
+  };
+
+  // --- HELPER LAINNYA ---
   const handleRefresh = () => {
-    // Memberitahu React Query bahwa data 'profile' sudah basi, 
-    // jadi tolong ambil ulang di background.
     queryClient.invalidateQueries({ queryKey: ["profile"] });
   };
 
-  // --- HANDLERS (Sama seperti sebelumnya) ---
-  const handleAddExp = () => { setSelectedExp(null); setOpenExp(true); };
-  const handleEditExp = (exp) => { setSelectedExp(exp); setOpenExp(true); };
-  
-  const handleAddAch = () => { setSelectedAch(null); setOpenAch(true); };
-  const handleEditAch = (ach) => { setSelectedAch(ach); setOpenAch(true); };
+  const handleAddExp = () => {
+    setSelectedExp(null);
+    setOpenExp(true);
+  };
+  const handleEditExp = (exp) => {
+    setSelectedExp(exp);
+    setOpenExp(true);
+  };
+  const handleAddAch = () => {
+    setSelectedAch(null);
+    setOpenAch(true);
+  };
+  const handleEditAch = (ach) => {
+    setSelectedAch(ach);
+    setOpenAch(true);
+  };
 
-  // --- HELPER DATE ---
   const formatDate = (dateString) => {
-    if (!dateString) return "Present";
+    if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("id-ID", {
-      day: "numeric", month: "long", year: "numeric",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     });
   };
 
-  // --- 5. LOADING STATE ---
+  const getFileName = (url) => {
+    if (!url) return "unknown_file.pdf";
+    return url.split("/").pop();
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -77,45 +141,61 @@ export const MyProfile = () => {
   }
 
   if (isError) {
-    return <div className="text-center p-10 text-red-500">Gagal memuat profil.</div>;
+    return (
+      <div className="text-center p-10 text-red-500">Gagal memuat profil.</div>
+    );
   }
 
-  // --- 6. DATA PROCESSING (Jalan setelah loading selesai) ---
   const { user, achievements, experiences } = profileData || {};
+  const isCvUploading = uploadCvMutation.isPending;
 
-  // Logic Specialization (Robust)
+  // Logic Specialization
   const rawSpec = user?.specialization;
   let specializationArray = [];
-
   if (Array.isArray(rawSpec)) {
     specializationArray = rawSpec;
-  } else if (typeof rawSpec === 'string') {
-    specializationArray = rawSpec.split(',').map(item => item.trim());
+  } else if (typeof rawSpec === "string") {
+    specializationArray = rawSpec.split(",").map((item) => item.trim());
   } else {
     specializationArray = [];
   }
 
+  // --- HELPER UNTUK URL SERTIFIKAT ---
+  const getCertificateUrl = (path) => {
+    if (!path) return "#";
+
+    // 1. Kalau link eksternal (https://google.com...), biarkan
+    if (path.startsWith("http")) {
+      return path;
+    }
+    const cleanPath = path.startsWith("/") ? path.substring(1) : path;
+
+    return `http://localhost:8000/storage/${cleanPath}`;
+  };
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 pb-10">
       <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
         <h1 className="text-xl">My Profile</h1>
       </div>
 
       <div className="w-full flex flex-row gap-6">
         <div className="w-3/5 flex flex-col gap-4">
-          
           {/* --- BIOGRAPHY --- */}
           <div className="flex flex-row justify-between">
             <h2 className="text-2xl">Biography</h2>
-            <Button variant="outline" className={"rounded-full"} onClick={() => setOpenBio(true)}>
+            <Button
+              variant="outline"
+              className={"rounded-full"}
+              onClick={() => setOpenBio(true)}
+            >
               <Edit /> Edit
             </Button>
-            {/* Perhatikan props onSuccess diganti jadi handleRefresh */}
             <EditBioDialog
               open={openBio}
               onOpenChange={setOpenBio}
               initialData={user?.bio}
-              onSuccess={handleRefresh} 
+              onSuccess={handleRefresh}
             />
           </div>
           <div className="bg-white p-4 border border-neutral-300 rounded-xl">
@@ -127,7 +207,11 @@ export const MyProfile = () => {
           {/* --- EDUCATION --- */}
           <div className="flex flex-row justify-between">
             <h2 className="text-2xl">Education</h2>
-            <Button variant="outline" className={"rounded-full"} onClick={() => setOpenEdu(true)}>
+            <Button
+              variant="outline"
+              className={"rounded-full"}
+              onClick={() => setOpenEdu(true)}
+            >
               <Edit /> Edit
             </Button>
             <EditEducationDialog
@@ -148,7 +232,9 @@ export const MyProfile = () => {
               <div className="flex items-center">
                 <span className="w-24">Degree</span>
                 <span className="mr-2">:</span>
-                <span className="font-light">{user?.education_level || "-"}</span>
+                <span className="font-light">
+                  {user?.education_level || "-"}
+                </span>
               </div>
             </div>
           </div>
@@ -156,7 +242,11 @@ export const MyProfile = () => {
           {/* --- EXPERIENCE --- */}
           <div className="flex flex-row justify-between">
             <h2 className="text-2xl">Experience</h2>
-            <Button variant="outline" className="rounded-full" onClick={handleAddExp}>
+            <Button
+              variant="outline"
+              className="rounded-full"
+              onClick={handleAddExp}
+            >
               <Edit className="mr-2 h-4 w-4" /> Add New
             </Button>
             <ExperienceDialog
@@ -166,40 +256,69 @@ export const MyProfile = () => {
               onSuccess={handleRefresh}
             />
           </div>
-          
-          {/* List Experience */}
           {experiences && experiences.length > 0 ? (
             experiences.map((exp) => (
-              <div key={exp.id} className="bg-white p-4 border border-neutral-300 rounded-xl flex flex-col gap-2 mb-2">
-                <div className="flex flex-row justify-between items-start">
-                  <h3 className="text-xl">{exp.title}</h3>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-500" onClick={() => handleEditExp(exp)}>
-                    <Edit className="h-4 w-4" />
+              <div
+                key={exp.id}
+                className="bg-white p-4 border border-neutral-300 rounded-xl flex flex-col gap-2 mb-2"
+              >
+                <div>
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-xl font-medium">{exp.title}</h3>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditExp(exp)}
+                      className="h-8 w-8"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                    <Briefcase className="w-3 h-3" /> {exp.company} •{" "}
+                    {exp.level}
+                  </div>
+                </div>
+                <p className="text-sm text-neutral-600">{exp.description}</p>
+                <div className="flex flex-col gap-1 mt-2 text-sm">
+                  <div className="flex items-center capitalize">
+                    <span className="w-20 font-medium">Type</span>: {exp.type}
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-20 font-medium">Date</span>:{" "}
+                    {formatDate(exp.start_date)} - {formatDate(exp.end_date)}
+                  </div>
+                </div>
+                {exp.certificate_url && (
+                  <Button
+                    variant="link"
+                    className="w-fit px-0 ml-auto"
+                    onClick={() =>
+                      window.open(
+                        getCertificateUrl(exp.certificate_url),
+                        "_blank"
+                      )
+                    }
+                  >
+                    See Certificate
                   </Button>
-                </div>
-                <p className="font-light text-sm text-neutral-600">{exp.description}</p>
-                <div className="flex flex-col gap-1 mt-2">
-                  <div className="flex items-center">
-                    <span className="w-24 font-medium">Type</span><span className="mr-2">:</span><span className="font-light capitalize">{exp.type}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="w-24 font-medium">Date</span><span className="mr-2">:</span>
-                    <span className="font-light">{formatDate(exp.start_date)} - {formatDate(exp.end_date)}</span>
-                  </div>
-                  {exp.certificate_url && (
-                    <Button variant="link" className="w-fit px-0 ml-auto" onClick={() => window.open(exp.certificate_url, '_blank')}>See Certificate</Button>
-                  )}
-                </div>
+                )}
               </div>
             ))
           ) : (
-            <div className="bg-white p-4 border border-neutral-300 rounded-xl text-center text-neutral-500 italic">No experience added yet.</div>
+            <div className="bg-white p-4 border border-neutral-300 rounded-xl text-center text-neutral-500 italic">
+              No experience added yet.
+            </div>
           )}
 
           {/* --- ACHIEVEMENT --- */}
           <div className="flex flex-row justify-between">
             <h2 className="text-2xl">Achievement</h2>
-            <Button variant="outline" className={"rounded-full"} onClick={handleAddAch}>
+            <Button
+              variant="outline"
+              className={"rounded-full"}
+              onClick={handleAddAch}
+            >
               <Edit className="mr-2 h-4 w-4" /> Add New
             </Button>
             <AchievementDialog
@@ -209,144 +328,238 @@ export const MyProfile = () => {
               onSuccess={handleRefresh}
             />
           </div>
-          
-          {/* List Achievement */}
           {achievements && achievements.length > 0 ? (
             achievements.map((ach) => (
-              <div key={ach.id} className="bg-white p-4 border border-neutral-300 rounded-xl flex flex-col gap-2 mb-2">
-                <div className="flex flex-row justify-between items-start">
-                    <h3 className="text-xl">{ach.title}</h3>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-500" onClick={() => handleEditAch(ach)}>
-                        <Edit className="h-4 w-4" />
+              <div
+                key={ach.id}
+                className="bg-white p-4 border border-neutral-300 rounded-xl flex flex-col gap-2 mb-2"
+              >
+                <div>
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-medium">{ach.title}</h3>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditAch(ach)}
+                      className="h-8 w-8"
+                    >
+                      <Edit className="h-4 w-4" />
                     </Button>
-                </div>
-                <p className="font-light text-sm text-neutral-600">{ach.description}</p>
-                <div className="flex flex-col gap-1 mt-2">
-                  <div className="flex items-center">
-                    <span className="w-24 font-medium">Org</span><span className="mr-2">:</span><span className="font-light">{ach.organization}</span>
                   </div>
-                  <div className="flex items-center">
-                    <span className="w-24 font-medium">Year</span><span className="mr-2">:</span><span className="font-light">{ach.year}</span>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                    <Award className="w-3 h-3" /> {ach.organization} ({ach.year}
+                    )
                   </div>
-                  {ach.certificate_url && (
-                    <Button variant="link" className="w-fit px-0 ml-auto" onClick={() => window.open(ach.certificate_url, '_blank')}>See Certificate</Button>
-                  )}
                 </div>
+                <p className="text-sm text-neutral-600">{ach.description}</p>
+                {ach.certificate_url && (
+                  <Button
+                    variant="link"
+                    className="w-fit px-0 ml-auto"
+                    onClick={() =>
+                      window.open(
+                        getCertificateUrl(ach.certificate_url),
+                        "_blank"
+                      )
+                    }
+                  >
+                    See Certificate
+                  </Button>
+                )}
               </div>
             ))
           ) : (
-            <div className="bg-white p-4 border border-neutral-300 rounded-xl text-center text-neutral-500 italic">No achievements yet.</div>
+            <div className="bg-white p-4 border border-neutral-300 rounded-xl text-center text-neutral-500 italic">
+              No achievements yet.
+            </div>
           )}
 
           {/* --- SPECIALIZATION --- */}
           <div className="flex flex-row justify-between">
             <h2 className="text-2xl">Specialization</h2>
-            <Button variant="outline" className={"rounded-full"} onClick={() => setOpenSpec(true)}>
+            <Button
+              variant="outline"
+              className={"rounded-full"}
+              onClick={() => setOpenSpec(true)}
+            >
               <Edit /> Edit
             </Button>
             <EditSpecializationDialog
               open={openSpec}
               onOpenChange={setOpenSpec}
               initialData={specializationArray}
-              onSuccess={handleRefresh} 
+              onSuccess={handleRefresh}
             />
           </div>
-
           <div className="bg-white p-4 border border-neutral-300 rounded-xl flex flex-wrap gap-2">
             {specializationArray.length > 0 ? (
               specializationArray.map((item, index) => (
-                <Badge key={index} className="bg-primary hover:bg-primary/90">{item}</Badge>
+                <Badge key={index} className="bg-primary hover:bg-primary/90">
+                  {item}
+                </Badge>
               ))
             ) : (
-              <span className="text-neutral-500 italic text-sm">Belum ada spesialisasi.</span>
+              <span className="text-neutral-500 text-center w-full italic">
+                Belum ada spesialisasi.
+              </span>
             )}
           </div>
 
-          {/* --- ATTACHMENT --- */}
+          {/* --- ATTACHMENT (CV SECTION) --- */}
           <div className="flex flex-row justify-between">
-            <h2 className="text-2xl">Attachment</h2>
+            <h2 className="text-2xl">Curriculum Vitae</h2>
           </div>
-          <div className="bg-white p-4 border border-neutral-300 rounded-xl flex flex-col gap-2">
-            <h3 className="text-xl">Curriculum Vitae</h3>
-            <div className="bg-neutral-200 p-3 border border-neutral-300 rounded-xl flex flex-row justify-between items-center ">
-              <div>
-                <span className="font-light">cv_bima_adnadnita.pdf</span>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center"><span className="w-24">Size</span><span className="mr-2">:</span><span className="font-light">2 MB</span></div>
-                  <div className="flex items-center"><span className="w-24">Type</span><span className="mr-2">:</span><span className="font-light">PDF</span></div>
-                </div>
-              </div>
-              <SquareArrowOutUpRight className="w-5 h-5" />
-            </div>
-            <div className="flex flex-row gap-2">
-              <Button variant="outline" className="w-fit px-0 rounded-full"><Edit /> Change</Button>
-              <Button variant="outline" className="w-fit px-0 border-red-500 text-red-500 rounded-full"><Trash /> Remove</Button>
-            </div>
-            
-            <h3 className="text-xl">Portfolio</h3>
-            <div className="bg-neutral-200 p-3 border border-neutral-300 rounded-xl flex flex-row justify-between items-center ">
-              <div>
-                <span className="font-light">portfolio_bima_adnadnita.pdf</span>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center"><span className="w-24">Size</span><span className="mr-2">:</span><span className="font-light">2 MB</span></div>
-                  <div className="flex items-center"><span className="w-24">Type</span><span className="mr-2">:</span><span className="font-light">PDF</span></div>
-                </div>
-              </div>
-              <SquareArrowOutUpRight className="w-5 h-5" />
-            </div>
-            <div className="flex flex-row gap-2">
-              <Button variant="outline" className="w-fit px-0 rounded-full"><Edit /> Change</Button>
-              <Button variant="outline" className="w-fit px-0 border-red-500 text-red-500 rounded-full"><Trash /> Remove</Button>
-            </div>
 
-            <h3 className="text-xl">Recommendation Letter</h3>
-            <div className="bg-neutral-200 p-3 border border-neutral-300 rounded-xl flex flex-row justify-between items-center ">
-              <div>
-                <span className="font-light">recommendation_bima_adnadnita.pdf</span>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center"><span className="w-24">Size</span><span className="mr-2">:</span><span className="font-light">2 MB</span></div>
-                  <div className="flex items-center"><span className="w-24">Type</span><span className="mr-2">:</span><span className="font-light">PDF</span></div>
+          <div className="bg-white p-4 border border-neutral-300 rounded-xl flex flex-col gap-4">
+            {/* 1. CURRICULUM VITAE */}
+            <div className="flex flex-col gap-2">
+              {/* Input File Hidden */}
+              <input
+                type="file"
+                ref={cvInputRef}
+                className="hidden"
+                accept="application/pdf"
+                onChange={handleCvChange}
+              />
+
+              {user?.cv || user?.cv_path ? ( // Cek apakah CV sudah ada di DB
+                <div className="flex flex-col gap-2">
+                  {/* File Card */}
+                  <div className="bg-neutral-50 p-3 border border-neutral-200 rounded-xl flex flex-row justify-between items-center group hover:border-primary/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-red-100 p-2 rounded-lg text-red-600">
+                        <FileText size={24} />
+                      </div>
+                      <div>
+                        <span className="font-medium text-sm block truncate max-w-[200px]">
+                          {/* Tampilkan nama file dari URL atau fallback */}
+                          {getFileName(user.cv || user.cv_path)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          PDF Document
+                        </span>
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        window.open(user.cv || user.cv_path, "_blank")
+                      }
+                      title="Lihat CV"
+                    >
+                      <SquareArrowOutUpRight className="w-5 h-5 text-neutral-500" />
+                    </Button>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-fit rounded-full border-primary/20 text-primary hover:bg-primary/5"
+                      onClick={handleCvClick}
+                      disabled={isCvUploading}
+                    >
+                      {isCvUploading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Edit className="mr-2 h-4 w-4" />
+                      )}
+                      {isCvUploading ? "Uploading..." : "Ganti File"}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <SquareArrowOutUpRight className="w-5 h-5" />
-            </div>
-            <div className="flex flex-row gap-2">
-              <Button variant="outline" className="w-fit px-0 rounded-full"><Edit /> Change</Button>
-              <Button variant="outline" className="w-fit px-0 border-red-500 text-red-500 rounded-full"><Trash /> Remove</Button>
+              ) : (
+                <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Belum ada CV yang diunggah
+                  </p>
+                  <Button onClick={handleCvClick} disabled={isCvUploading}>
+                    {isCvUploading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="mr-2 h-4 w-4" />
+                    )}
+                    {isCvUploading ? "Uploading..." : "Upload CV"}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* --- SIDEBAR --- */}
-        <div className="bg-white rounded-2xl border border-neutral-300 w-2/5 p-4 h-fit flex flex-col gap-2">
-          <div className="flex flex-row justify-between">
-            <h2 className="text-2xl">Profile</h2>
-            <Button variant="outline" className={"rounded-full"} onClick={() => setOpenPersonal(true)}>
-              <Edit /> Edit
-            </Button>
-            <EditPersonalDialog
-              open={openPersonal}
-              onOpenChange={setOpenPersonal}
-              initialData={user}
-              onSuccess={handleRefresh}
-            />
+        <div className="w-2/5 flex flex-col gap-4">
+          <div className="bg-white rounded-2xl border border-neutral-300 w-full p-4 h-fit flex flex-col gap-2">
+            {/* ... Sidebar content (Personal Info) tetap sama ... */}
+            <div className="flex flex-row justify-between">
+              <h2 className="text-2xl">Profile</h2>
+              <Button
+                variant="outline"
+                className={"rounded-full"}
+                onClick={() => setOpenPersonal(true)}
+              >
+                <Edit /> Edit
+              </Button>
+              <EditPersonalDialog
+                open={openPersonal}
+                onOpenChange={setOpenPersonal}
+                initialData={user}
+                onSuccess={handleRefresh}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center">
+                <span className="w-24 font-medium">Nama</span>
+                <span className="mr-2">:</span>
+                <span className="font-light">{user?.name || "-"}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="w-24 font-medium">Gender</span>
+                <span className="mr-2">:</span>
+                <span className="font-light capitalize">
+                  {user?.gender || "-"}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <span className="w-24 font-medium">Birth Date</span>
+                <span className="mr-2">:</span>
+                <span className="font-light">
+                  {formatDate(user?.birth_date)}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <span className="w-24 font-medium">Phone</span>
+                <span className="mr-2">:</span>
+                <span className="font-light">{user?.phone || "-"}</span>
+              </div>
+              <div className="flex items-start">
+                <span className="w-24 font-medium shrink-0">Address</span>
+                <span className="mr-2 shrink-0">:</span>
+                <span className="font-light wrap-break-word flex-1">
+                  {user?.address || "-"}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center"><span className="w-24 font-medium">Nama</span><span className="mr-2">:</span><span className="font-light">{user?.name || "-"}</span></div>
-            <div className="flex items-center"><span className="w-24 font-medium">Gender</span><span className="mr-2">:</span><span className="font-light capitalize">{user?.gender || "-"}</span></div>
-            <div className="flex items-center"><span className="w-24 font-medium">Birth Date</span><span className="mr-2">:</span><span className="font-light">{formatDate(user?.birth_date)}</span></div>
-            <div className="flex items-center"><span className="w-24 font-medium">Phone</span><span className="mr-2">:</span><span className="font-light">{user?.phone || "-"}</span></div>
-            <div className="flex items-start"><span className="w-24 font-medium shrink-0">Address</span><span className="mr-2 shrink-0">:</span><span className="font-light wrap-break-word flex-1">{user?.address || "-"}</span></div>
-          </div>
-
-          <div className="my-2 h-px w-full bg-neutral-200" />
-
-          <div className="flex flex-row justify-between">
-            <h2 className="text-2xl">Link</h2>
-            <Button variant="outline" className={"rounded-full"}><Edit /> Edit</Button>
-          </div>
-          <div className="flex flex-col gap-1 text-primary underline">
-            <a href="https://github.com/rinakartika">Github</a>
+          <Link to="portfolio">
+            <div className="flex flex-row justify-between bg-white items-center rounded-2xl p-4 border border-neutral-300">
+              <h2 className="text-2xl">My Portfolio</h2>
+              <ArrowRight className="w-5 h-5" />
+            </div>
+          </Link>
+          <div className="bg-white rounded-2xl border border-neutral-300 w-full p-4 h-fit flex flex-col gap-2">
+            <div className="flex flex-row justify-between">
+              <h2 className="text-2xl">Link</h2>
+              <Button variant="outline" className={"rounded-full"}>
+                <Edit /> Edit
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1 text-primary underline">
+              <a href="#">Github</a>
+            </div>
           </div>
         </div>
       </div>
