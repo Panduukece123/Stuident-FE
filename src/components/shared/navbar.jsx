@@ -36,6 +36,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import authService from "@/services/AuthService";
 
 export const Navbar = () => {
   const location = useLocation(); 
@@ -51,11 +52,21 @@ export const Navbar = () => {
   // State tambahan buat maksa refresh gambar di navbar
   const [imageHash, setImageHash] = useState(Date.now());
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await authService.logout(); 
+      console.log("Logout backend success");
+    } catch (error) {
+      console.warn("Logout backend failed (token might be expired):", error);
+    } finally {
+      // 3. Bersihkan Local Storage & State (Apapun hasil API-nya)
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      setUser(null);
+      
+      // 4. Redirect ke Login
+      navigate("/login");
+    }
   };
 
   // 2. LISTENER UPDATE USER (Ini Kuncinya!)
@@ -123,7 +134,7 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="mx-auto flex h-16 w-full items-center justify-between px-6 gap-4">
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-3">
@@ -148,13 +159,13 @@ export const Navbar = () => {
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
               <NavigationMenuItem>
-                <NavigationMenuLink asChild active={pathname === "/"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary focus:bg-transparent cursor-pointer">
+                <NavigationMenuLink asChild active={pathname === "/"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary focus:bg-transparent cursor-pointer focus:text-primary">
                   <Link to="/">Home</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger onClick={() => navigate("/e-learning")} className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! focus:bg-transparent data-[state=open]:text-primary ${pathname === "/e-learning" ? "text-primary" : ""}`}>
+                <NavigationMenuTrigger onClick={() => navigate("/e-learning")} className={`group cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:bg-accent/60! focus:bg-transparent data-[state=open]:text-primary focus:text-primary ${pathname === "/e-learning" ? "text-primary" : ""}`}>
                   E-Learning
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -166,13 +177,13 @@ export const Navbar = () => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuLink asChild active={pathname === "/scholarship"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer">
+                <NavigationMenuLink asChild active={pathname === "/scholarship"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer focus:text-primary focus:bg-transparent">
                   <Link to="/scholarship">Scholarship</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:text-primary data-[state=open]:bg-accent/60!">
+                <NavigationMenuTrigger className="cursor-pointer bg-transparent hover:text-primary hover:bg-accent/60 data-[state=open]:text-primary data-[state=open]:bg-accent/60! focus:text-primary focus:bg-transparent">
                   My Mentor
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -184,13 +195,13 @@ export const Navbar = () => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuLink asChild active={pathname === "/our-services"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary whitespace-nowrap cursor-pointer">
+                <NavigationMenuLink asChild active={pathname === "/our-services"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary whitespace-nowrap cursor-pointer focus:text-primary focus:bg-transparent">
                   <Link to="/our-services">Corporate Service</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuLink asChild active={pathname === "/article"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer">
+                <NavigationMenuLink asChild active={pathname === "/article"} className="rounded-md px-3 py-2 transition hover:text-primary hover:bg-accent/60 data-active:text-primary cursor-pointer focus:text-primary focus:bg-transparent">
                   <Link to="/article">Article</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>

@@ -22,7 +22,7 @@ const RecomendContent = () => {
   },
   select: (data) => data
   .sort((a, b) => new Date(b.deadline) - new Date(a.deadline))
-  .slice(0, 2),
+  .slice(0, 4),
 
   placeholderData: [],
   });
@@ -42,12 +42,15 @@ const RecomendContent = () => {
   return (
     <div className="flex flex-col gap-6 mx-4 mb-16">
       <h3 className="font-medium text-2xl">Recommended</h3>
+      <div className="grid grid-cols-2 gap-6">
+
+     
 
       {scholarships.map((scholarship) => (
         <Link
         to={`/scholarship/show/${scholarship.id}`}
           key={scholarship.id}
-          className="bg-white p-4 cursor-pointer border-primary border-[3px] rounded-xl mx-3 max-w-9/12  hover:shadow-xl hover:-translate-y-1  duration-300 transition-all block"
+          className=" bg-white p-4 cursor-pointer border-primary border-[3px] rounded-xl mx-3   hover:shadow-xl hover:-translate-y-1  duration-300 transition-all block w-full"
         >
           <h3 className="font-medium text-3xl mb-3">{scholarship.name}</h3>
 
@@ -82,7 +85,9 @@ const RecomendContent = () => {
             </span>
           </div>
         </Link>
+        
       ))}
+       </div>
     </div>
   );
 };

@@ -231,6 +231,7 @@ const ProfileService = {
           category: courseData.category || "Umum",
           progress: courseData.progress || 0,
           completed: courseData.completed || false,
+          certificate: courseData.certificate_url || null,
 
           // --- DATA PENTING DARI ENROLLMENT (Parent Object) ---
           progress: item.progress || 0, // Ambil dari item, bukan courseData
@@ -242,6 +243,7 @@ const ProfileService = {
 
     return [];
   },
+
 };
 
 export default ProfileService;
