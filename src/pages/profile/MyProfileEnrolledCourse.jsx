@@ -1,51 +1,54 @@
 import { EnrolledCourseList } from "@/components/section/EnrolledCourseList";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query"; // 1. Import useQuery
 import ProfileService from "@/services/ProfileService";
-import { Input } from "@/components/ui/input"; // Pastikan punya komponen Input
-import { Search } from "lucide-react"; // Icon Search
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { MyProfileEnrolledSkeleton } from "@/components/ProfileSkeleton";
 
 export const MyProfileEnrolledCourse = () => {
-  // 1. State
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(""); // <--- State untuk Search
+  // --- STATE ---
+  // Kita hanya butuh state untuk UI (Search), data & loading diurus TanStack
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // 2. Fetch Data
-  useEffect(() => {
-    const fetchMyCourses = async () => {
-      try {
-        setLoading(true);
-        const data = await ProfileService.getEnrolledCourses();
-        setCourses(data);
-      } catch (error) {
-        console.error("Error fetching enrolled courses:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // --- 2. FETCH DATA DENGAN TANSTACK QUERY ---
+  const { 
+    data: courses = [], // Default ke array kosong biar gak error pas filter
+    isLoading, 
+    isError 
+  } = useQuery({
+    queryKey: ["my-enrolled-courses"], // Key unik untuk cache
+    queryFn: async () => {
+      const res = await ProfileService.getEnrolledCourses();
+      // Pastikan return-nya Array. Jaga-jaga kalau response-nya { data: [...] }
+      return Array.isArray(res) ? res : (res.data || []);
+    },
+    staleTime: 1000 * 60 * 5, // Data dianggap fresh selama 5 menit
+  });
 
-    fetchMyCourses();
-  }, []);
-
-  // 3. LOGIC FILTERING
-  // Kita filter courses berdasarkan input search (case insensitive)
+  // --- 3. LOGIC FILTERING (Client Side) ---
+  // Filter dijalankan setiap render berdasarkan data dari TanStack & state search
   const filteredCourses = courses.filter((course) => {
-    // Pastikan properti namanya sesuai backend (misal: course.title atau course.course_name)
-    // Di sini saya asumsikan namanya 'title' atau ada di dalam object 'course.title'
+    // Sesuaikan field ini dengan struktur JSON backendmu
     const courseName = course.title || course.course?.title || "";
     return courseName.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  // 4. TAMPILAN LOADING
-  if (loading) {
+  // --- 4. TAMPILAN LOADING ---
+  if (isLoading) {
+    return <MyProfileEnrolledSkeleton />
+  }
+
+  // Opsional: Tampilan Error
+  if (isError) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-[20vh] flex items-center justify-center text-red-500">
+        Gagal memuat data kursus.
       </div>
     );
   }
 
-  // 5. TAMPILAN UTAMA
+  // --- 5. TAMPILAN UTAMA ---
   return (
     <div className="space-y-6">
       <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
@@ -67,7 +70,7 @@ export const MyProfileEnrolledCourse = () => {
       </div>
 
       <div>
-        {/* Render filteredCourses, bukan courses */}
+        {/* Render filteredCourses */}
         {filteredCourses.length > 0 ? (
           <EnrolledCourseList courses={filteredCourses} />
         ) : (

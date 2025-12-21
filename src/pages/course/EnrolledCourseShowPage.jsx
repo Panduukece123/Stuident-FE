@@ -20,6 +20,7 @@ import {
   Circle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EnrolledCourseShowSkeleton } from "@/components/EnrolledCourseShowSkeleton";
 
 export const EnrolledCourseShowPage = () => {
   const { id } = useParams();
@@ -208,11 +209,7 @@ export const EnrolledCourseShowPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <EnrolledCourseShowSkeleton />;
   }
 
   const completedCount = progressData.completedIds.length;

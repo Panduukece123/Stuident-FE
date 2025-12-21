@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react"; // Tambah useEffect
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "react-router-dom"; // <--- WAJIB IMPORT INI
-import { Navbar } from "../components/shared/Navbar";
+import { useLocation } from "react-router-dom";
 import { ElearningBanner } from "../components/section/ElearningBanner";
 import { ElearningCategories } from "../components/section/ElearningCategories";
 import { ElearningCourseList } from "../components/section/ElearningCourseList";
@@ -11,16 +10,16 @@ import { ElearningList } from "@/components/section/ElearningList";
 import { InfoBootcamp } from "@/components/section/InfoBootcampSection";
 import { ElearningBootcampList } from "@/components/section/ElearningBootcampList";
 import { ElearningEnrolledList } from "@/components/section/ElearningEnrolledList";
-import { BookOpen } from "lucide-react"; 
+import { BookOpen } from "lucide-react";
+import { ElearningPageSkeleton } from "@/components/ElearningPageSkeleton";
 
 export const ElearningPage = () => {
-  // --- 1. SETUP SCROLL LOGIC ---
-  const { hash } = useLocation(); // Ambil hash dari URL (misal: #course)
-
-  // ... (State Login & Pagination Tetap Sama) ...
+  // --- SETUP SCROLL LOGIC ---
+  const { hash } = useLocation();
   const token = localStorage.getItem("token");
   const isLoggedIn = !!localStorage.getItem("token");
 
+  // State Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [popularPage, setPopularPage] = useState(1);
@@ -28,7 +27,7 @@ export const ElearningPage = () => {
   const [bootcampPage, setBootcampPage] = useState(1);
   const bootcampLimit = 10;
 
-  // ... (Query Tetap Sama) ...
+  // Query Courses
   const { 
     data: courses = [], 
     isLoading: loadingCourses, 
@@ -40,6 +39,7 @@ export const ElearningPage = () => {
     staleTime: 1000 * 60 * 5,
   });
 
+  // Query Enrolled
   const { data: enrolledCourses = [] } = useQuery({
     queryKey: ["enrolled-courses", token],
     queryFn: async () => {
@@ -55,25 +55,20 @@ export const ElearningPage = () => {
     staleTime: 1000 * 60 * 2,
   });
 
-  // --- 2. EFFECT UNTUK SCROLL OTOMATIS ---
-  // Dijalankan setiap kali loading selesai atau hash berubah
+  // Effect Scroll
   useEffect(() => {
-    // Cek jika tidak loading DAN ada hash di URL
     if (!loadingCourses && hash) {
-      // Hapus tanda pagar '#' jadi tinggal 'course' atau 'bootcamp'
       const id = hash.replace("#", "");
       const element = document.getElementById(id);
-
       if (element) {
-        // Beri sedikit timeout agar render UI benar-benar selesai
         setTimeout(() => {
           element.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
       }
     }
-  }, [loadingCourses, hash]); // Dependency: Jalankan saat loading selesai
+  }, [loadingCourses, hash]);
 
-  // ... (Logic Pagination Tetap Sama) ...
+  // Logic Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentCourses = courses.slice(indexOfFirstItem, indexOfLastItem);
@@ -93,15 +88,12 @@ export const ElearningPage = () => {
     ...new Set(courses.map((course) => course.category)),
   ];
 
-  // ... (Loading & Error UI Tetap Sama) ...
+  // --- 2. IMPLEMENTASI SKELETON ---
   if (loadingCourses) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <ElearningPageSkeleton />;
   }
 
+  // Error State
   if (isCoursesError) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
@@ -129,9 +121,7 @@ export const ElearningPage = () => {
         >
           Previous
         </button>
-        <span className="text-sm font-medium">
-          Page {page} of {total}
-        </span>
+        <span className="text-sm font-medium">Page {page} of {total}</span>
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page === total}
@@ -185,24 +175,15 @@ export const ElearningPage = () => {
             subtitle="Perluas wawasan Anda dengan mempelajari topik-topik relevan."
             courses={currentCourses}
           />
-          <PaginationControl 
-            page={currentPage} 
-            total={totalPages} 
-            onPageChange={setCurrentPage} 
-          />
+          <PaginationControl page={currentPage} total={totalPages} onPageChange={setCurrentPage} />
         </div>
 
-        {/* --- SECTION 3: TERPOPULER --- */}
         <ElearningCourseList
           title="Kursus Terpopuler"
           subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain."
           courses={currentPopularCourses}
         />
-        <PaginationControl 
-          page={popularPage} 
-          total={totalPopularPages} 
-          onPageChange={setPopularPage} 
-        />
+        <PaginationControl page={popularPage} total={totalPopularPages} onPageChange={setPopularPage} />
 
         <InfoBootcamp />
 
@@ -213,13 +194,8 @@ export const ElearningPage = () => {
             subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
             courses={currentBootcampCourses}
           />
-          <PaginationControl 
-            page={bootcampPage} 
-            total={totalBootcampPages} 
-            onPageChange={setBootcampPage} 
-          />
+          <PaginationControl page={bootcampPage} total={totalBootcampPages} onPageChange={setBootcampPage} />
         </div>
-
       </main>
     </div>
   );
