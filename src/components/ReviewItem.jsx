@@ -42,7 +42,7 @@ function ReviewItem({
                             { userName ? getInitials(userName) : "?"}
                         </AvatarFallback>
                     </Avatar>
-                    <p className="text-lg">{userName}</p>
+                    <p className="md:text-lg">{userName}</p>
                 </div>
                 <div className="flex flex-row gap-2 items-center text-muted-foreground">
                     <Star size={24}/>
@@ -57,9 +57,14 @@ function ReviewItem({
 
             {/* Action Footer */}
             <div className="flex flex-row gap-2 py-3">
-                <Button variant={"destructive"} size={"icon"}>
-                    <MessageSquareWarning  />
-                </Button>
+                {!editable && (
+                    <Button
+                        variant={"destructive"}
+                        size={"icon"}
+                    >
+                        <MessageSquareWarning  />
+                    </Button>
+                )}
                 {editable && (
                     <>
                         <Button
@@ -80,7 +85,7 @@ function ReviewItem({
                 {editable && (
                     <>
                         <Button
-                            variant={"outline"}
+                            variant={"destructive"}
                             size={"icon"}
                             onClick={() => setIsDeleteOpen(true)}
                         >

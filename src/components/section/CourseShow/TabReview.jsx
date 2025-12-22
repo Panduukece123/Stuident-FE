@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertCircle, Star, X } from "lucide-react";
+import { AlertCircle, Loader2, Star, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReviewItem from "@/components/ReviewItem";
 import { useState } from "react";
@@ -134,7 +134,12 @@ export const TabReview = ({ course, user, onReviewModified }) => {
             </span>
           )}
 
-          <Button type="submit" disabled={isSubmitting} className="block w-fit mt-4">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-4"
+          >
+            {isSubmitting && <Loader2 className="mr-2 animate-spin"/>}
             Kirim ulasan
           </Button>
 
