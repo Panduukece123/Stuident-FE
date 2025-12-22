@@ -44,7 +44,7 @@ export const MyProfileOrderHistory = () => {
 
   useEffect(() => {
     setSelectedTransaction(null);
-  }, [location.pathname]);
+  }, [location.key]);
 
   useEffect(() => {
     const handlePopState = () => {
