@@ -11,7 +11,7 @@ export const OrderHistoryCard = ({
   instructor,
   duration,
   image,
-  onClick, // Tambahkan prop onClick di sini
+  onClick,
 }) => {
   const statusStyle = {
     Lunas: "bg-green-500 text-white",
@@ -37,14 +37,11 @@ export const OrderHistoryCard = ({
       onClick={onClick}
       className="cursor-pointer bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition space-y-3"
     >
-      {/* ⏫ TYPE (Paling atas - Kanan) */}
       <div className="flex justify-end items-center text-xs pb-2">
         <span className="text-muted-foreground">{type}</span>
       </div>
 
-      {/* 🖼️ IMAGE + DATA (Layout Utama) */}
       <div className="flex gap-4">
-        {/* Kiri: IMAGE & DURATION */}
         <div className="flex flex-col items-center flex-shrink-0">
           <img
             src={image || "https://via.placeholder.com/64x64?text=No+Image"}
@@ -54,7 +51,6 @@ export const OrderHistoryCard = ({
           <p className="text-xs mt-1 text-gray-500">{duration}</p>
         </div>
 
-        {/* Kanan: DETAIL DATA */}
         <div className="flex-1 space-y-1">
           <div>
             <h3 className="font-semibold text-sm">{title}</h3>
@@ -83,7 +79,6 @@ export const OrderHistoryCard = ({
         </div>
       </div>
 
-      {/* ⏬ STATUS (Kanan Bawah) */}
       <div className="flex justify-end pt-3">
         <span
           className={`text-xs px-3 py-1 rounded-full font-medium ${

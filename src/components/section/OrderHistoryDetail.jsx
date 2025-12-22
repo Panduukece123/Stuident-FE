@@ -64,7 +64,6 @@ export const OrderHistoryDetail = ({ order, onBack }) => {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm max-w-4xl mx-auto">
       <div className="space-y-8">
-        {/* HEADER */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
             Invoice Transaction
@@ -75,9 +74,7 @@ export const OrderHistoryDetail = ({ order, onBack }) => {
           </p>
         </div>
 
-        {/* CONTENT */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-          {/* LEFT */}
           <div className="space-y-4">
             <DetailRow label="Email" value={order.user?.email || "-"} />
             <DetailRow label="Nama Produk" value={order.title || "-"} />
@@ -179,9 +176,6 @@ export const OrderHistoryDetail = ({ order, onBack }) => {
   );
 };
 
-/* ======================
-   REUSABLE ROW
-====================== */
 const DetailRow = ({ label, value, valueClass = "text-sm text-gray-600" }) => (
   <div>
     <p className="text-sm font-bold text-gray-900">{label}</p>
