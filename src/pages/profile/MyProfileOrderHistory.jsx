@@ -1,74 +1,120 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import TransactionService from "@/services/TransactionService";
-import { useQuery } from "@tanstack/react-query"; // 1. Import Hook
 import { OrderHistoryList } from "@/components/section/OrderHistoryList";
+import { OrderHistoryDetail } from "@/components/section/OrderHistoryDetail";
 import { Input } from "@/components/ui/input";
-import { MyProfileEnrolledSkeleton } from "@/components/ProfileSkeleton";
+
+const BACKEND_URL = "http://localhost:8000";
+const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
 
 export const MyProfileOrderHistory = () => {
-  // --- STATE ---
-  // Hanya simpan state untuk Search
+  const location = useLocation();
+
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
-  // --- 2. FETCH DATA (TanStack Query) ---
-  const { 
-    data: orders = [], 
-    isLoading 
-  } = useQuery({
-    queryKey: ["my-order-history"],
-    queryFn: TransactionService.getAll, // Service sudah mengembalikan data yang bersih (item_name, item_image, dll)
-    staleTime: 1000 * 60 * 5, // Cache 5 menit
-  });
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const data = await TransactionService.getAll();
 
-  // --- 3. FILTERING (Client Side) ---
-  const filteredOrders = orders.filter((order) => {
-    if (!searchQuery) return true;
-    
-    const query = searchQuery.toLowerCase();
-    
-    // Kita filter berdasarkan 'item_name' (judul) atau 'transaction_code'
-    // 'item_name' berasal dari normalisasi di Service
-    const title = order.item_name || order.type_label || "";
-    const code = order.transaction_code || "";
+        const mapped = data.map((trx) => ({
+          ...trx,
+          title: trx.item_name || trx.type_label || "-",
+          image: trx.item_details?.image
+            ? trx.item_details.image.startsWith("http")
+              ? trx.item_details.image
+              : `${BACKEND_URL}${trx.item_details.image}`
+            : DEFAULT_IMAGE,
+        }));
 
-    return title.toLowerCase().includes(query) || code.toLowerCase().includes(query);
-  });
+        setOrders(mapped);
+      } catch (error) {
+        console.error("Gagal mengambil transaksi:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // --- 4. UI LOADING ---
-  if (isLoading) {
-    return <MyProfileEnrolledSkeleton />
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    setSelectedTransaction(null);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setSelectedTransaction(null);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const handleSelectTransaction = (order) => {
+    window.history.pushState(
+      { transactionId: order.id },
+      "",
+      window.location.pathname
+    );
+    setSelectedTransaction(order);
+  };
+
+  
+  const handleBackToList = () => {
+    setSelectedTransaction(null);
+  };
+
+  const filteredOrders = useMemo(() => {
+    if (!searchQuery) return orders;
+    const q = searchQuery.toLowerCase();
+    return orders.filter((o) =>
+      o.title?.toLowerCase().includes(q)
+    );
+  }, [orders, searchQuery]);
+
+
+  if (loading) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="animate-spin h-12 w-12 border-b-2 border-primary rounded-full" />
+      </div>
+    );
   }
 
-  // Logic Text Kosong
-  const noResultText =
-    orders.length > 0 && searchQuery
-      ? "Tidak ada transaksi yang cocok."
-      : "Belum ada transaksi.";
-
-  // --- 5. RENDER UI ---
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
-        <h1 className="text-xl">My Order History</h1>
+     
+      <div className="w-full flex flex-col items-center border-b-2 border-b-primary p-2">
+        <h1 className="text-xl font-semibold mb-3">Order History</h1>
       </div>
 
-      {/* Search Input */}
-      <div>
+      
+      {!selectedTransaction && (
         <Input
           type="text"
           placeholder="Cari Order History mu..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+          className="w-full max-w-md"
         />
-      </div>
+      )}
 
-      {/* Order List */}
-      {filteredOrders.length > 0 ? (
-        <OrderHistoryList orders={filteredOrders} />
+      {selectedTransaction ? (
+        <OrderHistoryDetail
+          order={selectedTransaction}
+          onBack={handleBackToList}
+        />
       ) : (
-        <p className="text-muted-foreground text-center py-8">{noResultText}</p>
+        <OrderHistoryList
+          orders={filteredOrders}
+          onSelect={handleSelectTransaction}
+          selectedOrder={selectedTransaction}
+        />
       )}
     </div>
   );
