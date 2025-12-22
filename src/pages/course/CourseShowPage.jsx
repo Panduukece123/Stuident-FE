@@ -188,7 +188,7 @@ export default function CourseShowPage() {
           </TabsContent>
 
           <TabsContent value="reviews">
-            <TabReview course={course} user={user} onReviewCreated={fetchData} />
+            <TabReview course={course} user={user} onReviewModified={fetchData} />
           </TabsContent>
         </Tabs>
       </div>
