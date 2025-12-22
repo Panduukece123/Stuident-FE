@@ -1,18 +1,17 @@
-import React, { useState, useRef } from "react"; // Tambah useRef
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // Tambah useMutation
+import React, { useState, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Edit,
   SquareArrowOutUpRight,
-  Trash,
   Upload,
   Loader2,
   FileText,
   Briefcase,
   Award,
   ArrowRight,
-} from "lucide-react"; // Tambah Icon
+} from "lucide-react";
 import ProfileService from "@/services/ProfileService";
 
 // IMPORT SEMUA DIALOG
@@ -29,28 +28,23 @@ import { MyProfileSkeleton } from "@/components/skeleton/ProfileSkeleton";
 export const MyProfile = () => {
   const queryClient = useQueryClient();
   const token = localStorage.getItem("token");
-
-  // Ref untuk input file CV
   const cvInputRef = useRef(null);
 
   // --- STATE UNTUK DIALOG ---
   const [openBio, setOpenBio] = useState(false);
   const [openEdu, setOpenEdu] = useState(false);
   const [openPersonal, setOpenPersonal] = useState(false);
-
   const [openExp, setOpenExp] = useState(false);
   const [selectedExp, setSelectedExp] = useState(null);
-
   const [openAch, setOpenAch] = useState(false);
   const [selectedAch, setSelectedAch] = useState(null);
-
   const [openSpec, setOpenSpec] = useState(false);
 
-  // --- FETCH DATA ---
+  // 1. FETCH PROFILE (Data User Umum)
   const {
     data: profileData,
-    isLoading,
-    isError,
+    isLoading: loadingProfile,
+    isError: errorProfile,
   } = useQuery({
     queryKey: ["profile", token],
     queryFn: async () => {
@@ -60,12 +54,36 @@ export const MyProfile = () => {
     staleTime: 1000 * 60 * 5,
   });
 
+  // 2. FETCH CV CHECK (Khusus buat ngecek CV karena /profile kadang kosong)
+  const { data: cvData, isLoading: loadingCv } = useQuery({
+    queryKey: ["cv-check", token],
+    queryFn: async () => {
+      try {
+        const res = await ProfileService.getCV();
+        return res?.data; // { cv_path: "...", cv_url: "..." }
+      } catch (err) {
+        return null;
+      }
+    },
+    retry: false,
+  });
+
+  const { user, achievements, experiences } = profileData || {};
+
+  // --- LOGIC GABUNGAN (CHECKER) ---
+  // Gabungkan hasil dari kedua fetch diatas
+  const activeCvPath = user?.cv_path || user?.cv || cvData?.cv_path;
+  const activeCvUrl = cvData?.cv_url;
+  const displayCvName =
+    cvData?.cv_name ||
+    (activeCvPath ? activeCvPath.split("/").pop() : "My_CV.pdf");
+
   // --- MUTATION UPLOAD CV ---
   const uploadCvMutation = useMutation({
     mutationFn: (file) => ProfileService.uploadCv(file),
     onSuccess: () => {
-      // Refresh data profil setelah sukses upload
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["cv-check"] });
       alert("CV berhasil diunggah!");
     },
     onError: (error) => {
@@ -74,7 +92,6 @@ export const MyProfile = () => {
     },
   });
 
-  // --- HANDLER UPLOAD CV ---
   const handleCvClick = () => {
     cvInputRef.current.click();
   };
@@ -82,27 +99,25 @@ export const MyProfile = () => {
   const handleCvChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    // Validasi sederhana (opsional)
     if (file.type !== "application/pdf") {
       alert("Harap unggah file PDF.");
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      // 2MB
       alert("Ukuran file maksimal 2MB.");
       return;
     }
 
     uploadCvMutation.mutate(file);
-    e.target.value = null; // Reset input
+    e.target.value = null;
   };
 
-  // --- HELPER LAINNYA ---
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ["profile"] });
+    queryClient.invalidateQueries({ queryKey: ["cv-check"] });
   };
 
+  // --- HELPERS ---
   const handleAddExp = () => {
     setSelectedExp(null);
     setOpenExp(true);
@@ -129,25 +144,22 @@ export const MyProfile = () => {
     });
   };
 
-  const getFileName = (url) => {
-    if (!url) return "unknown_file.pdf";
-    return url.split("/").pop();
+  const getCertificateUrl = (path) => {
+    if (!path) return "#";
+    if (path.startsWith("http")) return path;
+    const cleanPath = path.startsWith("/") ? path.substring(1) : path;
+    return `http://localhost:8000/storage/${cleanPath}`;
   };
 
-  if (isLoading) {
-    return <MyProfileSkeleton />;
-  }
-
-  if (isError) {
+  if (loadingProfile) return <MyProfileSkeleton />;
+  if (errorProfile)
     return (
       <div className="text-center p-10 text-red-500">Gagal memuat profil.</div>
     );
-  }
 
-  const { user, achievements, experiences } = profileData || {};
   const isCvUploading = uploadCvMutation.isPending;
 
-  // Logic Specialization
+  // Logic Spec
   const rawSpec = user?.specialization;
   let specializationArray = [];
   if (Array.isArray(rawSpec)) {
@@ -157,19 +169,6 @@ export const MyProfile = () => {
   } else {
     specializationArray = [];
   }
-
-  // --- HELPER UNTUK URL SERTIFIKAT ---
-  const getCertificateUrl = (path) => {
-    if (!path) return "#";
-
-    // 1. Kalau link eksternal (https://google.com...), biarkan
-    if (path.startsWith("http")) {
-      return path;
-    }
-    const cleanPath = path.startsWith("/") ? path.substring(1) : path;
-
-    return `http://localhost:8000/storage/${cleanPath}`;
-  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -187,7 +186,8 @@ export const MyProfile = () => {
               className={"rounded-full"}
               onClick={() => setOpenBio(true)}
             >
-              <Edit /> Edit
+              {" "}
+              <Edit /> Edit{" "}
             </Button>
             <EditBioDialog
               open={openBio}
@@ -210,7 +210,8 @@ export const MyProfile = () => {
               className={"rounded-full"}
               onClick={() => setOpenEdu(true)}
             >
-              <Edit /> Edit
+              {" "}
+              <Edit /> Edit{" "}
             </Button>
             <EditEducationDialog
               open={openEdu}
@@ -245,7 +246,8 @@ export const MyProfile = () => {
               className="rounded-full"
               onClick={handleAddExp}
             >
-              <Edit className="mr-2 h-4 w-4" /> Add New
+              {" "}
+              <Edit className="mr-2 h-4 w-4" /> Add New{" "}
             </Button>
             <ExperienceDialog
               open={openExp}
@@ -317,7 +319,8 @@ export const MyProfile = () => {
               className={"rounded-full"}
               onClick={handleAddAch}
             >
-              <Edit className="mr-2 h-4 w-4" /> Add New
+              {" "}
+              <Edit className="mr-2 h-4 w-4" /> Add New{" "}
             </Button>
             <AchievementDialog
               open={openAch}
@@ -380,7 +383,8 @@ export const MyProfile = () => {
               className={"rounded-full"}
               onClick={() => setOpenSpec(true)}
             >
-              <Edit /> Edit
+              {" "}
+              <Edit /> Edit{" "}
             </Button>
             <EditSpecializationDialog
               open={openSpec}
@@ -409,9 +413,7 @@ export const MyProfile = () => {
           </div>
 
           <div className="bg-white p-4 border border-neutral-300 rounded-xl flex flex-col gap-4">
-            {/* 1. CURRICULUM VITAE */}
             <div className="flex flex-col gap-2">
-              {/* Input File Hidden */}
               <input
                 type="file"
                 ref={cvInputRef}
@@ -420,18 +422,23 @@ export const MyProfile = () => {
                 onChange={handleCvChange}
               />
 
-              {user?.cv || user?.cv_path ? ( // Cek apakah CV sudah ada di DB
+              {/* === LOGIC PENGECEKAN CV (FINAL) === */}
+              {loadingCv ? (
+                <div className="flex justify-center p-4">
+                  <Loader2 className="animate-spin text-neutral-400" />
+                </div>
+              ) : activeCvPath ? (
+                // 1. JIKA CV ADA (DARI USER ATAU GETCV)
                 <div className="flex flex-col gap-2">
-                  {/* File Card */}
                   <div className="bg-neutral-50 p-3 border border-neutral-200 rounded-xl flex flex-row justify-between items-center group hover:border-primary/50 transition-colors">
+                    {/* INFO FILE */}
                     <div className="flex items-center gap-3">
                       <div className="bg-red-100 p-2 rounded-lg text-red-600">
                         <FileText size={24} />
                       </div>
                       <div>
                         <span className="font-medium text-sm block truncate max-w-[200px]">
-                          {/* Tampilkan nama file dari URL atau fallback */}
-                          {getFileName(user.cv || user.cv_path)}
+                          {displayCvName}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           PDF Document
@@ -439,19 +446,24 @@ export const MyProfile = () => {
                       </div>
                     </div>
 
+                    {/* TOMBOL VIEW (BUKA TAB BARU) */}
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() =>
-                        window.open(user.cv || user.cv_path, "_blank")
-                      }
+                      onClick={() => {
+                        if (activeCvUrl) {
+                          window.open(activeCvUrl, "_blank");
+                        } else {
+                          alert("Link CV belum tersedia. Coba refresh.");
+                        }
+                      }}
                       title="Lihat CV"
                     >
                       <SquareArrowOutUpRight className="w-5 h-5 text-neutral-500" />
                     </Button>
                   </div>
 
-                  {/* Action Buttons */}
+                  {/* TOMBOL GANTI FILE */}
                   <div className="flex flex-row gap-2">
                     <Button
                       variant="outline"
@@ -470,6 +482,7 @@ export const MyProfile = () => {
                   </div>
                 </div>
               ) : (
+                // 2. JIKA BELUM ADA CV
                 <div className="border-2 border-dashed border-neutral-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center">
                   <p className="text-sm text-muted-foreground">
                     Belum ada CV yang diunggah
@@ -491,7 +504,6 @@ export const MyProfile = () => {
         {/* --- SIDEBAR --- */}
         <div className="w-2/5 flex flex-col gap-4">
           <div className="bg-white rounded-2xl border border-neutral-300 w-full p-4 h-fit flex flex-col gap-2">
-            {/* ... Sidebar content (Personal Info) tetap sama ... */}
             <div className="flex flex-row justify-between">
               <h2 className="text-2xl">Profile</h2>
               <Button
@@ -499,7 +511,8 @@ export const MyProfile = () => {
                 className={"rounded-full"}
                 onClick={() => setOpenPersonal(true)}
               >
-                <Edit /> Edit
+                {" "}
+                <Edit /> Edit{" "}
               </Button>
               <EditPersonalDialog
                 open={openPersonal}
