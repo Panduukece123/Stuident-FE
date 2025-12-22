@@ -16,15 +16,15 @@ import {
 import ProfileService from "@/services/ProfileService";
 
 // IMPORT SEMUA DIALOG
-import { EditBioDialog } from "@/components/EditBioDialog";
-import { EditEducationDialog } from "@/components/EditEduDialog";
-import { EditPersonalDialog } from "@/components/EditPersonalDialog";
-import { ExperienceDialog } from "@/components/ExperienceDialog";
-import { AchievementDialog } from "@/components/AchievementDialog";
-import { EditSpecializationDialog } from "@/components/EditSpecializationDialog";
+import { EditBioDialog } from "@/components/dialog/EditBioDialog";
+import { EditEducationDialog } from "@/components/dialog/EditEduDialog";
+import { EditPersonalDialog } from "@/components/dialog/EditPersonalDialog";
+import { ExperienceDialog } from "@/components/dialog/ExperienceDialog";
+import { AchievementDialog } from "@/components/dialog/AchievementDialog";
+import { EditSpecializationDialog } from "@/components/dialog/EditSpecializationDialog";
 import { Link } from "react-router";
 
-import { MyProfileSkeleton } from "@/components/ProfileSkeleton";
+import { MyProfileSkeleton } from "@/components/skeleton/ProfileSkeleton";
 
 export const MyProfile = () => {
   const queryClient = useQueryClient();
@@ -135,7 +135,7 @@ export const MyProfile = () => {
   };
 
   if (isLoading) {
-    return <MyProfileSkeleton />
+    return <MyProfileSkeleton />;
   }
 
   if (isError) {
@@ -172,7 +172,7 @@ export const MyProfile = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 pb-10">
+    <div className="flex flex-col gap-6">
       <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
         <h1 className="text-xl">My Profile</h1>
       </div>

@@ -303,7 +303,7 @@ const ProfileService = {
   uploadExperienceCertificate: async (id, file) => {
     const token = localStorage.getItem("token");
     const formData = new FormData();
-    formData.append('certificate', file); // Sesuaikan key backend ('certificate' atau 'file')
+    formData.append('certificate', file);
     
     const response = await api.post(`/experiences/${id}/certificate`, formData, {
       headers: {
@@ -346,7 +346,6 @@ const ProfileService = {
     });
     return response.data;
   },
-  
 };
 
 export default ProfileService;

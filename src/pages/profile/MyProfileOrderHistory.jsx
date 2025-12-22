@@ -3,7 +3,7 @@ import TransactionService from "@/services/TransactionService";
 import { useQuery } from "@tanstack/react-query"; // 1. Import Hook
 import { OrderHistoryList } from "@/components/section/OrderHistoryList";
 import { Input } from "@/components/ui/input";
-import { MyProfileEnrolledSkeleton } from "@/components/ProfileSkeleton";
+import { MyProfileEnrolledSkeleton } from "@/components/skeleton/ProfileSkeleton";
 
 export const MyProfileOrderHistory = () => {
   // --- STATE ---
@@ -11,10 +11,7 @@ export const MyProfileOrderHistory = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // --- 2. FETCH DATA (TanStack Query) ---
-  const { 
-    data: orders = [], 
-    isLoading 
-  } = useQuery({
+  const { data: orders = [], isLoading } = useQuery({
     queryKey: ["my-order-history"],
     queryFn: TransactionService.getAll, // Service sudah mengembalikan data yang bersih (item_name, item_image, dll)
     staleTime: 1000 * 60 * 5, // Cache 5 menit
@@ -23,20 +20,22 @@ export const MyProfileOrderHistory = () => {
   // --- 3. FILTERING (Client Side) ---
   const filteredOrders = orders.filter((order) => {
     if (!searchQuery) return true;
-    
+
     const query = searchQuery.toLowerCase();
-    
+
     // Kita filter berdasarkan 'item_name' (judul) atau 'transaction_code'
     // 'item_name' berasal dari normalisasi di Service
     const title = order.item_name || order.type_label || "";
     const code = order.transaction_code || "";
 
-    return title.toLowerCase().includes(query) || code.toLowerCase().includes(query);
+    return (
+      title.toLowerCase().includes(query) || code.toLowerCase().includes(query)
+    );
   });
 
   // --- 4. UI LOADING ---
   if (isLoading) {
-    return <MyProfileEnrolledSkeleton />
+    return <MyProfileEnrolledSkeleton />;
   }
 
   // Logic Text Kosong
