@@ -284,9 +284,13 @@ const ScholarshipDetail = () => {
                     <Calendar className="w-4 h-4" /> {formattedDeadline}
                   </p>
                 </div>
+                
                 <Button className="w-full h-12 text-lg bg-[#3DBDC2] hover:bg-[#2da8ad] text-white font-semibold rounded-lg shadow-md transition-all cursor-pointer">
+                  <Link to={`/scholarship/application/${data.id}`}>
                   Register Now
+                  </Link>
                 </Button>
+               
 
                 <Button
                   variant="outline"

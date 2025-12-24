@@ -42,11 +42,67 @@ export const getScholarshipById = async (id) => {
   return response.data;
 };
 
+export const applyScholarship = async (id, formData) => {
+  const token = localStorage.getItem("token");
+  const response = await api.post(`/scholarships/${id}/apply`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+// Step 1: Save draft with documents
+export const saveDraft = async (scholarshipId, formData) => {
+  const response = await api.post(`/scholarships/${scholarshipId}/draft`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+// Step 2: Update pre-assessment data
+export const updateAssessment = async (applicationId, data) => {
+  const response = await api.put(`/scholarship-applications/${applicationId}/assessment`, data);
+  return response.data;
+};
+
+// Step 3: Get application detail for review
+export const getApplicationDetail = async (applicationId) => {
+  const response = await api.get(`/scholarship-applications/${applicationId}`);
+  return response.data;
+};
+
+// Step 3b: Update draft documents
+export const updateDraft = async (applicationId, formData) => {
+  const response = await api.put(`/scholarship-applications/${applicationId}/draft`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+// Step 4: Submit the application
+export const submitApplication = async (applicationId) => {
+  const response = await api.post(`/scholarship-applications/${applicationId}/submit`);
+  return response.data;
+};
+
 const scholarshipService = {
   getScholarships,
   getRecommendedScholarships,
   getScholarshipById,
-  getPopularityScholarships
+  getPopularityScholarships,
+  applyScholarship,
+  saveDraft,
+  updateAssessment,
+  getApplicationDetail,
+  updateDraft,
+  submitApplication,
 };
 
 export default scholarshipService;

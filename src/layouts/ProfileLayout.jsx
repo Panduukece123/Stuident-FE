@@ -1,28 +1,33 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { GraduationCap, LogOut, Settings, ShoppingCart, User, Loader2, Edit } from "lucide-react";
+import {
+  GraduationCap,
+  LogOut,
+  Settings,
+  ShoppingCart,
+  User,
+  Loader2,
+  Edit,
+} from "lucide-react";
 import React, { useState, useRef } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"; 
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // <--- 1. Import
 import ProfileService from "@/services/ProfileService";
 import authService from "@/services/AuthService";
-import { ProfileLayoutSkeleton } from "@/components/ProfileSkeleton";
+import { ProfileLayoutSkeleton } from "@/components/skeleton/ProfileSkeleton";
 
 export const ProfileLayout = () => {
   const queryClient = useQueryClient(); // Init Client
   const [imageHash, setImageHash] = useState(Date.now());
   const token = localStorage.getItem("token");
-  
+
   const location = useLocation();
   const navigate = useNavigate();
   const pathname = location.pathname;
   const fileInputRef = useRef(null);
 
   // --- 1. FETCH PROFILE (Ganti useEffect) ---
-  const { 
-    data: profileData, 
-    isLoading: loading 
-  } = useQuery({
+  const { data: profileData, isLoading: loading } = useQuery({
     queryKey: ["profile", token],
     queryFn: async () => {
       try {
@@ -47,7 +52,7 @@ export const ProfileLayout = () => {
     onSuccess: async () => {
       // A. Refresh data profile di TanStack Cache
       await queryClient.invalidateQueries({ queryKey: ["profile"] });
-      
+
       // B. Paksa browser reload gambar (bypass browser cache)
       setImageHash(Date.now());
 
@@ -64,7 +69,7 @@ export const ProfileLayout = () => {
     onError: (error) => {
       console.error("Upload error:", error);
       alert("Gagal upload foto profil.");
-    }
+    },
   });
 
   // --- HANDLERS ---
@@ -102,7 +107,7 @@ export const ProfileLayout = () => {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       // Clear TanStack Cache saat logout biar bersih
-      queryClient.clear(); 
+      queryClient.clear();
       navigate("/login");
     }
   };
@@ -110,21 +115,23 @@ export const ProfileLayout = () => {
   const getSidebarClass = (path) => {
     const isActive = pathname === path;
     return `w-full justify-start text-base h-10 px-4 ${
-      isActive ? "text-primary font-medium" : "font-light text-neutral-700 hover:bg-neutral-100 hover:text-primary" 
+      isActive
+        ? "text-primary font-medium"
+        : "font-light text-neutral-700 hover:bg-neutral-100 hover:text-primary"
     }`;
   };
 
   // --- UI ---
   if (loading) {
-    return <ProfileLayoutSkeleton />
+    return <ProfileLayoutSkeleton />;
   }
 
   const user = profileData?.user || profileData;
   const isUploading = uploadMutation.isPending; // Status loading dari mutation
 
   // URL Avatar + Hash Time biar browser gak cache gambar lama
-  const avatarSrc = user 
-    ? `${ProfileService.getAvatarUrl(user)}?t=${imageHash}` 
+  const avatarSrc = user
+    ? `${ProfileService.getAvatarUrl(user)}?t=${imageHash}`
     : "";
 
   return (
@@ -138,12 +145,21 @@ export const ProfileLayout = () => {
               className="h-full w-full object-cover"
             />
             <AvatarFallback className="text-neutral-800 font-medium text-5xl">
-              {user?.name ? user.name.split(" ").map((n)=>n[0]).join("").substring(0, 2).toUpperCase() : "US"}
+              {user?.name
+                ? user.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .substring(0, 2)
+                    .toUpperCase()
+                : "US"}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex flex-col space-y-1 text-center md:text-left">
-            <h1 className="text-3xl font-bold tracking-tight">{user?.name || "User"}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {user?.name || "User"}
+            </h1>
             <p className="opacity-90">{user?.email}</p>
             <p className="opacity-90">{user?.phone || "-"}</p>
             <div className="mt-2 flex items-center justify-center gap-3 md:justify-start">
@@ -155,20 +171,24 @@ export const ProfileLayout = () => {
         </div>
 
         <div className="mt-6 md:mt-0">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            className="hidden" 
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
             accept="image/png, image/jpeg, image/jpg, image/gif"
           />
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="border-white/40 bg-white/10 text-white hover:bg-white hover:text-[#074799] backdrop-blur-sm transition-all"
             onClick={handleEditAvatarClick}
             disabled={isUploading}
           >
-            {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Edit className="mr-2 h-4 w-4" />}
+            {isUploading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Edit className="mr-2 h-4 w-4" />
+            )}
             {isUploading ? "Uploading..." : "Edit Avatar"}
           </Button>
         </div>
@@ -177,32 +197,49 @@ export const ProfileLayout = () => {
       <div className="flex flex-col gap-6 md:flex-row">
         <aside className="w-full shrink-0 md:w-64">
           <div className="sticky top-20 flex flex-col gap-2 rounded-xl border border-neutral-300 bg-white p-4 shadow-sm">
-            <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">Menu</h2>
+            <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">
+              Menu
+            </h2>
             <Link to="/profile/my-profile">
-              <Button variant="ghost" className={getSidebarClass("/profile/my-profile")}>
-                 <User className="mr-3 h-5 w-5" /> My Profile
+              <Button
+                variant="ghost"
+                className={getSidebarClass("/profile/my-profile")}
+              >
+                <User className="mr-3 h-5 w-5" /> My Profile
               </Button>
             </Link>
             <Link to="/profile/my-enrolled-courses">
-              <Button variant="ghost" className={getSidebarClass("/profile/my-enrolled-courses")}>
-                 <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
+              <Button
+                variant="ghost"
+                className={getSidebarClass("/profile/my-enrolled-courses")}
+              >
+                <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
               </Button>
             </Link>
             <Link to="/profile/my-order-history">
-              <Button variant="ghost" className={getSidebarClass("/profile/my-order-history")}>
-                 <ShoppingCart className="mr-3 h-5 w-5" /> Order History
+              <Button
+                variant="ghost"
+                className={getSidebarClass("/profile/my-order-history")}
+              >
+                <ShoppingCart className="mr-3 h-5 w-5" /> Order History
               </Button>
             </Link>
             <div className="my-2 h-px w-full bg-neutral-100" />
-            <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2 mt-2">Account</h2>
-            <Button variant="ghost" onClick={handleLogout} className="w-full justify-start text-base font-light text-red-500 hover:bg-red-50 hover:text-red-600 h-10 px-4">
-               <LogOut className="mr-3 h-5 w-5" /> Logout
+            <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2 mt-2">
+              Account
+            </h2>
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              className="w-full justify-start text-base font-light text-red-500 hover:bg-red-50 hover:text-red-600 h-10 px-4"
+            >
+              <LogOut className="mr-3 h-5 w-5" /> Logout
             </Button>
           </div>
         </aside>
         <main className="w-full">
-            {/* Context profileData diteruskan ke children (MyProfile, dll) */}
-            <Outlet context={profileData} />
+          {/* Context profileData diteruskan ke children (MyProfile, dll) */}
+          <Outlet context={profileData} />
         </main>
       </div>
     </div>
