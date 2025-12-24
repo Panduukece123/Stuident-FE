@@ -20,6 +20,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ScholarshipDetail from "./pages/scholarsip/ScholarshipDetailPage";
 import { LearnLayout } from "./layouts/LearnLayout";
 import { MyPortfolio } from "./pages/profile/MyPortfolio";
+import AdminLayout from "./layouts/AdminLayout";
+import { ManageUsers } from "./pages/admin/AdminUsers";
+import AdminRoute from "./components/route/AdminRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +39,12 @@ function App() {
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
+          <Route element={<AdminRoute />}>
+            <Route path="admin" element={<AdminLayout />}>
+              <Route path="users" element={<ManageUsers />} />
+            </Route>
+          </Route>
+
           <Route path="/" element={<AppLayout />}>
             <Route index element={<HomePage />} />
 
@@ -53,7 +62,7 @@ function App() {
 
             <Route path="profile" element={<ProfileLayout />}>
               <Route path="my-profile" element={<MyProfile />} />
-              <Route path="my-profile/portfolio" element={<MyPortfolio/>} />
+              <Route path="my-profile/portfolio" element={<MyPortfolio />} />
               <Route
                 path="my-order-history"
                 element={<MyProfileOrderHistory />}
