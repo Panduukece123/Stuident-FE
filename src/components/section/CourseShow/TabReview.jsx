@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertCircle, Star, X } from "lucide-react";
+import { AlertCircle, Loader2, Star, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReviewItem from "@/components/ReviewItem";
 import { useState } from "react";
@@ -19,7 +19,7 @@ const schemaRating = z.object({
   comment: z.string().min(1, "Komentar wajib diisi"),
 });
 
-export const TabReview = ({ course, user, onReviewCreated }) => {
+export const TabReview = ({ course, user, onReviewModified }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -56,7 +56,7 @@ export const TabReview = ({ course, user, onReviewCreated }) => {
         color: "#fff",
         background: "#074799",
       });
-      if (onReviewCreated) await onReviewCreated(); // Memanggi fetchData
+      if (onReviewModified) await onReviewModified(); // Memanggi fetchData
 
     } catch (error) {
       
@@ -105,7 +105,7 @@ export const TabReview = ({ course, user, onReviewCreated }) => {
                           {Array(num)
                             .fill(0)
                             .map((_, i) => (
-                              <Star key={i} size={16} fill="currentColor" />
+                              <Star key={i} size={16} fill="currentColor" className="text-yellow-500" />
                             ))}
                         </div>
                       </SelectItem>
@@ -134,7 +134,12 @@ export const TabReview = ({ course, user, onReviewCreated }) => {
             </span>
           )}
 
-          <Button type="submit" disabled={isSubmitting} className="block w-fit mt-4">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-4"
+          >
+            {isSubmitting && <Loader2 className="mr-2 animate-spin"/>}
             Kirim ulasan
           </Button>
 
@@ -170,11 +175,9 @@ export const TabReview = ({ course, user, onReviewCreated }) => {
             course.reviews.map((review) => (
               <ReviewItem
                 key={review.id}
-                userName={review.user.name}
-                userProfilePic={review.user.profile_photo}
-                comment={review.comment}
-                rating={review.rating}
+                review={review}
                 editable={user?.name === review.user.name}
+                onSuccess={onReviewModified}
               />
             ))
           ) : (
