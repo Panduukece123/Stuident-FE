@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./layouts/AppLayout";
 import { HomePage } from "./pages/HomePage";
 import { ElearningPage } from "./pages/ElearningPage";
@@ -26,6 +26,8 @@ import { MyPortfolio } from "./pages/profile/MyPortfolio";
 import AdminLayout from "./layouts/AdminLayout";
 import { ManageUsers } from "./pages/admin/AdminUsers";
 import AdminRoute from "./components/route/AdminRoute";
+import AdminCourses from "./pages/admin/AdminCourses";
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,6 +47,7 @@ function App() {
           <Route element={<AdminRoute />}>
             <Route path="admin" element={<AdminLayout />}>
               <Route path="users" element={<ManageUsers />} />
+              <Route path="courses" element={<AdminCourses />} /> 
             </Route>
           </Route>
 
