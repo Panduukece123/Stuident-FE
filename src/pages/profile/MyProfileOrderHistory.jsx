@@ -4,9 +4,7 @@ import TransactionService from "@/services/TransactionService";
 import { OrderHistoryList } from "@/components/section/OrderHistoryList";
 import { OrderHistoryDetail } from "@/components/section/OrderHistoryDetail";
 import { Input } from "@/components/ui/input";
-
-const BACKEND_URL = "http://localhost:8000";
-const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
+import { MyProfileEnrolledSkeleton } from "@/components/skeleton/ProfileSkeleton";
 
 export const MyProfileOrderHistory = () => {
   const location = useLocation();
@@ -16,74 +14,32 @@ export const MyProfileOrderHistory = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const data = await TransactionService.getAll();
+  // --- 2. FETCH DATA (TanStack Query) ---
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ["my-order-history"],
+    queryFn: TransactionService.getAll, // Service sudah mengembalikan data yang bersih (item_name, item_image, dll)
+    staleTime: 1000 * 60 * 5, // Cache 5 menit
+  });
 
-        const mapped = data.map((trx) => ({
-          ...trx,
-          title: trx.item_name || trx.type_label || "-",
-          image: trx.item_details?.image
-            ? trx.item_details.image.startsWith("http")
-              ? trx.item_details.image
-              : `${BACKEND_URL}${trx.item_details.image}`
-            : DEFAULT_IMAGE,
-        }));
+  // --- 3. FILTERING (Client Side) ---
+  const filteredOrders = orders.filter((order) => {
+    if (!searchQuery) return true;
 
-        setOrders(mapped);
-      } catch (error) {
-        console.error("Gagal mengambil transaksi:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const query = searchQuery.toLowerCase();
 
-    fetchOrders();
-  }, []);
+    // Kita filter berdasarkan 'item_name' (judul) atau 'transaction_code'
+    // 'item_name' berasal dari normalisasi di Service
+    const title = order.item_name || order.type_label || "";
+    const code = order.transaction_code || "";
 
-  useEffect(() => {
-    setSelectedTransaction(null);
-  }, [location.key]);
-
-  useEffect(() => {
-    const handlePopState = () => {
-      setSelectedTransaction(null);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  const handleSelectTransaction = (order) => {
-    window.history.pushState(
-      { transactionId: order.id },
-      "",
-      window.location.pathname
-    );
-    setSelectedTransaction(order);
-  };
-
-  
-  const handleBackToList = () => {
-    setSelectedTransaction(null);
-  };
-
-  const filteredOrders = useMemo(() => {
-    if (!searchQuery) return orders;
-    const q = searchQuery.toLowerCase();
-    return orders.filter((o) =>
-      o.title?.toLowerCase().includes(q)
-    );
-  }, [orders, searchQuery]);
-
-
-  if (loading) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="animate-spin h-12 w-12 border-b-2 border-primary rounded-full" />
-      </div>
+      title.toLowerCase().includes(query) || code.toLowerCase().includes(query)
     );
+  });
+
+  // --- 4. UI LOADING ---
+  if (isLoading) {
+    return <MyProfileEnrolledSkeleton />;
   }
 
   return (

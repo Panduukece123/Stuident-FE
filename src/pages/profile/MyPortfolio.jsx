@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileService from "@/services/ProfileService";
+import { MyPortfolioSkeleton } from "@/components/skeleton/MyPortfolioSkeleton";
 
 export const MyPortfolio = () => {
   const navigate = useNavigate();
@@ -37,11 +38,7 @@ export const MyPortfolio = () => {
   });
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <MyPortfolioSkeleton />;
   }
 
   if (isError) {
@@ -52,7 +49,6 @@ export const MyPortfolio = () => {
     );
   }
 
-  // --- DESTRUCTURE DATA (Sesuai JSON response kamu) ---
   const {
     profile,
     prestasi = [],
@@ -65,7 +61,6 @@ export const MyPortfolio = () => {
 
   const { sebagai_murid = [], sebagai_mentor = [] } = sesi_mentoring;
 
-  // Helper Formatter
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("id-ID", {
@@ -115,11 +110,7 @@ export const MyPortfolio = () => {
           <div className="flex flex-wrap gap-2">
             {profile?.specialization && profile.specialization.length > 0 ? (
               profile.specialization.map((spec, i) => (
-                <Badge
-                  key={i}
-                >
-                  {spec}
-                </Badge>
+                <Badge key={i}>{spec}</Badge>
               ))
             ) : (
               <span className="text-xs text-muted-foreground italic">
@@ -159,10 +150,6 @@ export const MyPortfolio = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* =======================
-            KOLOM KIRI (2/3) 
-            (Pengalaman & Prestasi)
-           ======================= */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           {/* PENGALAMAN KERJA */}
           <div className="flex flex-col gap-4 bg-white p-6 border border-neutral-300 rounded-2xl">
@@ -253,11 +240,6 @@ export const MyPortfolio = () => {
             </div>
           </div>
         </div>
-
-        {/* =======================
-            KOLOM KANAN (1/3) 
-            (Org, Kursus, Mentoring, Beasiswa)
-           ======================= */}
         <div className="flex flex-col gap-6">
           {/* ORGANISASI */}
           <div className="bg-white border border-neutral-200 rounded-xl p-5 shadow-sm flex flex-col gap-4">
