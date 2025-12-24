@@ -87,7 +87,7 @@ export default function CourseShowPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 py-8 md:p-6 flex flex-col md:flex-row gap-4 md:gap-8">
+    <div className="max-w-7xl mx-auto pt-1 p-4 md:py-8 md:px-6 flex flex-col md:flex-row gap-4 md:gap-8">
       <div className="basis-full">
         {/* Legend Page */}
         <div className="w-full flex flex-row gap-4 items-center border-b">

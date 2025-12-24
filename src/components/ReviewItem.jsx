@@ -71,6 +71,7 @@ function ReviewItem({
                             variant={"outline"}
                             size={"icon"}
                             onClick={() => setIsEditOpen(true)}
+                            title="Edit ulasan"
                         >
                             <Edit />
                         </Button>
@@ -88,6 +89,7 @@ function ReviewItem({
                             variant={"destructive"}
                             size={"icon"}
                             onClick={() => setIsDeleteOpen(true)}
+                            title="Hapus ulasan"
                         >
                             <X />
                         </Button>

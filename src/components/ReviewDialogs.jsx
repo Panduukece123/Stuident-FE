@@ -6,8 +6,7 @@ import {
     DialogHeader,
     DialogPortal,
     DialogTitle,
-    DialogContent, // Pastikan ini diimpor dari file UI yang benar
-    DialogOverlay, // Tambahkan overlay agar tampilan benar
+    DialogContent,
 } from "./ui/dialog";
 import { Loader2, Star } from "lucide-react";
 import { Label } from "./ui/label";
@@ -145,7 +144,10 @@ export const EditReviewDialog = ({
                                             onValueChange={field.onChange}
                                             value={field.value?.toString()}
                                         >
-                                            <SelectTrigger id="rating" className={errors.rating ? "border-red-500 w-40" : "w-40"}>
+                                            <SelectTrigger
+                                                id="rating"
+                                                className={errors.rating ? "border-red-500 w-40" : "w-40"}
+                                            >
                                                 <SelectValue placeholder="Pilih Rating" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -162,7 +164,10 @@ export const EditReviewDialog = ({
                                         </Select>
                                     )}
                                 />
-
+                                {/* 
+                                TODO: Add error text?
+                                Should be impossible because ratings are already applied and cannot choose other else, unless something happened...
+                                */}
                             </div>
 
                             <Textarea
