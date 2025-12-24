@@ -61,6 +61,7 @@ function ReviewItem({
                     <Button
                         variant={"destructive"}
                         size={"icon"}
+                        title="Laporkan ulasan"
                     >
                         <MessageSquareWarning  />
                     </Button>
