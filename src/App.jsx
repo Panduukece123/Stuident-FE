@@ -19,7 +19,8 @@ import { ArticlePage } from "./pages/ArticlePage";
 import { ArticleDetailPage } from "./pages/ArticleDetailPage";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import ScholarshipDetail from "./pages/scholarsip/ScholarshipDetailPage";
+import ScholarshipDetail from "./pages/scholarsip/Detail/ScholarshipDetailPage";
+import ScholarshipApplicationPage from "./pages/scholarsip/scholarshipApplication/ScholarshipApplicationPage";
 import { LearnLayout } from "./layouts/LearnLayout";
 import { MyPortfolio } from "./pages/profile/MyPortfolio";
 import AdminLayout from "./layouts/AdminLayout";
@@ -77,6 +78,7 @@ function App() {
               path="scholarship/show/:id"
               element={<ScholarshipDetail />}
             />
+            <Route path="scholarship/application/:id" element={<ScholarshipApplicationPage />} />
           </Route>
 
           <Route element={<LearnLayout />}>
