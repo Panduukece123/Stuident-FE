@@ -4,8 +4,6 @@ import { useLocation } from "react-router-dom";
 import { ElearningBanner } from "../components/section/ElearningBanner";
 import { ElearningCategories } from "../components/section/ElearningCategories";
 import { ElearningCourseList } from "../components/section/ElearningCourseList";
-import ElearningService from "@/services/elearningService";
-import ProfileService from "@/services/ProfileService";
 import { ElearningList } from "@/components/section/ElearningList";
 import { InfoBootcamp } from "@/components/section/InfoBootcampSection";
 import { ElearningBootcampList } from "@/components/section/ElearningBootcampList";
@@ -13,13 +11,20 @@ import { ElearningEnrolledList } from "@/components/section/ElearningEnrolledLis
 import { BookOpen } from "lucide-react";
 import { ElearningPageSkeleton } from "@/components/skeleton/ElearningPageSkeleton";
 
+// IMPORT LAYANAN & COMPONENT SUBSCRIPTION
+import ElearningService from "@/services/elearningService";
+import ProfileService from "@/services/ProfileService";
+import { subscriptionService } from "@/services/SubscriptionService";
+import { InfoSubscription } from "@/components/section/InfoSubscription";
+import { UpgradeSubscriptionDialog } from "@/components/dialog/UpgradeSubsDialog";
+
 export const ElearningPage = () => {
   // --- SETUP SCROLL LOGIC ---
   const { hash } = useLocation();
   const token = localStorage.getItem("token");
   const isLoggedIn = !!localStorage.getItem("token");
 
-  // State Pagination
+  // State Pagination (biarkan seperti adanya)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [popularPage, setPopularPage] = useState(1);
@@ -27,7 +32,76 @@ export const ElearningPage = () => {
   const [bootcampPage, setBootcampPage] = useState(1);
   const bootcampLimit = 10;
 
-  // 1. Query Generic Courses
+  // --- LOGIC SUBSCRIPTION (PINDAHAN DARI INFOSUBSCRIPTION) ---
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [subsLoading, setSubsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [targetPlan, setTargetPlan] = useState("");
+  const [isUpgrading, setIsUpgrading] = useState(false);
+
+  // Fetch Subscription Data
+  const fetchSubscriptions = async () => {
+    try {
+      setSubsLoading(true);
+      const response = await subscriptionService.getMySubscriptions();
+      if (response.sukses) {
+        setSubscriptions(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+    } finally {
+      setSubsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
+
+  // Handler: Saat tombol Plan diklik di Child Component
+  const handlePlanClick = (selectedPlan) => {
+    setTargetPlan(selectedPlan);
+    setIsDialogOpen(true);
+  };
+
+  // Handler: Confirm Upgrade
+  const handleConfirmUpgrade = async (selectedPaymentMethod) => {
+    // Cari Subscription ID yang sedang aktif
+    const activeSub = subscriptions.find((sub) => sub.status === "active");
+    const activeId = activeSub ? activeSub.id : null;
+
+    if (!activeId) {
+      alert("Tidak ditemukan paket aktif untuk di-upgrade.");
+      return;
+    }
+
+    try {
+      setIsUpgrading(true);
+      const payload = {
+        plan: targetPlan,
+        payment_method: selectedPaymentMethod,
+      };
+
+      await subscriptionService.upgradeSubscription(activeId, payload);
+
+      setIsDialogOpen(false);
+      alert(`Berhasil upgrade ke ${targetPlan}!`);
+
+      // Refresh Data setelah sukses
+      fetchSubscriptions();
+    } catch (error) {
+      console.error("Upgrade failed:", error);
+      const errMsg =
+        error.response?.data?.message ||
+        "Gagal melakukan upgrade subscription.";
+      alert(errMsg);
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
+  // --- END LOGIC SUBSCRIPTION ---
+
+  // --- QUERY ELEARNING LAINNYA ---
   const {
     data: courses = [],
     isLoading: loadingCourses,
@@ -39,7 +113,6 @@ export const ElearningPage = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  // 2. Query Recommendations (BARU)
   const { data: recData, isLoading: loadingRecs } = useQuery({
     queryKey: ["recommendations", token],
     queryFn: ProfileService.getRecommendations,
@@ -47,7 +120,6 @@ export const ElearningPage = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  // 3. Query Enrolled
   const { data: enrolledCourses = [] } = useQuery({
     queryKey: ["enrolled-courses", token],
     queryFn: async () => {
@@ -76,17 +148,12 @@ export const ElearningPage = () => {
     }
   }, [loadingCourses, hash]);
 
-  // --- LOGIC DATA SOURCE (PERBAIKAN DI SINI) ---
-
-  // Karena JSON 'data' langsung berisi Array [], kita ambil langsung.
-  // JSON: { success: true, data: [ ...array courses... ] }
+  // Logic Data Source
   const recommendedCourses = Array.isArray(recData?.data) ? recData.data : [];
-
-  // Jika user login DAN ada data rekomendasi, pakai itu. Jika tidak, pakai generic courses.
   const discoverySource =
     isLoggedIn && recommendedCourses.length > 0 ? recommendedCourses : courses;
 
-  // Logic Pagination: Discovery
+  // Pagination Logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentDiscoveryCourses = discoverySource.slice(
@@ -95,13 +162,11 @@ export const ElearningPage = () => {
   );
   const totalDiscoveryPages = Math.ceil(discoverySource.length / itemsPerPage);
 
-  // Logic Pagination: Popular
   const idxLastPop = popularPage * popularLimit;
   const idxFirstPop = idxLastPop - popularLimit;
   const currentPopularCourses = courses.slice(idxFirstPop, idxLastPop);
   const totalPopularPages = Math.ceil(courses.length / popularLimit);
 
-  // Logic Pagination: Bootcamp
   const idxLastBoot = bootcampPage * bootcampLimit;
   const idxFirstBoot = idxLastBoot - bootcampLimit;
   const currentBootcampCourses = courses.slice(idxFirstBoot, idxLastBoot);
@@ -111,12 +176,10 @@ export const ElearningPage = () => {
     ...new Set(courses.map((course) => course.category)),
   ];
 
-  // --- SKELETON ---
   if (loadingCourses || (isLoggedIn && loadingRecs)) {
     return <ElearningPageSkeleton />;
   }
 
-  // Error State
   if (isCoursesError) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
@@ -217,6 +280,12 @@ export const ElearningPage = () => {
           />
         </div>
 
+        <InfoSubscription
+          subscriptions={subscriptions}
+          loading={subsLoading}
+          onSubscribe={handlePlanClick}
+        />
+
         <div id="course" className="scroll-mt-10">
           <ElearningCourseList
             title="Kursus Terpopuler"
@@ -232,7 +301,6 @@ export const ElearningPage = () => {
 
         <InfoBootcamp />
 
-        {/* --- 4. PASANG ID UNTUK BOOTCAMP --- */}
         <div id="bootcamp" className="scroll-mt-10">
           <ElearningBootcampList
             title="Kursus Bootcamp"
@@ -245,6 +313,15 @@ export const ElearningPage = () => {
             onPageChange={setBootcampPage}
           />
         </div>
+
+        {/* --- RENDER DIALOG DI PARENT --- */}
+        <UpgradeSubscriptionDialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          planName={targetPlan}
+          isLoading={isUpgrading}
+          onConfirm={handleConfirmUpgrade}
+        />
       </main>
     </div>
   );
