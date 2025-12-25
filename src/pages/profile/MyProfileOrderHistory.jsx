@@ -4,6 +4,7 @@ import TransactionService from "@/services/TransactionService";
 import { OrderHistoryList } from "@/components/section/OrderHistoryList";
 import { OrderHistoryDetail } from "@/components/section/OrderHistoryDetail";
 import { Input } from "@/components/ui/input";
+import { OrderHistorySkeleton } from "@/components/skeleton/OrderHistorySkeleton";
 
 const BACKEND_URL = "http://localhost:8000";
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
@@ -46,15 +47,6 @@ export const MyProfileOrderHistory = () => {
     setSelectedTransaction(null);
   }, [location.key]);
 
-  useEffect(() => {
-    const handlePopState = () => {
-      setSelectedTransaction(null);
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
   const handleSelectTransaction = (order) => {
     window.history.pushState(
       { transactionId: order.id },
@@ -64,7 +56,6 @@ export const MyProfileOrderHistory = () => {
     setSelectedTransaction(order);
   };
 
-  
   const handleBackToList = () => {
     setSelectedTransaction(null);
   };
@@ -77,23 +68,26 @@ export const MyProfileOrderHistory = () => {
     );
   }, [orders, searchQuery]);
 
-
+  /* ======================
+      LOADING STATE
+  ====================== */
   if (loading) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="animate-spin h-12 w-12 border-b-2 border-primary rounded-full" />
+      <div className="space-y-6">
+        <div className="w-full flex flex-col items-center border-b-2 border-b-primary p-2">
+          <div className="h-6 w-40 bg-gray-200 rounded animate-pulse mb-3" />
+        </div>
+        <OrderHistorySkeleton count={4} />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-     
       <div className="w-full flex flex-col items-center border-b-2 border-b-primary p-2">
         <h1 className="text-xl font-semibold mb-3">Order History</h1>
       </div>
 
-      
       {!selectedTransaction && (
         <Input
           type="text"

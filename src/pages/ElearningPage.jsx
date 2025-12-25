@@ -11,7 +11,7 @@ import { InfoBootcamp } from "@/components/section/InfoBootcampSection";
 import { ElearningBootcampList } from "@/components/section/ElearningBootcampList";
 import { ElearningEnrolledList } from "@/components/section/ElearningEnrolledList";
 import { BookOpen } from "lucide-react";
-import { ElearningPageSkeleton } from "@/components/ElearningPageSkeleton";
+import { ElearningPageSkeleton } from "@/components/skeleton/ElearningPageSkeleton";
 
 export const ElearningPage = () => {
   // --- SETUP SCROLL LOGIC ---
@@ -27,31 +27,39 @@ export const ElearningPage = () => {
   const [bootcampPage, setBootcampPage] = useState(1);
   const bootcampLimit = 10;
 
-  // Query Courses
-  const { 
-    data: courses = [], 
-    isLoading: loadingCourses, 
+  // 1. Query Generic Courses
+  const {
+    data: courses = [],
+    isLoading: loadingCourses,
     isError: isCoursesError,
-    error: coursesError 
+    error: coursesError,
   } = useQuery({
     queryKey: ["courses"],
     queryFn: ElearningService.fetchCourses,
     staleTime: 1000 * 60 * 5,
   });
 
-  // Query Enrolled
+  // 2. Query Recommendations (BARU)
+  const { data: recData, isLoading: loadingRecs } = useQuery({
+    queryKey: ["recommendations", token],
+    queryFn: ProfileService.getRecommendations,
+    enabled: isLoggedIn,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // 3. Query Enrolled
   const { data: enrolledCourses = [] } = useQuery({
     queryKey: ["enrolled-courses", token],
     queryFn: async () => {
-      if (!isLoggedIn) return []; 
+      if (!isLoggedIn) return [];
       try {
         const res = await ProfileService.getEnrolledCourses();
-        return Array.isArray(res) ? res : (res.data || []);
+        return Array.isArray(res) ? res : res.data || [];
       } catch (err) {
         return [];
       }
     },
-    enabled: isLoggedIn, 
+    enabled: isLoggedIn,
     staleTime: 1000 * 60 * 2,
   });
 
@@ -68,17 +76,32 @@ export const ElearningPage = () => {
     }
   }, [loadingCourses, hash]);
 
-  // Logic Pagination
+  // --- LOGIC DATA SOURCE (PERBAIKAN DI SINI) ---
+
+  // Karena JSON 'data' langsung berisi Array [], kita ambil langsung.
+  // JSON: { success: true, data: [ ...array courses... ] }
+  const recommendedCourses = Array.isArray(recData?.data) ? recData.data : [];
+
+  // Jika user login DAN ada data rekomendasi, pakai itu. Jika tidak, pakai generic courses.
+  const discoverySource =
+    isLoggedIn && recommendedCourses.length > 0 ? recommendedCourses : courses;
+
+  // Logic Pagination: Discovery
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentCourses = courses.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(courses.length / itemsPerPage);
+  const currentDiscoveryCourses = discoverySource.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalDiscoveryPages = Math.ceil(discoverySource.length / itemsPerPage);
 
+  // Logic Pagination: Popular
   const idxLastPop = popularPage * popularLimit;
   const idxFirstPop = idxLastPop - popularLimit;
   const currentPopularCourses = courses.slice(idxFirstPop, idxLastPop);
   const totalPopularPages = Math.ceil(courses.length / popularLimit);
 
+  // Logic Pagination: Bootcamp
   const idxLastBoot = bootcampPage * bootcampLimit;
   const idxFirstBoot = idxLastBoot - bootcampLimit;
   const currentBootcampCourses = courses.slice(idxFirstBoot, idxLastBoot);
@@ -88,8 +111,8 @@ export const ElearningPage = () => {
     ...new Set(courses.map((course) => course.category)),
   ];
 
-  // --- 2. IMPLEMENTASI SKELETON ---
-  if (loadingCourses) {
+  // --- SKELETON ---
+  if (loadingCourses || (isLoggedIn && loadingRecs)) {
     return <ElearningPageSkeleton />;
   }
 
@@ -121,7 +144,9 @@ export const ElearningPage = () => {
         >
           Previous
         </button>
-        <span className="text-sm font-medium">Page {page} of {total}</span>
+        <span className="text-sm font-medium">
+          Page {page} of {total}
+        </span>
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page === total}
@@ -138,52 +163,72 @@ export const ElearningPage = () => {
       <main className="flex-1">
         <ElearningBanner />
         <ElearningCategories categories={uniqueCategories} />
-        
-        {isLoggedIn && (
-           enrolledCourses.length > 0 ? (
+
+        {isLoggedIn &&
+          (enrolledCourses.length > 0 ? (
             <ElearningEnrolledList
               title="Kursus yang Sedang Diikuti"
               subtitle="Lanjutkan progres belajar Anda."
-              courses={enrolledCourses} 
+              courses={enrolledCourses}
             />
-           ) : (
+          ) : (
             <section className="px-6 py-12">
-               <div className="mb-6">
-                  <h2 className="text-2xl font-bold mb-2">Kursus yang Sedang Diikuti</h2>
-                  <p className="text-muted-foreground">Lanjutkan progres belajar Anda.</p>
-               </div>
-               <div className="w-full py-12 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-center gap-4 bg-gray-50/50">
-                  <div className="bg-white p-4 rounded-full shadow-sm">
-                    <BookOpen className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Belum ada kursus yang diikuti</h3>
-                    <p className="text-sm text-gray-500 max-w-sm mx-auto mt-1">
-                      Anda belum mendaftar di kursus manapun. Yuk, mulai perjalanan belajar Anda sekarang!
-                    </p>
-                  </div>
-               </div>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">
+                  Kursus yang Sedang Diikuti
+                </h2>
+                <p className="text-muted-foreground">
+                  Lanjutkan progres belajar Anda.
+                </p>
+              </div>
+              <div className="w-full py-12 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-center gap-4 bg-gray-50/50">
+                <div className="bg-white p-4 rounded-full shadow-sm">
+                  <BookOpen className="h-8 w-8 text-gray-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Belum ada kursus yang diikuti
+                  </h3>
+                  <p className="text-sm text-gray-500 max-w-sm mx-auto mt-1">
+                    Anda belum mendaftar di kursus manapun. Yuk, mulai
+                    perjalanan belajar Anda sekarang!
+                  </p>
+                </div>
+              </div>
             </section>
-           )
-        )}
+          ))}
 
-        {/* --- 3. PASANG ID UNTUK COURSE --- */}
-        {/* Tambahkan div wrapper dengan ID 'course' dan class scroll-mt biar gak ketutup navbar */}
-        <div id="course" className="scroll-mt-10">
+        <div>
           <ElearningList
-            title="Temukan Keahlian Baru"
-            subtitle="Perluas wawasan Anda dengan mempelajari topik-topik relevan."
-            courses={currentCourses}
+            title={
+              isLoggedIn ? "Rekomendasi Untuk Anda" : "Temukan Keahlian Baru"
+            }
+            subtitle={
+              isLoggedIn
+                ? "Kursus yang disesuaikan dengan minat dan spesialisasi Anda."
+                : "Perluas wawasan Anda dengan mempelajari topik-topik relevan."
+            }
+            courses={currentDiscoveryCourses}
           />
-          <PaginationControl page={currentPage} total={totalPages} onPageChange={setCurrentPage} />
+          <PaginationControl
+            page={currentPage}
+            total={totalDiscoveryPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
 
-        <ElearningCourseList
-          title="Kursus Terpopuler"
-          subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain."
-          courses={currentPopularCourses}
-        />
-        <PaginationControl page={popularPage} total={totalPopularPages} onPageChange={setPopularPage} />
+        <div id="course" className="scroll-mt-10">
+          <ElearningCourseList
+            title="Kursus Terpopuler"
+            subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain."
+            courses={currentPopularCourses}
+          />
+          <PaginationControl
+            page={popularPage}
+            total={totalPopularPages}
+            onPageChange={setPopularPage}
+          />
+        </div>
 
         <InfoBootcamp />
 
@@ -194,7 +239,11 @@ export const ElearningPage = () => {
             subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
             courses={currentBootcampCourses}
           />
-          <PaginationControl page={bootcampPage} total={totalBootcampPages} onPageChange={setBootcampPage} />
+          <PaginationControl
+            page={bootcampPage}
+            total={totalBootcampPages}
+            onPageChange={setBootcampPage}
+          />
         </div>
       </main>
     </div>

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query"; // 1. Import useQuery
 import ProfileService from "@/services/ProfileService";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { MyProfileEnrolledSkeleton } from "@/components/ProfileSkeleton";
+import { MyProfileEnrolledSkeleton } from "@/components/skeleton/ProfileSkeleton";
 
 export const MyProfileEnrolledCourse = () => {
   // --- STATE ---
@@ -12,16 +12,16 @@ export const MyProfileEnrolledCourse = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // --- 2. FETCH DATA DENGAN TANSTACK QUERY ---
-  const { 
+  const {
     data: courses = [], // Default ke array kosong biar gak error pas filter
-    isLoading, 
-    isError 
+    isLoading,
+    isError,
   } = useQuery({
     queryKey: ["my-enrolled-courses"], // Key unik untuk cache
     queryFn: async () => {
       const res = await ProfileService.getEnrolledCourses();
       // Pastikan return-nya Array. Jaga-jaga kalau response-nya { data: [...] }
-      return Array.isArray(res) ? res : (res.data || []);
+      return Array.isArray(res) ? res : res.data || [];
     },
     staleTime: 1000 * 60 * 5, // Data dianggap fresh selama 5 menit
   });
@@ -36,7 +36,7 @@ export const MyProfileEnrolledCourse = () => {
 
   // --- 4. TAMPILAN LOADING ---
   if (isLoading) {
-    return <MyProfileEnrolledSkeleton />
+    return <MyProfileEnrolledSkeleton />;
   }
 
   // Opsional: Tampilan Error

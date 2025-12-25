@@ -48,17 +48,25 @@ export const LoginPage = () => {
       const responseData = await authService.login(data);
       
       const token = responseData.data?.token || responseData.token || responseData.access_token;
+      
+      // Ambil data user untuk dicek role-nya
+      const userData = responseData.data?.user || responseData.user;
 
       if (token) {
         localStorage.setItem("token", token);
 
-        if (responseData.data?.user) {
-          localStorage.setItem("user", JSON.stringify(responseData.data.user));
-        } else if (responseData.user) {
-          localStorage.setItem("user", JSON.stringify(responseData.user));
+        if (userData) {
+          localStorage.setItem("user", JSON.stringify(userData));
         }
 
-        navigate("/");
+        // --- LOGIC REDIRECT (HANYA BAGIAN INI YG DIUBAH) ---
+        if (userData?.role === 'admin' || userData?.role === 'superadmin') {
+            navigate("/admin/users"); // Atau '/admin/dashboard'
+        } else {
+            navigate("/");
+        }
+        // ----------------------------------------------------
+
       } else {
         console.error("Token tidak ditemukan.");
         setError("email", {

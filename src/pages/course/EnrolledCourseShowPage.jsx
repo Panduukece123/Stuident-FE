@@ -20,7 +20,7 @@ import {
   Circle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EnrolledCourseShowSkeleton } from "@/components/EnrolledCourseShowSkeleton";
+import { EnrolledCourseShowSkeleton } from "@/components/skeleton/EnrolledCourseShowSkeleton";
 
 export const EnrolledCourseShowPage = () => {
   const { id } = useParams();
@@ -221,14 +221,16 @@ export const EnrolledCourseShowPage = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
           <Link to="/profile/my-enrolled-courses ">
-            <Button className={"rounded-full cursor-pointer" }>
+            <Button className={"rounded-full cursor-pointer"}>
               <ChevronLeft /> Back
             </Button>
           </Link>
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/profile/my-enrolled-courses">Kursus Saya</BreadcrumbLink>
+                <BreadcrumbLink href="/profile/my-enrolled-courses">
+                  Kursus Saya
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem aria-current="page">

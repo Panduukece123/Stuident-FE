@@ -11,6 +11,7 @@ const RecomendContent = () => {
 
   const {data: scholarships = [], isLoading} = useQuery({
     queryKey: ['recommended-scholarships', filters],
+
     queryFn: async () => {
       const params = { is_recommended: 1, ...filters }; 
       const response = await scholarshipService.getScholarships(params);

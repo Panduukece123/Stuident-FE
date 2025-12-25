@@ -1,15 +1,13 @@
 import React from "react";
-import { useNavigate } from "react-router";
-
+import { useNavigate } from "react-router-dom";
 
 export const OrderHistoryDetail = ({ order, onBack }) => {
-  if (!order) return null;
-
   const navigate = useNavigate();
+  if (!order) return null;
 
   const isMentoring = order.type === "mentoring_session";
   const isSubscription = order.type === "subscription";
-  const isPaid = order.status === "paid"; 
+  const isPaid = order.status === "paid";
   const isPending = order.status === "pending";
 
   const handleStartLearning = () => {
@@ -22,10 +20,35 @@ export const OrderHistoryDetail = ({ order, onBack }) => {
         break;
       }
 
-      case "subscription": {
+      case "subscription":
         navigate("/my-subscription");
         break;
+
+      case "mentoring_session": {
+        const mentoringId = order.item_details?.id;
+        if (mentoringId) navigate(`/mentoring/${mentoringId}`);
+        break;
       }
+
+      default:
+        console.warn("Unknown order type:", order.type);
+    }
+  };
+
+  const handlePendingAction = () => {
+    console.log("CLICKED", order);
+
+    if (!isPending) return;
+    switch (order.type) {
+      case "course_enrollment": {
+        const courseId = order.item_details?.id;
+        if (courseId) navigate(`/course/show/${courseId}`);
+        break;
+      }
+
+      case "subscription":
+        navigate("/my-subscription");
+        break;
 
       case "mentoring_session": {
         const mentoringId = order.item_details?.id;
@@ -64,6 +87,7 @@ export const OrderHistoryDetail = ({ order, onBack }) => {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm max-w-4xl mx-auto">
       <div className="space-y-8">
+        {/* HEADER */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
             Invoice Transaction
@@ -74,6 +98,7 @@ export const OrderHistoryDetail = ({ order, onBack }) => {
           </p>
         </div>
 
+        {/* CONTENT */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
           <div className="space-y-4">
             <DetailRow label="Email" value={order.user?.email || "-"} />
@@ -123,18 +148,14 @@ export const OrderHistoryDetail = ({ order, onBack }) => {
           {/* RIGHT */}
           <div className="space-y-6">
             <div>
-              <p className="text-sm font-bold text-gray-900">
-                Tanggal Expired
-              </p>
+              <p className="text-sm font-bold text-gray-900">Tanggal Expired</p>
               <p className="text-sm text-gray-600">
                 {formatDate(order.expired_at)}
               </p>
             </div>
 
             <div>
-              <p className="text-sm font-bold text-gray-900 mb-2">
-                Status
-              </p>
+              <p className="text-sm font-bold text-gray-900 mb-2">Status</p>
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
                   order.status
@@ -164,8 +185,8 @@ export const OrderHistoryDetail = ({ order, onBack }) => {
             </button>
           ) : (
             <button
-              disabled={!isPending}
-              className="w-full py-2.5 bg-yellow-500 text-white rounded-lg font-semibold disabled:opacity-60"
+              onClick={handlePendingAction}
+              className="w-full py-2.5 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition"
             >
               Selesaikan Pembayaran
             </button>
