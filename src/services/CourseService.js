@@ -32,11 +32,11 @@ const courseService = {
     const token = localStorage.getItem("token"); // <--- Harus ambil dulu!
 
     const response = await api.post(
-      `/curriculums/${curriculumId}/complete`, 
+      `/curriculums/${curriculumId}/complete`,
       {
-        completed: true
-      }, 
-      {  
+        completed: true,
+      },
+      {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
@@ -44,7 +44,42 @@ const courseService = {
       }
     );
     return response.data;
-},
+  },
+
+  enrollCourse: async (courseId, paymentMethod) => {
+    const token = localStorage.getItem("token");
+
+    // GANTI JADI INI (Sesuai Postman kamu):
+    return await api.post(`/courses/${courseId}/enroll`, 
+      {
+        payment_method: paymentMethod,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        }
+      }
+    );
+  },
+  // =======================================
+
+  uploadPaymentProof: async (transactionId, file) => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("payment_proof", file);
+
+    return await api.post(
+      `/transactions/${transactionId}/payment-proof`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  },
 };
 
 export default courseService;
