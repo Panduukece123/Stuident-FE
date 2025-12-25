@@ -181,11 +181,6 @@ export const MyProfileEnrolledSkeleton = () => {
 
       {/* Grid List */}
       <div className="bg-background">
-         {/* Title Section */}
-         <div className="mb-4 space-y-2">
-             <Skeleton className={`h-8 w-64 ${skeletonColor}`} /> 
-             <Skeleton className={`h-4 w-48 ${skeletonColor}`} />
-         </div>
          
          {/* Grid 3 Kolom */}
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

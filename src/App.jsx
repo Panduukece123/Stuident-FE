@@ -27,6 +27,8 @@ import AdminLayout from "./layouts/AdminLayout";
 import { ManageUsers } from "./pages/admin/AdminUsers";
 import AdminRoute from "./components/route/AdminRoute";
 import AdminCourses from "./pages/admin/AdminCourses";
+import { MyProfileMySession } from "./pages/profile/MyProfileMySession";
+import MyMentoringSessionDetail from "./pages/profile/MyMentoringSessionDetail";
 
 
 const queryClient = new QueryClient({
@@ -72,6 +74,8 @@ function App() {
                 path="my-enrolled-courses"
                 element={<MyProfileEnrolledCourse />}
               />
+              <Route path="my-mentoring-sessions" element={<MyProfileMySession />} />
+              <Route path="my-mentoring-sessions/:id" element={<MyMentoringSessionDetail />} />
             </Route>
 
             <Route path="article" element={<ArticlePage />} />
