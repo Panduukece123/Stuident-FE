@@ -26,30 +26,38 @@ const ProfileService = {
     return response.data;
   },
 
-  // 3. UPDATE PROFILE
+  // 3. UPDATE PROFILE (Fix Syntax Axios)
   updateProfile: async (payload) => {
     const token = localStorage.getItem("token");
+
+    // Axios: api.put(url, data, config)
+    // Tidak perlu JSON.stringify, Axios otomatis handle
     const response = await api.put("/auth/profile", payload, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
     });
+
     return response.data;
   },
 
   updateSpecializations: async (specializationsArray) => {
     try {
       const payload = {
-        specialization: specializationsArray,
+        specialization: specializationsArray 
       };
+
       const token = localStorage.getItem("token");
-      const response = await api.put("/auth/profile", payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-      });
+
+      const response = await api.put( "/auth/profile", payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          }
+        }
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -59,13 +67,16 @@ const ProfileService = {
   // 4. UPLOAD AVATAR
   uploadAvatar: async (file) => {
     const token = localStorage.getItem("token");
+
+    // Wajib pakai FormData buat upload file
     const formData = new FormData();
-    formData.append("photo", file);
+    formData.append("photo", file); // Key 'photo' sesuai validasi backend
+
     const response = await api.post("/auth/profile/photo", formData, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "multipart/form-data", // Header wajib upload
       },
     });
     return response.data;
@@ -73,19 +84,27 @@ const ProfileService = {
 
   getAvatarUrl: (user) => {
     if (!user) return "";
+
+    // 1. Cek prioritas field gambar
     let url = user.profile_photo_url || user.profile_photo || user.avatar_url;
+
+    // 2. Jika path relatif (bukan http), tambahkan domain backend + folder storage
     if (url && !url.startsWith("http")) {
+      // Pastikan formatnya rapi (handle slash)
       const cleanPath = url.startsWith("/") ? url.substring(1) : url;
       url = `${BACKEND_URL}/storage/${cleanPath}`;
     }
+
     return url;
   },
 
-  // === EXPERIENCE SECTION ===
+  // === EXPERIENCE SECTION (FIXED) ===
 
   // 5. ADD EXPERIENCE
   addExperience: async (payload) => {
     const token = localStorage.getItem("token");
+
+    // PENTING: Endpoint diganti ke /experiences (bukan achievements lagi)
     const response = await api.post("/experiences", payload, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -98,6 +117,7 @@ const ProfileService = {
   // 6. UPDATE EXPERIENCE
   updateExperience: async (id, payload) => {
     const token = localStorage.getItem("token");
+
     const response = await api.put(`/experiences/${id}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -109,6 +129,7 @@ const ProfileService = {
 
   deleteExperience: async (id) => {
     const token = localStorage.getItem("token");
+    // Method DELETE ke endpoint specific ID
     const response = await api.delete(`/experiences/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -118,11 +139,12 @@ const ProfileService = {
     return response.data;
   },
 
-  // === ACHIEVEMENT SECTION ===
+  // === ACHIEVEMENT SECTION (FIXED) ===
 
   // 7. ADD ACHIEVEMENT
   addAchievement: async (payload) => {
     const token = localStorage.getItem("token");
+
     const response = await api.post("/achievements", payload, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -135,6 +157,7 @@ const ProfileService = {
   // 8. UPDATE ACHIEVEMENT
   updateAchievement: async (id, payload) => {
     const token = localStorage.getItem("token");
+
     const response = await api.put(`/achievements/${id}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -157,6 +180,7 @@ const ProfileService = {
 
   getEnrolledCourses: async () => {
     const token = localStorage.getItem("token");
+
     const response = await api.get("/my-courses", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -166,65 +190,140 @@ const ProfileService = {
 
     const responseData = response.data;
     const data = responseData.data || [];
-    const BACKEND_URL = "http://localhost:8000";
+
+    const BACKEND_URL = "http://localhost:8000"; 
     const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
 
     if (Array.isArray(data)) {
+      // Ubah nama parameter jadi 'item' (karena ini objek enrollment, bukan course langsung)
       return data.map((item) => {
+        
         const courseData = item.course || {};
 
         // 1. LOGIKA GAMBAR
-        let imageUrl = courseData.image;
+        // Di JSON kamu key-nya adalah "image", bukan "image_url"
+        let imageUrl = courseData.image; 
+
         if (imageUrl && !imageUrl.startsWith("http")) {
+          // Tambahkan base URL jika path relatif (bukan dari unsplash)
           imageUrl = `${BACKEND_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
         }
 
-        // 2. LOGIKA SERTIFIKAT - DIPERBAIKI: Ambil dari enrollment (item), bukan course
-        let certificatePath = item.certificate_url || null; // Dari enrollment
-        if (certificatePath && certificatePath.includes("example.com")) {
-          certificatePath = null;
-        }
-        if (certificatePath && !certificatePath.startsWith("http")) {
-          certificatePath = `${BACKEND_URL}/storage/${certificatePath}`;
-        }
-
+        // 2. RETURN OBJECT YANG SUDAH DIRAPIKAN
         return {
-          id: courseData.id,
+          // Gunakan ID dari courseData (5), bukan ID enrollment (7)
+          // Biar kalau diklik arahnya benar ke /course/5
+          id: courseData.id, 
+
           title: courseData.title || "Untitled Course",
           level: courseData.level || "Beginner",
-          rating: Number(courseData.average_rating) || 0,
+          
+          // Sesuaikan key dengan JSON backend
+          rating: Number(courseData.average_rating) || 0, 
           reviews: Number(courseData.total_reviews) || 0,
+          
           description: courseData.description || "No description available.",
           price: courseData.price ? Number(courseData.price) : 0,
+          
           image: imageUrl || DEFAULT_IMAGE,
+          
           instructor: courseData.instructor || "Unknown",
           category: courseData.category || "Umum",
-          
-          // Data dari enrollment
-          progress: item.progress || 0,
+          progress: courseData.progress || 0,
+          completed: courseData.completed || false,
+          certificate: courseData.certificate_url || null,
+
+          // --- DATA PENTING DARI ENROLLMENT (Parent Object) ---
+          progress: item.progress || 0, // Ambil dari item, bukan courseData
           completed: item.completed || false,
-          certificate: certificatePath,
-          enrollment_id: item.id,
+          enrollment_id: item.id // Simpan ID pendaftaran kalau butuh nanti
         };
       });
     }
+
     return [];
   },
 
   uploadCv: async (file) => {
-    const token = localStorage.getItem("token");
+    // 1. AMBIL TOKEN DULU DARI LOCALSTORAGE
+    const token = localStorage.getItem("token"); 
+
     const formData = new FormData();
     formData.append("cv", file);
+
     const response = await api.post("/auth/profile/cv", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
+        // 2. Pastikan token dipakai di sini
+        "Authorization": `Bearer ${token}`, 
       },
     });
     return response.data;
   },
 
-  // === PORTFOLIO & RECOMMENDATIONS ===
+  getPortfolio: async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await api.get("/auth/portfolio", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  uploadAchievementCertificate: async (id, file) => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append('certificate', file); // Pastikan key-nya sesuai request Laravel ('certificate' atau 'file')
+    
+    // Endpoint: /achievements/{id}/certificate
+    const response = await api.post(`/achievements/${id}/certificate`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  },
+
+  deleteAchievementCertificate: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/achievements/${id}/certificate`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  // --- EXPERIENCE CERTIFICATE ---
+  uploadExperienceCertificate: async (id, file) => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append('certificate', file); // Sesuaikan key backend ('certificate' atau 'file')
+    
+    const response = await api.post(`/experiences/${id}/certificate`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  },
+
+  deleteExperienceCertificate: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/experiences/${id}/certificate`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
 
   getPortfolio: async () => {
     const token = localStorage.getItem("token");
@@ -247,79 +346,7 @@ const ProfileService = {
     });
     return response.data;
   },
-
-  getCV: async () => {
-    const token = localStorage.getItem("token");
-    const response = await api.get("/auth/profile/cv", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-    return response.data;
-  },
-
-  // === CERTIFICATE UPLOADS ===
-
-  uploadAchievementCertificate: async (id, file) => {
-    const token = localStorage.getItem("token");
-    const formData = new FormData();
-    formData.append("certificate", file);
-    const response = await api.put(`/achievements/${id}/certificate`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  },
-
-  deleteAchievementCertificate: async (id) => {
-    const token = localStorage.getItem("token");
-    const response = await api.delete(`/achievements/${id}/certificate`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-    return response.data;
-  },
-
-  uploadExperienceCertificate: async (id, file) => {
-    const token = localStorage.getItem("token");
-    const formData = new FormData();
-    formData.append("certificate", file);
-    const response = await api.put(`/experiences/${id}/certificate`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  },
-
-  deleteExperienceCertificate: async (id) => {
-    const token = localStorage.getItem("token");
-    const response = await api.delete(`/experiences/${id}/certificate`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-    return response.data;
-  },
-
-  // === GENERATE CERTIFICATE ===
-  generateCertificate: async (enrollmentId) => {
-    const token = localStorage.getItem("token");
-    const response = await api.post(`/enrollments/${enrollmentId}/generate-certificate`, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-    return response.data;
-  },
+  
 };
 
 export default ProfileService;
