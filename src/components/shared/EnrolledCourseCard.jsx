@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import { Star, FileText, PlayCircle } from "lucide-react"; // Saya tambah icon biar cakep
 import { Progress } from "../ui/progress";
 
+
 export const EnrolledCourseCard = ({
   title,
   level,
@@ -21,16 +22,19 @@ export const EnrolledCourseCard = ({
   image,
   certificate,
 }) => {
-  // Di dalam EnrolledCourseCard.jsx
+  // Fungsi utilitas untuk membangun URL sertifikat
+  const getCertificateUrl = (path) => {
+    if (!path) return "#";
+    if (path.startsWith("http")) return path;
+    const cleanPath = path.startsWith("/") ? path.substring(1) : path;
+    return `http://localhost:8000/storage/${cleanPath}`;
+  };
 
   const handleOpenCertificate = (e) => {
-    // 1. MATIKAN Event Bubbling & Default Behavior
     e.preventDefault();
     e.stopPropagation();
-
-    // 2. Baru jalankan logika buka link
     if (certificate) {
-      window.open(certificate, "_blank");
+      window.open(getCertificateUrl(certificate), "_blank");
     } else {
       alert("Sertifikat belum tersedia atau link rusak.");
     }
