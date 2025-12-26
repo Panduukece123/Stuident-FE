@@ -6,35 +6,33 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Save, Trash2, Edit2, X } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Trash2, Edit2, X, CheckCircle } from "lucide-react";
 import { NeedAssessmentSkeleton } from "../skeleton/NeedAssessmentSkeleton";
 
-export const NeedAssessmentTab = ({ sessionId }) => {
+export const NeedAssessmentTab = ({ sessionId, isMentor = false }) => {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   
-  // State Form
   const [formData, setFormData] = useState({
     goals: "",
     current_situation: "",
     expectations: "",
-    challenges: "", // Kita handle sebagai string comma-separated dulu di UI
+    challenges: "",
   });
 
-  // 1. Fetch Data
   const { data: result, isLoading } = useQuery({
     queryKey: ["need-assessment", sessionId],
     queryFn: () => MentoringService.getNeedAssessment(sessionId),
   });
   
-  const assessmentData = result?.data; // Data dari API
+  const assessmentData = result?.data;
 
-  // Effect untuk isi form saat data di-load
   useEffect(() => {
     if (assessmentData?.form_data) {
       setFormData({
         ...assessmentData.form_data,
-        // Convert array challenges ke string biar bisa diedit di input
         challenges: Array.isArray(assessmentData.form_data.challenges) 
           ? assessmentData.form_data.challenges.join(", ") 
           : assessmentData.form_data.challenges
@@ -42,15 +40,13 @@ export const NeedAssessmentTab = ({ sessionId }) => {
     }
   }, [assessmentData]);
 
-  // 2. Mutations (Create/Update/Delete)
+  // --- MUTATIONS ---
   const saveMutation = useMutation({
     mutationFn: (data) => {
-      // Convert string challenges balik ke array
       const payload = {
         ...data,
         challenges: data.challenges.split(",").map(item => item.trim()).filter(i => i)
       };
-
       if (assessmentData) {
         return MentoringService.updateNeedAssessment(sessionId, payload);
       } else {
@@ -73,89 +69,99 @@ export const NeedAssessmentTab = ({ sessionId }) => {
     }
   });
 
-  // Handlers
-  const handleSubmit = (e) => {
+  const completeMutation = useMutation({
+    mutationFn: () => MentoringService.markAssessmentCompleted(sessionId),
+    onSuccess: () => {
+        queryClient.invalidateQueries(["need-assessment", sessionId]);
+        alert("Assessment ditandai selesai.");
+    }
+  });
+
+  const handleSubmitStudent = (e) => {
     e.preventDefault();
     saveMutation.mutate(formData);
   };
 
   if (isLoading) return <NeedAssessmentSkeleton />;
 
-  // --- RENDER ---
-  const isFormMode = isEditing || !assessmentData;
+  const isFormMode = !isMentor && (isEditing || !assessmentData);
+  const isCompleted = assessmentData?.status === "completed";
+  const readOnlyClass = "disabled:opacity-100 disabled:cursor-default disabled:bg-white text-neutral-900 border-neutral-300";
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Need Assessment</CardTitle>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <CardTitle>Need Assessment</CardTitle>
+            {isCompleted && <Badge className="bg-green-600">Completed</Badge>}
+          </div>
           <CardDescription>Evaluasi kebutuhan mentoring Anda.</CardDescription>
         </div>
         
-        {/* Tombol Action (Edit/Delete/Cancel) */}
-        {!isFormMode && (
+        {!isMentor && !isFormMode && (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} disabled={isCompleted}>
               <Edit2 className="h-4 w-4 mr-2" /> Edit
             </Button>
             <Button variant="destructive" size="sm" onClick={() => {
                 if(window.confirm("Yakin hapus data ini?")) deleteMutation.mutate();
-            }}>
+            }} disabled={isCompleted}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         )}
-        {isEditing && assessmentData && (
+        {!isMentor && isEditing && assessmentData && (
              <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>
                 <X className="h-4 w-4 mr-2" /> Batal
              </Button>
         )}
       </CardHeader>
       
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          
+      <CardContent className="space-y-6">
+        <form onSubmit={handleSubmitStudent} className="space-y-4">
           <div className="space-y-1">
             <Label>Situasi Saat Ini</Label>
             <Textarea 
-              disabled={!isFormMode}
+              disabled={isMentor || !isFormMode}
               value={formData.current_situation}
               onChange={(e) => setFormData({...formData, current_situation: e.target.value})}
               placeholder="Contoh: Mahasiswa semester 5 bingung arah karir..."
+              className={readOnlyClass}
             />
           </div>
-
           <div className="space-y-1">
             <Label>Tujuan (Goals)</Label>
             <Input 
-              disabled={!isFormMode}
+              disabled={isMentor || !isFormMode}
               value={formData.goals}
               onChange={(e) => setFormData({...formData, goals: e.target.value})}
               placeholder="Contoh: Ingin menjadi Backend Developer..."
+              className={readOnlyClass}
             />
           </div>
-
           <div className="space-y-1">
-            <Label>Tantangan (Pisahkan dengan koma)</Label>
+            <Label>Tantangan</Label>
             <Input 
-              disabled={!isFormMode}
+              disabled={isMentor || !isFormMode}
               value={formData.challenges}
               onChange={(e) => setFormData({...formData, challenges: e.target.value})}
               placeholder="Contoh: Kurang pengalaman, Tidak bisa manajemen waktu"
+              className={readOnlyClass}
             />
           </div>
-
           <div className="space-y-1">
             <Label>Ekspektasi Mentoring</Label>
             <Textarea 
-              disabled={!isFormMode}
+              disabled={isMentor || !isFormMode}
               value={formData.expectations}
               onChange={(e) => setFormData({...formData, expectations: e.target.value})}
               placeholder="Contoh: Mendapat panduan roadmap belajar..."
+              className={readOnlyClass}
             />
           </div>
 
-          {isFormMode && (
+          {!isMentor && isFormMode && (
             <div className="pt-4">
                <Button type="submit" disabled={saveMutation.isPending} className="bg-[#074799]">
                   {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -164,6 +170,30 @@ export const NeedAssessmentTab = ({ sessionId }) => {
             </div>
           )}
         </form>
+
+        {/* --- AREA MENTOR: HANYA TOMBOL COMPLETE --- */}
+        {isMentor && (
+            <>
+                <Separator className="my-4" />
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex items-center justify-between">
+                     <div className="text-sm text-slate-500">
+                        {isCompleted 
+                            ? "Assessment ini telah ditandai selesai." 
+                            : "Jika assessment student sudah sesuai, tandai sebagai selesai."}
+                    </div>
+                    <Button 
+                        onClick={() => completeMutation.mutate()}
+                        disabled={completeMutation.isPending || isCompleted}
+                        className={isCompleted ? "bg-green-600" : ""}
+                        size="sm"
+                    >
+                        {completeMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        {isCompleted ? "Assessment Selesai" : "Tandai Selesai"}
+                    </Button>
+                </div>
+            </>
+        )}
       </CardContent>
     </Card>
   );

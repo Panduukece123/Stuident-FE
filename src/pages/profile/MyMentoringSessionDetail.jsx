@@ -24,6 +24,14 @@ const MyMentoringSessionDetail = () => {
     navigate("/profile/my-mentoring-sessions");
   };
 
+  const userRole = localStorage.getItem("role");
+
+  const userData = JSON.parse(localStorage.getItem("user"));
+
+  const role = userData?.role;
+
+  console.log("User Role Debug:", userRole);
+
   // Gunakan Skeleton Component yang baru
   if (isLoading) {
     return <SessionDetailSkeleton />;
@@ -42,7 +50,7 @@ const MyMentoringSessionDetail = () => {
 
   return (
     <div>
-      <SessionDetail session={session} onBack={handleBack} />
+      <SessionDetail session={session} onBack={handleBack} userRole={role} />
     </div>
   );
 };

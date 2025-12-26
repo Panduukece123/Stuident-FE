@@ -1,28 +1,6 @@
 import api from "./Api";
 
 const MentoringService = {
-    getPortfolio: async () => {
-    const token = localStorage.getItem("token");
-    const response = await api.get("/auth/portfolio", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-    return response.data;
-  },
-
-  getRecommendations: async () => {
-    const token = localStorage.getItem("token");
-    const response = await api.get("/auth/recommendations", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
-    return response.data;
-  },
-
   getMySessions: async () => {
     const token = localStorage.getItem("token");
     const response = await api.get("/mentoring-sessions", {
@@ -111,6 +89,71 @@ const MentoringService = {
   getCoachingFiles: async (id) => {
     const token = localStorage.getItem("token");
     const response = await api.get(`/mentoring-sessions/${id}/coaching-files`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  updateStatus: async (sessionId, status) => {
+    const token = localStorage.getItem("token");
+    const response = await api.put(`/mentoring-sessions/${sessionId}/status`, {
+      status: status,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  markAssessmentCompleted: async (sessionId) => {
+    const token = localStorage.getItem("token");
+    const response = await api.put(`/mentoring-sessions/${sessionId}/need-assessments/mark-completed`, {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  updateMentorNotes: async (sessionId, notes) => {
+    const token = localStorage.getItem("token");
+    // Method PUT ke /mentoring-sessions/{id}
+    const response = await api.put(`/mentoring-sessions/${sessionId}`, {
+      notes: notes, 
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  uploadCoachingFile: async (sessionId, file) => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post(`/mentoring-sessions/${sessionId}/coaching-files`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  deleteCoachingFile: async (sessionId, fileId) => {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/mentoring-sessions/${sessionId}/coaching-files/${fileId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
