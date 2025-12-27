@@ -3,21 +3,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   GraduationCap,
   LogOut,
-  Settings,
   ShoppingCart,
   User,
   Loader2,
   Edit,
+  Presentation, // Icon untuk Mentoring Session
 } from "lucide-react";
 import React, { useState, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // <--- 1. Import
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ProfileService from "@/services/ProfileService";
 import authService from "@/services/AuthService";
 import { ProfileLayoutSkeleton } from "@/components/skeleton/ProfileSkeleton";
 
 export const ProfileLayout = () => {
-  const queryClient = useQueryClient(); // Init Client
+  const queryClient = useQueryClient();
   const [imageHash, setImageHash] = useState(Date.now());
   const token = localStorage.getItem("token");
 
@@ -26,7 +26,7 @@ export const ProfileLayout = () => {
   const pathname = location.pathname;
   const fileInputRef = useRef(null);
 
-  // --- 1. FETCH PROFILE (Ganti useEffect) ---
+  // --- FETCH PROFILE ---
   const { data: profileData, isLoading: loading } = useQuery({
     queryKey: ["profile", token],
     queryFn: async () => {
@@ -34,7 +34,6 @@ export const ProfileLayout = () => {
         const result = await ProfileService.getProfile();
         return result.data || result;
       } catch (error) {
-        // Handle 401 Unauthorized langsung di sini
         if (error.response && error.response.status === 401) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
@@ -43,27 +42,20 @@ export const ProfileLayout = () => {
         throw error;
       }
     },
-    staleTime: 1000 * 60 * 5, // Data fresh 5 menit
+    staleTime: 1000 * 60 * 5,
   });
 
-  // --- 2. UPLOAD MUTATION (Ganti logic upload manual) ---
+  // --- UPLOAD MUTATION ---
   const uploadMutation = useMutation({
     mutationFn: (file) => ProfileService.uploadAvatar(file),
     onSuccess: async () => {
-      // A. Refresh data profile di TanStack Cache
       await queryClient.invalidateQueries({ queryKey: ["profile"] });
-
-      // B. Paksa browser reload gambar (bypass browser cache)
       setImageHash(Date.now());
-
-      // C. Update LocalStorage & Event (Untuk sinkronisasi dengan Navbar jika perlu)
-      // Kita ambil data terbaru yang sudah di-invalidate
       const updatedData = queryClient.getQueryData(["profile"]);
       if (updatedData?.user) {
         localStorage.setItem("user", JSON.stringify(updatedData.user));
         window.dispatchEvent(new Event("user-updated"));
       }
-
       alert("Foto profil berhasil diperbarui!");
     },
     onError: (error) => {
@@ -81,21 +73,17 @@ export const ProfileLayout = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validasi Ukuran (2MB)
     if (file.size > 2 * 1024 * 1024) {
       alert("File terlalu besar! Maksimal 2MB.");
       return;
     }
 
-    // Validasi Tipe
     if (!file.type.startsWith("image/")) {
       alert("Harap upload file gambar.");
       return;
     }
-
-    // Jalankan Mutation
     uploadMutation.mutate(file);
-    e.target.value = null; // Reset input
+    e.target.value = null;
   };
 
   const handleLogout = async () => {
@@ -106,7 +94,6 @@ export const ProfileLayout = () => {
     } finally {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      // Clear TanStack Cache saat logout biar bersih
       queryClient.clear();
       navigate("/login");
     }
@@ -127,9 +114,8 @@ export const ProfileLayout = () => {
   }
 
   const user = profileData?.user || profileData;
-  const isUploading = uploadMutation.isPending; // Status loading dari mutation
+  const isUploading = uploadMutation.isPending;
 
-  // URL Avatar + Hash Time biar browser gak cache gambar lama
   const avatarSrc = user
     ? `${ProfileService.getAvatarUrl(user)}?t=${imageHash}`
     : "";
@@ -224,6 +210,19 @@ export const ProfileLayout = () => {
                 <ShoppingCart className="mr-3 h-5 w-5" /> Order History
               </Button>
             </Link>
+
+            {/* --- MENTORING SESSION (ALL ROLES) --- */}
+            {/* Langsung dirender tanpa cek kondisi role */}
+            <Link to="/profile/my-mentoring-sessions">
+              <Button
+                variant="ghost"
+                className={getSidebarClass("/profile/my-mentoring-sessions")}
+              >
+                <Presentation className="mr-3 h-5 w-5" /> Mentoring Sessions
+              </Button>
+            </Link>
+            {/* ------------------------------------- */}
+
             <div className="my-2 h-px w-full bg-neutral-100" />
             <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2 mt-2">
               Account
@@ -238,7 +237,6 @@ export const ProfileLayout = () => {
           </div>
         </aside>
         <main className="w-full">
-          {/* Context profileData diteruskan ke children (MyProfile, dll) */}
           <Outlet context={profileData} />
         </main>
       </div>

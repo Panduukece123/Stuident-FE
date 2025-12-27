@@ -30,6 +30,9 @@ import AdminCourses from "./pages/admin/AdminCourses";
 import CorporateRoute from "./components/route/CorporateRoute";
 import CorporateLayout from "./layouts/CorporateLayout";
 import { CorporateScholarships } from "./pages/corporate/CorporateScholarships";
+import { MyProfileMySession } from "./pages/profile/MyProfileMySession";
+import MyMentoringSessionDetail from "./pages/profile/MyMentoringSessionDetail";
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +84,8 @@ function App() {
                 path="my-enrolled-courses"
                 element={<MyProfileEnrolledCourse />}
               />
+              <Route path="my-mentoring-sessions" element={<MyProfileMySession />} />
+              <Route path="my-mentoring-sessions/:id" element={<MyMentoringSessionDetail />} />
             </Route>
 
             <Route path="article" element={<ArticlePage />} />
