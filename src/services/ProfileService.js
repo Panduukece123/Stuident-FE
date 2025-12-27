@@ -45,19 +45,17 @@ const ProfileService = {
   updateSpecializations: async (specializationsArray) => {
     try {
       const payload = {
-        specialization: specializationsArray 
+        specialization: specializationsArray,
       };
 
       const token = localStorage.getItem("token");
 
-      const response = await api.put( "/auth/profile", payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          }
-        }
-      );
+      const response = await api.put("/auth/profile", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -191,42 +189,43 @@ const ProfileService = {
     const responseData = response.data;
     const data = responseData.data || [];
 
-    const BACKEND_URL = "http://localhost:8000"; 
+    const BACKEND_URL = "http://localhost:8000";
     const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
 
     if (Array.isArray(data)) {
       // Ubah nama parameter jadi 'item' (karena ini objek enrollment, bukan course langsung)
       return data.map((item) => {
-        
         const courseData = item.course || {};
 
         // 1. LOGIKA GAMBAR
         // Di JSON kamu key-nya adalah "image", bukan "image_url"
-        let imageUrl = courseData.image; 
+        let imageUrl = courseData.image;
 
         if (imageUrl && !imageUrl.startsWith("http")) {
           // Tambahkan base URL jika path relatif (bukan dari unsplash)
-          imageUrl = `${BACKEND_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+          imageUrl = `${BACKEND_URL}${
+            imageUrl.startsWith("/") ? "" : "/"
+          }${imageUrl}`;
         }
 
         // 2. RETURN OBJECT YANG SUDAH DIRAPIKAN
         return {
           // Gunakan ID dari courseData (5), bukan ID enrollment (7)
           // Biar kalau diklik arahnya benar ke /course/5
-          id: courseData.id, 
+          id: courseData.id,
 
           title: courseData.title || "Untitled Course",
           level: courseData.level || "Beginner",
-          
+
           // Sesuaikan key dengan JSON backend
-          rating: Number(courseData.average_rating) || 0, 
+          rating: Number(courseData.average_rating) || 0,
           reviews: Number(courseData.total_reviews) || 0,
-          
+
           description: courseData.description || "No description available.",
           price: courseData.price ? Number(courseData.price) : 0,
-          
+
           image: imageUrl || DEFAULT_IMAGE,
-          
+
           instructor: courseData.instructor || "Unknown",
           category: courseData.category || "Umum",
           progress: courseData.progress || 0,
@@ -236,7 +235,7 @@ const ProfileService = {
           // --- DATA PENTING DARI ENROLLMENT (Parent Object) ---
           progress: item.progress || 0, // Ambil dari item, bukan courseData
           completed: item.completed || false,
-          enrollment_id: item.id // Simpan ID pendaftaran kalau butuh nanti
+          enrollment_id: item.id, // Simpan ID pendaftaran kalau butuh nanti
         };
       });
     }
@@ -246,7 +245,7 @@ const ProfileService = {
 
   uploadCv: async (file) => {
     // 1. AMBIL TOKEN DULU DARI LOCALSTORAGE
-    const token = localStorage.getItem("token"); 
+    const token = localStorage.getItem("token");
 
     const formData = new FormData();
     formData.append("cv", file);
@@ -255,7 +254,7 @@ const ProfileService = {
       headers: {
         "Content-Type": "multipart/form-data",
         // 2. Pastikan token dipakai di sini
-        "Authorization": `Bearer ${token}`, 
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
@@ -276,15 +275,19 @@ const ProfileService = {
   uploadAchievementCertificate: async (id, file) => {
     const token = localStorage.getItem("token");
     const formData = new FormData();
-    formData.append('certificate', file); // Pastikan key-nya sesuai request Laravel ('certificate' atau 'file')
-    
+    formData.append("certificate", file); // Pastikan key-nya sesuai request Laravel ('certificate' atau 'file')
+
     // Endpoint: /achievements/{id}/certificate
-    const response = await api.post(`/achievements/${id}/certificate`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
+    const response = await api.post(
+      `/achievements/${id}/certificate`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   },
 
@@ -303,14 +306,18 @@ const ProfileService = {
   uploadExperienceCertificate: async (id, file) => {
     const token = localStorage.getItem("token");
     const formData = new FormData();
-    formData.append('certificate', file); // Sesuaikan key backend ('certificate' atau 'file')
-    
-    const response = await api.post(`/experiences/${id}/certificate`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
+    formData.append("certificate", file); // Sesuaikan key backend ('certificate' atau 'file')
+
+    const response = await api.post(
+      `/experiences/${id}/certificate`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   },
 
@@ -346,7 +353,104 @@ const ProfileService = {
     });
     return response.data;
   },
-  
+
+  getMySessions: async () => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/mentoring-sessions", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  getSessionDetails: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/mentoring-sessions/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  submitFeedback: async (id, payload) => {
+    const token = localStorage.getItem("token");
+    const response = await api.post(`/mentoring-sessions/${id}/feedback`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  getNeedAssessment: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/mentoring-sessions/${id}/need-assessments`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  createNeedAssessment: async (id, rawData) => {
+    const token = localStorage.getItem("token");
+    const body = {
+        form_data: rawData
+    };
+
+    const response = await api.post(`/mentoring-sessions/${id}/need-assessments`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  updateNeedAssessment: async (id, rawData) => {
+    const token = localStorage.getItem("token");
+    const body = {
+        form_data: rawData
+    };
+
+    const response = await api.put(`/mentoring-sessions/${id}/need-assessments`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  deleteNeedAssessment: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/mentoring-sessions/${id}/need-assessments`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  getCoachingFiles: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/mentoring-sessions/${id}/coaching-files`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+
 };
 
 export default ProfileService;
