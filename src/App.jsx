@@ -27,7 +27,9 @@ import AdminLayout from "./layouts/AdminLayout";
 import { ManageUsers } from "./pages/admin/AdminUsers";
 import AdminRoute from "./components/route/AdminRoute";
 import AdminCourses from "./pages/admin/AdminCourses";
-
+import CorporateRoute from "./components/route/CorporateRoute";
+import CorporateLayout from "./layouts/CorporateLayout";
+import { CorporateScholarships } from "./pages/corporate/CorporateScholarships";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,7 +49,14 @@ function App() {
           <Route element={<AdminRoute />}>
             <Route path="admin" element={<AdminLayout />}>
               <Route path="users" element={<ManageUsers />} />
-              <Route path="courses" element={<AdminCourses />} /> 
+              <Route path="courses" element={<AdminCourses />} />
+              <Route path="scholarships" element={<CorporateScholarships />} />
+            </Route>
+          </Route>
+
+          <Route element={<CorporateRoute />}>
+            <Route path="corporate" element={<CorporateLayout />}>
+              <Route path="scholarships" element={<CorporateScholarships />} />
             </Route>
           </Route>
 
@@ -81,7 +90,10 @@ function App() {
               path="scholarship/show/:id"
               element={<ScholarshipDetail />}
             />
-            <Route path="scholarship/application/:id" element={<ScholarshipApplicationPage />} />
+            <Route
+              path="scholarship/application/:id"
+              element={<ScholarshipApplicationPage />}
+            />
           </Route>
 
           <Route element={<LearnLayout />}>
