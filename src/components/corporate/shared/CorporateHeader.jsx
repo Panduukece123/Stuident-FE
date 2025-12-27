@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu, Search, LogOut, Settings, User } from "lucide-react";
+import { Menu, Search, LogOut, User, Building2 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom"; 
 import { useQuery, useQueryClient } from "@tanstack/react-query"; 
 import { Button } from "@/components/ui/button";
@@ -16,18 +16,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; 
 import { Skeleton } from "@/components/ui/skeleton";
-import { AdminSidebar } from "./AdminSidebar";
+import { CorporateSidebar } from "./CorporateSidebar"; // Import Sidebar yang baru
 import ProfileService from "@/services/ProfileService";
 import authService from "@/services/AuthService";
 
-export const AdminHeader = () => {
+export const CorporateHeader = () => {
   const navigate = useNavigate();
   const location = useLocation(); 
   const token = localStorage.getItem("token");
-
   const queryClient = useQueryClient();
 
-  // --- FETCH DATA USER ---
+  // Fetch Data User
   const { data: profileData, isLoading } = useQuery({
     queryKey: ["profile", token], 
     queryFn: async () => {
@@ -54,23 +53,19 @@ export const AdminHeader = () => {
     }
   };
 
-  // --- 3. LOGIC MENENTUKAN JUDUL ---
+  // --- LOGIC JUDUL HALAMAN CORPORATE ---
   const getPageTitle = () => {
     const path = location.pathname;
 
-    // Cek path dan kembalikan judul yang sesuai
-    if (path.includes("/admin/users")) return "User Management";
-    if (path.includes("/admin/courses")) return "Courses";
-    if (path.includes("/admin/scholarships")) return "Scholarships";
-    if (path.includes("/admin/settings")) return "Settings";
-    
-    return "Admin Panel"; // Default title
+    if (path.includes("/corporate/scholarships")) return "Manajemen Beasiswa";
+    if (path.includes("/corporate/articles")) return "Manajemen Artikel";
+    if (path.includes("/corporate/profile")) return "Profil Perusahaan";
   };
 
   return (
-    <header className="flex h-14 items-center justify-between gap-20 border-b bg-white px-4 lg:h-15 lg:px-6 sticky top-0 z-30 shadow-sm">
+    <header className="flex h-14 items-center justify-between gap-4 border-b bg-white px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30 shadow-sm">
       
-      {/* MOBILE TRIGGER */}
+      {/* MOBILE TRIGGER (Panggil CorporateSidebar) */}
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="shrink-0 lg:hidden">
@@ -79,23 +74,23 @@ export const AdminHeader = () => {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col p-0 w-60">
-          <AdminSidebar />
+          <CorporateSidebar />
         </SheetContent>
       </Sheet>
 
-      {/* --- 4. TAMPILKAN JUDUL DINAMIS DI SINI --- */}
-      <h1 className="font-semibold text-xl md:text-2xl text-neutral-800 whitespace-nowrap">
+      {/* PAGE TITLE */}
+      <h1 className="font-semibold text-lg md:text-xl text-neutral-800 whitespace-nowrap">
         {getPageTitle()}
       </h1>
 
-      {/* SEARCH BAR */}
-      <div className="w-full flex-1  ml-4">
+      {/* SEARCH BAR (Optional for Corporate) */}
+      <div className="w-full flex-1 ml-4 hidden md:block">
         <form onSubmit={(e) => e.preventDefault()}>
-          <div className="relative">
+          <div className="relative w-full max-w-sm ml-auto">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search..."
+              placeholder="Cari data..."
               className="w-full appearance-none bg-background pl-8 shadow-sm"
             />
           </div>
@@ -120,12 +115,12 @@ export const AdminHeader = () => {
                     className="object-cover"
                   />
                   <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
-                    {user.name?.charAt(0).toUpperCase() || "U"}
+                    {user.name?.charAt(0).toUpperCase() || "C"}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium text-neutral-700 hidden md:block">
-                    {user.name}
-                </span>
+                <div className="hidden md:flex flex-col items-center text-xs">
+                    <span className="font-semibold text-neutral-800 text-sm">{user.name}</span>
+                </div>
               </div>
             )}
           </Button>
@@ -142,9 +137,9 @@ export const AdminHeader = () => {
           <DropdownMenuSeparator />
 
           <DropdownMenuGroup>
-            <DropdownMenuItem onClick={() => navigate("/profile/my-profile")}>
-              <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+            <DropdownMenuItem onClick={() => navigate("/corporate/profile")}>
+              <Building2 className="mr-2 h-4 w-4" />
+              <span>Profil Perusahaan</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           

@@ -10,6 +10,7 @@ import {
   BookUser 
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const UserStats = ({ stats, isLoading }) => {
   const data = stats || {
@@ -28,66 +29,84 @@ export const UserStats = ({ stats, isLoading }) => {
       title: "Total Users", 
       value: data.total, 
       icon: Users, 
-      color: "text-blue-600", 
-      bgColor: "bg-blue-50" 
+      iconClass: "text-muted-foreground", // Icon abu-abu standard
+      valueClass: "text-neutral-900",
+      desc: "Semua pengguna terdaftar"
     },
     { 
       title: "Active", 
       value: data.active, 
       icon: UserCheck, 
-      color: "text-green-600", 
-      bgColor: "bg-green-50" 
+      iconClass: "text-green-600",
+      valueClass: "text-green-700", // Angka hijau
+      desc: "Pengguna aktif saat ini"
     },
     { 
       title: "Inactive", 
       value: data.inactive, 
       icon: UserMinus, 
-      color: "text-slate-500", 
-      bgColor: "bg-slate-50" 
+      iconClass: "text-slate-500",
+      valueClass: "text-slate-700",
+      desc: "Jarang beraktivitas"
     },
     { 
       title: "Suspended", 
       value: data.suspended, 
       icon: UserX, 
-      color: "text-red-600", 
-      bgColor: "bg-red-50" 
+      iconClass: "text-red-600",
+      valueClass: "text-red-700", // Angka merah
+      desc: "Akun dibekukan"
     },
+    // --- ROLES ---
     { 
       title: "Admins", 
       value: data.admins, 
       icon: Shield, 
-      color: "text-indigo-600", 
-      bgColor: "bg-indigo-50" 
+      iconClass: "text-indigo-600",
+      valueClass: "text-neutral-900",
+      desc: "Administrator sistem"
     },
     { 
       title: "Mentors", 
       value: data.mentors, 
       icon: GraduationCap, 
-      color: "text-purple-600", 
-      bgColor: "bg-purple-50" 
+      iconClass: "text-purple-600",
+      valueClass: "text-neutral-900",
+      desc: "Tenaga pengajar"
     },
     { 
       title: "Students", 
       value: data.students, 
       icon: BookUser, 
-      color: "text-orange-600", 
-      bgColor: "bg-orange-50" 
+      iconClass: "text-orange-600",
+      valueClass: "text-neutral-900",
+      desc: "Mahasiswa/Pelajar"
     },
     { 
       title: "Corporate", 
       value: data.corporate, 
       icon: Building2, 
-      color: "text-cyan-600", 
-      bgColor: "bg-cyan-50" 
+      iconClass: "text-cyan-600",
+      valueClass: "text-neutral-900",
+      desc: "Partner perusahaan"
     },
   ];
 
-  // Skeleton Loading (Menyesuaikan 8 kartu)
+  // Skeleton Loading
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="h-28 rounded-xl bg-neutral-100 animate-pulse border border-neutral-200" />
+          <Card key={i}>
+             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-4 rounded-full" />
+             </CardHeader>
+             <CardContent>
+                <Skeleton className="h-8 w-16 mb-1" />
+                <Skeleton className="h-3 w-32" />
+             </CardContent>
+          </Card>
         ))}
       </div>
     );
@@ -96,17 +115,23 @@ export const UserStats = ({ stats, isLoading }) => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statItems.map((item, index) => (
-        <Card key={index} className="shadow-sm border-neutral-200">
+        <Card key={index}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium">
               {item.title}
             </CardTitle>
-            <div className={`p-2 rounded-lg ${item.bgColor}`}>
-                <item.icon className={`h-4 w-4 ${item.color}`} />
-            </div>
+            {/* Icon langsung tanpa background box */}
+            <item.icon className={`h-4 w-4 ${item.iconClass}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-medium text-neutral-800">{item.value}</div>
+            {/* Value Bold & Berwarna sesuai status */}
+            <div className={`text-2xl font-bold ${item.valueClass}`}>
+                {item.value}
+            </div>
+            {/* Deskripsi kecil di bawah */}
+            <p className="text-xs text-muted-foreground">
+                {item.desc}
+            </p>
           </CardContent>
         </Card>
       ))}
