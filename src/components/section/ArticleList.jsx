@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 export const ArticleList = ({ articles = [] }) => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export const ArticleList = ({ articles = [] }) => {
             {mainArticles.map((article) => (
               <Card
                 key={article.id}
-                className="overflow-hidden rounded-3xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col h-full cursor-pointer"
+                className="p-0 overflow-hidden rounded-3xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col h-full cursor-pointer"
                 onClick={() => navigate(`/article/${article.id}`)}
               >
                 <div className="h-48 bg-gradient-to-b from-[#007EA7] to-[#003459] relative overflow-hidden">
@@ -34,13 +35,15 @@ export const ArticleList = ({ articles = [] }) => {
                     {article.title}
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                    {article.description}
+                    <div className="article-content">
+                      <ReactMarkdown>{article.description}</ReactMarkdown>
+                    </div>
                   </p>
                 </CardContent>
                 <CardFooter className="pb-6 px-6">
                   <Button
                     variant="outline"
-                    className="w-full rounded-full border-gray-200 text-[#007EA7] hover:bg-[#007EA7]/5 hover:text-[#005F7F] h-10"
+                    className="cursor-pointer w-full rounded-full border-gray-200 text-[#007EA7] hover:bg-[#007EA7]/5 hover:text-[#005F7F] h-10"
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate(`/article/${article.id}`);
