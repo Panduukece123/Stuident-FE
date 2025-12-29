@@ -59,13 +59,17 @@ export const LoginPage = () => {
           localStorage.setItem("user", JSON.stringify(userData));
         }
 
-        // --- LOGIC REDIRECT (HANYA BAGIAN INI YG DIUBAH) ---
+        // --- LOGIC REDIRECT ---
         if (userData?.role === 'admin' || userData?.role === 'superadmin') {
-            navigate("/admin/users"); // Atau '/admin/dashboard'
+            navigate("/admin/users");
+        } else if (userData?.role === 'corporate') { 
+            // Tambahkan kondisi ini 👇
+            navigate("/corporate");
         } else {
+            // Student & Mentor lari ke Home
             navigate("/");
         }
-        // ----------------------------------------------------
+        // ----------------------
 
       } else {
         console.error("Token tidak ditemukan.");

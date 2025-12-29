@@ -306,7 +306,7 @@ const ProfileService = {
   uploadExperienceCertificate: async (id, file) => {
     const token = localStorage.getItem("token");
     const formData = new FormData();
-    formData.append("certificate", file);
+    formData.append("certificate", file); // Sesuaikan key backend ('certificate' atau 'file')
 
     const response = await api.post(
       `/experiences/${id}/certificate`,
@@ -354,16 +354,103 @@ const ProfileService = {
     return response.data;
   },
 
-  getCV: async () => {
-  const token = localStorage.getItem("token");
-  const response = await api.get("/auth/profile/cv", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json", // Kita minta JSON
-    },
-  });
-  return response.data; 
-},
+  getMySessions: async () => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/mentoring-sessions", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  getSessionDetails: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/mentoring-sessions/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  submitFeedback: async (id, payload) => {
+    const token = localStorage.getItem("token");
+    const response = await api.post(`/mentoring-sessions/${id}/feedback`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  getNeedAssessment: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/mentoring-sessions/${id}/need-assessments`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  createNeedAssessment: async (id, rawData) => {
+    const token = localStorage.getItem("token");
+    const body = {
+        form_data: rawData
+    };
+
+    const response = await api.post(`/mentoring-sessions/${id}/need-assessments`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  updateNeedAssessment: async (id, rawData) => {
+    const token = localStorage.getItem("token");
+    const body = {
+        form_data: rawData
+    };
+
+    const response = await api.put(`/mentoring-sessions/${id}/need-assessments`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  deleteNeedAssessment: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.delete(`/mentoring-sessions/${id}/need-assessments`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  getCoachingFiles: async (id) => {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/mentoring-sessions/${id}/coaching-files`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+
 };
 
 export default ProfileService;

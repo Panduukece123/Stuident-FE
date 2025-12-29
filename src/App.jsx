@@ -28,6 +28,11 @@ import { ManageUsers } from "./pages/admin/AdminUsers";
 import AdminRoute from "./components/route/AdminRoute";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCurriculumCourse from "./pages/admin/AdminCurriculums";
+import CorporateRoute from "./components/route/CorporateRoute";
+import CorporateLayout from "./layouts/CorporateLayout";
+import { CorporateScholarships } from "./pages/corporate/CorporateScholarships";
+import { MyProfileMySession } from "./pages/profile/MyProfileMySession";
+import MyMentoringSessionDetail from "./pages/profile/MyMentoringSessionDetail";
 
 
 const queryClient = new QueryClient({
@@ -52,6 +57,13 @@ function App() {
                 <Route index element={<AdminCourses />} />
                 <Route path=":id" element={<AdminCurriculumCourse />} />
               </Route>
+              <Route path="scholarships" element={<CorporateScholarships />} />
+            </Route>
+          </Route>
+
+          <Route element={<CorporateRoute />}>
+            <Route path="corporate" element={<CorporateLayout />}>
+              <Route path="scholarships" element={<CorporateScholarships />} />
             </Route>
           </Route>
 
@@ -76,6 +88,8 @@ function App() {
                 path="my-enrolled-courses"
                 element={<MyProfileEnrolledCourse />}
               />
+              <Route path="my-mentoring-sessions" element={<MyProfileMySession />} />
+              <Route path="my-mentoring-sessions/:id" element={<MyMentoringSessionDetail />} />
             </Route>
 
             <Route path="article" element={<ArticlePage />} />
@@ -85,7 +99,10 @@ function App() {
               path="scholarship/show/:id"
               element={<ScholarshipDetail />}
             />
-            <Route path="scholarship/application/:id" element={<ScholarshipApplicationPage />} />
+            <Route
+              path="scholarship/application/:id"
+              element={<ScholarshipApplicationPage />}
+            />
           </Route>
 
           <Route element={<LearnLayout />}>

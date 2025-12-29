@@ -28,6 +28,9 @@ import { TabOverview } from "@/components/section/CourseShow/TabOverview";
 import { TabReview } from "@/components/section/CourseShow/TabReview";
 import { Progress } from "@/components/ui/progress";
 import { CourseShowPageSkeleton } from "@/components/skeleton/CourseShowPageSkeleton";
+import { CheckoutDialog } from "@/components/dialog/CheckoutDialog";
+import { PaymentProofDialog } from "@/components/dialog/PaymentProofDialog";
+import { useState } from "react";
 
 export default function CourseShowPage() {
   const { id } = useParams();
@@ -36,7 +39,16 @@ export default function CourseShowPage() {
   const [profileData, setProfileData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  const fetchData = React.useCallback( async () => {
+  // --- STATE TRANSAKSI ---
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isProofOpen, setIsProofOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("qris");
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Kita simpan FULL object data transaksi disini (id, qr_code_url, nominal, dll)
+  const [transactionData, setTransactionData] = useState(null);
+
+  const fetchData = React.useCallback(async () => {
     try {
       const courseData = await courseService.showCourse(id);
       setCourse(courseData.data || courseData);
@@ -77,11 +89,82 @@ export default function CourseShowPage() {
     const average = sum / course.reviews.length;
 
     return {
-      ratingAverage: average.toFixed(1), // One decimal place
+      ratingAverage: average.toFixed(1),
       ratingTotal: course.reviews.length,
     };
   };
   const { ratingAverage, ratingTotal } = calculateRating();
+
+  const handleBuyClick = () => {
+    if (!profileData) {
+      alert("Silakan login terlebih dahulu untuk membeli kursus.");
+      return;
+    }
+    setIsCheckoutOpen(true);
+  };
+
+  const handleEnrollSubmit = async () => {
+    setIsProcessing(true);
+    try {
+      const response = await courseService.enrollCourse(id, paymentMethod);
+      
+      const responseData = response.data?.data || response.data; 
+      const transaction = responseData?.transaction;
+
+      if (transaction?.id) {
+        setTransactionData(transaction);
+        setIsCheckoutOpen(false);
+        setIsProofOpen(true);    
+      } else {
+        console.error("Response structure:", response);
+        alert("Gagal mendapatkan ID Transaksi. Silakan cek console.");
+      }
+    } catch (error) {
+      console.error("Error Enroll:", error);
+      
+      // --- PERBAIKAN HANDLING ERROR BIAR GAK CRASH ---
+      const errorResponse = error.response?.data;
+      
+      if (errorResponse) {
+          // 1. Cek kalau ada field 'errors' (Validasi Laravel standar)
+          if (errorResponse.errors) {
+             const firstError = Object.values(errorResponse.errors)[0][0];
+             alert(`Gagal Validasi: ${firstError}`);
+          } 
+          // 2. Cek kalau ada field 'pesan' (Format custom backend kamu)
+          else if (errorResponse.pesan) {
+             alert(`Gagal: ${errorResponse.pesan}`);
+          }
+          // 3. Cek kalau ada field 'message' (Error umum)
+          else if (errorResponse.message) {
+             alert(`Gagal: ${errorResponse.message}`);
+          } else {
+             alert("Terjadi kesalahan pada server.");
+          }
+      } else {
+          alert("Terjadi kesalahan jaringan atau server tidak merespon.");
+      }
+      // -----------------------------------------------
+
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  const handleUploadProof = async (file) => {
+    setIsProcessing(true);
+    try {
+      // Ambil ID dari object transactionData
+      await courseService.uploadPaymentProof(transactionData.id, file);
+      alert("Bukti berhasil diunggah!");
+      setIsProofOpen(false);
+      fetchData(); // Refresh data course (misal jumlah enrolled nambah)
+    } catch (error) {
+      console.error(error);
+      alert("Gagal mengunggah bukti.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   if (isLoading) {
     return <CourseShowPageSkeleton />
@@ -226,7 +309,7 @@ export default function CourseShowPage() {
                 </p>
               </div>
               <div className="w-full flex flex-col gap-2 pt-2 pb-2">
-                <Button variant={"default"}>Beli Sekarang</Button>
+                <Button variant={"default"} onClick={handleBuyClick}>Beli Sekarang</Button>
                 <Button variant={"outline"}>Tambahkan ke Keranjang</Button>
                 <Button variant={"outline"}>Tambahkan ke Favorit</Button>
               </div>
@@ -245,6 +328,26 @@ export default function CourseShowPage() {
           </section>
         </CardContent>
       </Card>
+
+      {/* DIALOGS */}
+      <CheckoutDialog 
+        open={isCheckoutOpen} 
+        onOpenChange={setIsCheckoutOpen}
+        course={course}
+        paymentMethod={paymentMethod}
+        setPaymentMethod={setPaymentMethod}
+        onConfirm={handleEnrollSubmit}
+        isProcessing={isProcessing}
+      />
+
+      <PaymentProofDialog 
+        open={isProofOpen}
+        onOpenChange={setIsProofOpen}
+        // PERUBAHAN: Gunakan prop 'transaction' supaya bisa baca QR Code di dalamnya
+        transaction={transactionData}
+        onUpload={handleUploadProof}
+        isProcessing={isProcessing}
+      />
     </div>
   );
 }
