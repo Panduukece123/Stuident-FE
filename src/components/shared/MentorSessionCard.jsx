@@ -2,7 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { CalendarDays, GraduationCap, User, ChevronRight, MapPin } from "lucide-react";
 
 export const MentorSessionCard = ({ session }) => {
@@ -97,4 +96,4 @@ export const MentorSessionCard = ({ session }) => {
       </CardContent>
     </Card>
   );
-};git
+};
