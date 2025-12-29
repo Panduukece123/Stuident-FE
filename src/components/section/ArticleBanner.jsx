@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 export const ArticleBanner = ({ article }) => {
   const navigate = useNavigate();
@@ -13,10 +14,12 @@ export const ArticleBanner = ({ article }) => {
             {article.title}
           </h1>
           <p className="text-gray-600 leading-relaxed text-lg line-clamp-3">
-            {article.description}
+            <div className="article-content">
+              <ReactMarkdown>{article.description}</ReactMarkdown>
+            </div>
           </p>
           <Button
-            className="rounded-full px-8 py-6 text-base font-medium bg-white text-[#007EA7] border-2 border-[#E5E7EB] hover:bg-gray-50 hover:text-[#005F7F] transition-colors shadow-sm"
+            className=" cursor-pointer rounded-full px-8 py-6 text-base font-medium bg-white text-[#007EA7] border-2 border-[#E5E7EB] hover:bg-gray-50 hover:text-[#005F7F] transition-colors shadow-sm"
             variant="outline"
             onClick={() => navigate(`/article/${article.id}`)}
           >

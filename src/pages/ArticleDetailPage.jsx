@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
 import ArticleService from "@/services/ArticleService";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -109,14 +110,10 @@ export const ArticleDetailPage = () => {
           </h1>
 
           {/* Content */}
-          <div className="prose prose-lg max-w-none text-gray-600 leading-relaxed">
-            {/* If content is HTML, use dangerouslySetInnerHTML, otherwise just display text */}
-            {/* Assuming content might be plain text or simple HTML for now */}
-            <div
-              dangerouslySetInnerHTML={{
-                __html: article.content || article.description,
-              }}
-            />
+          <div className="article-content">
+            <ReactMarkdown>
+              {article.content || article.description}
+            </ReactMarkdown>
           </div>
         </div>
       </div>
