@@ -1,6 +1,8 @@
 import { Edit, MessageSquareWarning, Star, X } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
+import { DeleteReviewDialog, EditReviewDialog } from "./ReviewDialogs";
+import { useState } from "react";
 
 const getInitials = (fullName) => {
   return fullName
@@ -11,12 +13,20 @@ const getInitials = (fullName) => {
 };
 
 function ReviewItem({
-    userName = "Anonymous",
-    userProfilePic = "",
-    rating = 5,
-    comment = "Lorem Ipsum Dolor Sit Amet",
+    review,
     editable = false,
+    onSuccess,
 }) {
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+    const {
+        userName = review.user?.name || "Anonymous",
+        userProfilePic = review.user?.profile_photo || "",
+        rating = review.rating || 5,
+        comment = review.comment || "Lorem Ipsum Dolor Sit Amet",
+    } = review || {};
+
     return (
         <article className="border rounded-xl px-4 bg-muted">
             
@@ -32,7 +42,7 @@ function ReviewItem({
                             { userName ? getInitials(userName) : "?"}
                         </AvatarFallback>
                     </Avatar>
-                    <p className="text-lg">{userName}</p>
+                    <p className="md:text-lg">{userName}</p>
                 </div>
                 <div className="flex flex-row gap-2 items-center text-muted-foreground">
                     <Star size={24}/>
@@ -47,18 +57,50 @@ function ReviewItem({
 
             {/* Action Footer */}
             <div className="flex flex-row gap-2 py-3">
-                <Button variant={"destructive"} size={"icon"}>
-                    <MessageSquareWarning  />
-                </Button>
-                {editable && (
-                    <Button variant={"outline"} size={"icon"}>
-                        <Edit />
+                {!editable && (
+                    <Button
+                        variant={"destructive"}
+                        size={"icon"}
+                        title="Laporkan ulasan"
+                    >
+                        <MessageSquareWarning  />
                     </Button>
                 )}
                 {editable && (
-                    <Button variant={"outline"} size={"icon"}>
-                        <X />
-                    </Button>
+                    <>
+                        <Button
+                            variant={"outline"}
+                            size={"icon"}
+                            onClick={() => setIsEditOpen(true)}
+                            title="Edit ulasan"
+                        >
+                            <Edit />
+                        </Button>
+                        <EditReviewDialog
+                            open={isEditOpen}
+                            onOpenChange={setIsEditOpen}
+                            initialData={review}
+                            onSuccess={onSuccess}
+                        />
+                    </>
+                )}
+                {editable && (
+                    <>
+                        <Button
+                            variant={"destructive"}
+                            size={"icon"}
+                            onClick={() => setIsDeleteOpen(true)}
+                            title="Hapus ulasan"
+                        >
+                            <X />
+                        </Button>
+                        <DeleteReviewDialog
+                            open={isDeleteOpen}
+                            onOpenChange={setIsDeleteOpen}
+                            targetData={review}
+                            onSuccess={onSuccess}
+                        />
+                    </>
                 )}
             </div>
         </article>

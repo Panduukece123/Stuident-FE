@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ChevronDown, ChevronUp, Edit, List, Trash } from "lucide-react";
+import { Link } from "react-router";
 
 const CourseTable = ({ courses, onEdit, onDelete }) => {
   const [expandedId, setExpandedId] = useState(null);
@@ -25,22 +27,26 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
   return (
     <div className="overflow-x-auto">
       <table className="w-full table-auto border-collapse border shadow-sm">
+
+        {/* Head row */}
         <thead className="bg-gray-100">
           <tr>
-            <th className="border p-2 text-left">ID</th>
-            <th className="border p-2 text-left">Gambar</th>
-            <th className="border p-2 text-left">Title</th>
-            <th className="border p-2 text-left">Instructor</th>
-            <th className="border p-2 text-right">Price</th>
-            <th className="border p-2 text-center">Access</th>
-            <th className="border p-2 text-center">Actions</th>
+            <th className="border p-2 text-left font-medium text-sm">ID</th>
+            <th className="border p-2 text-left font-medium text-sm">Gambar</th>
+            <th className="border p-2 text-left font-medium text-sm">Title</th>
+            <th className="border p-2 text-left font-medium text-sm">Instructor</th>
+            <th className="border p-2 text-right font-medium text-sm">Price</th>
+            <th className="border p-2 text-center font-medium text-sm">Access</th>
+            <th className="border p-2 text-center font-medium text-sm">Actions</th>
           </tr>
         </thead>
+        
+        {/* Course row */}
         <tbody>
           {courses.map((course) => (
             <React.Fragment key={course.id}>
               <tr className="hover:bg-gray-50 transition-colors">
-                <td className="border p-2">{course.id}</td>
+                <td className="border p-2 text-sm">{course.id}</td>
                 <td className="border p-2">
                   <img
                     src={course.image}
@@ -48,9 +54,9 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
                     className="w-24 h-16 object-cover rounded-md shadow-sm"
                   />
                 </td>
-                <td className="border p-2 font-semibold">{course.title}</td>
-                <td className="border p-2">{course.instructor}</td>
-                <td className="border p-2 text-right font-medium">
+                <td className="border p-2 font-medium text-sm">{course.title}</td>
+                <td className="border p-2 text-sm">{course.instructor}</td>
+                <td className="border p-2 text-right text-sm">
                   {Number(course.price).toLocaleString("id-ID", {
                     style: "currency",
                     currency: "IDR",
@@ -66,24 +72,43 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
                     {course.access_type}
                   </Badge>
                 </td>
-                <td className="border p-2 flex justify-center gap-1">
-                  <Button size="sm" onClick={() => onEdit(course)}>
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => onDelete(course.id)}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => toggleExpand(course.id)}
-                  >
-                    {expandedId === course.id ? "Hide Details" : "Show Details"}
-                  </Button>
+                <td className="border p-2">
+                  <div className="flex gap-1 justify-center">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => toggleExpand(course.id)}
+                      title={expandedId === course.id ? "Hide details" : "Show details"}
+                    >
+                      Details
+                      {expandedId === course.id ? (<ChevronUp />) : (<ChevronDown />)}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      title="Edit curriculum"
+                      asChild
+                    >
+                      <Link to={`/admin/courses/${course.id}`}>
+                        <List />
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => onEdit(course)}
+                      title="Edit course"
+                    >
+                      <Edit />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => onDelete(course.id)}
+                      title="Delete course"
+                    >
+                      <Trash />
+                    </Button>
+                  </div>
                 </td>
               </tr>
 

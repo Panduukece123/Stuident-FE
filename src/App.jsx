@@ -27,6 +27,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import { ManageUsers } from "./pages/admin/AdminUsers";
 import AdminRoute from "./components/route/AdminRoute";
 import AdminCourses from "./pages/admin/AdminCourses";
+import AdminCurriculumCourse from "./pages/admin/AdminCurriculums";
 import CorporateRoute from "./components/route/CorporateRoute";
 import CorporateLayout from "./layouts/CorporateLayout";
 import { CorporateScholarships } from "./pages/corporate/CorporateScholarships";
@@ -52,7 +53,10 @@ function App() {
           <Route element={<AdminRoute />}>
             <Route path="admin" element={<AdminLayout />}>
               <Route path="users" element={<ManageUsers />} />
-              <Route path="courses" element={<AdminCourses />} />
+              <Route path="courses">
+                <Route index element={<AdminCourses />} />
+                <Route path=":id" element={<AdminCurriculumCourse />} />
+              </Route>
               <Route path="scholarships" element={<CorporateScholarships />} />
             </Route>
           </Route>

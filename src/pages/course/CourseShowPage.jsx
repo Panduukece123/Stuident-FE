@@ -17,7 +17,7 @@ import {
 import * as React from "react";
 import { Tabs } from "@radix-ui/react-tabs";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import courseService from "@/services/CourseService";
 import LevelBadge from "@/components/LevelBadge";
 import ShareActionButtons from "@/components/shared/ShareActionButtons";
@@ -26,6 +26,8 @@ import ProfileService from "@/services/ProfileService";
 import { TabCurriculum } from "@/components/section/CourseShow/TabCurriculum";
 import { TabOverview } from "@/components/section/CourseShow/TabOverview";
 import { TabReview } from "@/components/section/CourseShow/TabReview";
+import { Progress } from "@/components/ui/progress";
+import { CourseShowPageSkeleton } from "@/components/skeleton/CourseShowPageSkeleton";
 import { CheckoutDialog } from "@/components/dialog/CheckoutDialog";
 import { PaymentProofDialog } from "@/components/dialog/PaymentProofDialog";
 import { useState } from "react";
@@ -50,7 +52,6 @@ export default function CourseShowPage() {
     try {
       const courseData = await courseService.showCourse(id);
       setCourse(courseData.data || courseData);
-
       try {
         const profileRes = await ProfileService.getProfile();
         setProfileData(profileRes.data || profileRes);
@@ -71,6 +72,11 @@ export default function CourseShowPage() {
   }, [id, fetchData]);
 
   const user = profileData?.user || profileData;
+  // console.log(user?.name);
+  
+  const userEnrollData = course.enrollments?.find(
+    (enrollment) => enrollment.user_id === user?.id
+  )
 
   const calculateRating = () => {
     if (!course.reviews || course.reviews.length === 0)
@@ -79,7 +85,7 @@ export default function CourseShowPage() {
     const sum = course.reviews.reduce(
       (total, review) => total + review.rating,
       0
-    ); 
+    ); // Review value is always integers (1-5)
     const average = sum / course.reviews.length;
 
     return {
@@ -161,15 +167,11 @@ export default function CourseShowPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <CourseShowPageSkeleton />
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-4 py-8 md:p-6 flex flex-col md:flex-row gap-4 md:gap-8">
+    <div className="max-w-7xl mx-auto pt-1 p-4 md:py-8 md:px-6 flex flex-col md:flex-row gap-4 md:gap-8">
       <div className="basis-full">
         {/* Legend Page */}
         <div className="w-full flex flex-row gap-4 items-center border-b">
@@ -194,6 +196,8 @@ export default function CourseShowPage() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
+
+        {/* Side Page (Mobile) */}
 
         {/* Summary Page */}
         <div className="my-4">
@@ -270,28 +274,47 @@ export default function CourseShowPage() {
           </TabsContent>
 
           <TabsContent value="reviews">
-            <TabReview course={course} user={user} onReviewCreated={fetchData} />
+            <TabReview course={course} user={user} onReviewModified={fetchData} />
           </TabsContent>
         </Tabs>
       </div>
 
       {/* Side Page */}
-      <Card className={"md:basis-lg h-fit md:sticky md:top-23"}>
+      <Card className="md:basis-lg h-fit md:sticky md:top-23">
         <CardContent>
-          {/* Payment Section */}
-          <section className="mb-4 pb-4 border-b">
-            <div>
-              <p className="text-muted-foreground font-light">Harga:</p>
-              <p className="text-2xl" id="price">
-                {course?.price <= 0 ? "Gratis" : formatPrice(course.price)}
-              </p>
-            </div>
-            <div className="w-full flex flex-col gap-2 pt-2 pb-2">
-              <Button variant={"default"} onClick={handleBuyClick}>Beli Sekarang</Button>
-              <Button variant={"outline"}>Tambahkan ke Keranjang</Button>
-              <Button variant={"outline"}>Tambahkan ke Favorit</Button>
-            </div>
-          </section>
+          {userEnrollData ? (
+            <section className="mb-4 pb-4 border-b">
+              {/* Study Section */}
+              <div className="mb-4">
+                <p className="text-muted-foreground font-light">Progress:</p>
+                <p className="text-2xl">
+                  {userEnrollData?.progress ? `${userEnrollData?.progress}%` : "Belum ada"}
+                </p>
+                <Progress value={userEnrollData?.progress} />
+              </div>
+              <div className="w-full flex flex-col gap-2 pt-2 pb-2">
+                <Button variant={"default"} asChild>
+                  <Link to={`/my-courses/learn/${course?.id}`}>Belajar</Link>
+                </Button>
+                <Button variant={"outline"}>Tambahkan ke Favorit</Button>
+              </div>
+            </section>
+          ) : (
+            <section className="mb-4 pb-4 border-b">
+              {/* Purchase Section */}
+              <div>
+                <p className="text-muted-foreground font-light">Harga:</p>
+                <p className="text-2xl" id="price">
+                  {course?.price <= 0 ? "Gratis" : formatPrice(course.price)}
+                </p>
+              </div>
+              <div className="w-full flex flex-col gap-2 pt-2 pb-2">
+                <Button variant={"default"} onClick={handleBuyClick}>Beli Sekarang</Button>
+                <Button variant={"outline"}>Tambahkan ke Keranjang</Button>
+                <Button variant={"outline"}>Tambahkan ke Favorit</Button>
+              </div>
+            </section>
+          )}
 
           {/* Share Section */}
           <section>

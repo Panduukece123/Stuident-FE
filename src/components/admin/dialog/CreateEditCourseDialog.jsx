@@ -112,7 +112,7 @@ const CreateEditCourseDialog = ({
           <DialogTitle>{course ? "Edit Course" : "Create Course"}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[50vh] overflow-y-auto p-2">
           <Input
             placeholder="Title"
             value={form.title}
