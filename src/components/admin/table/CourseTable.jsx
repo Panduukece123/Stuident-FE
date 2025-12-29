@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Edit, Trash } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit, List, Trash } from "lucide-react";
+import { Link } from "react-router";
 
 const CourseTable = ({ courses, onEdit, onDelete }) => {
   const [expandedId, setExpandedId] = useState(null);
@@ -75,6 +76,25 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
                   <div className="flex gap-1 justify-center">
                     <Button
                       size="sm"
+                      variant="outline"
+                      onClick={() => toggleExpand(course.id)}
+                      title={expandedId === course.id ? "Hide details" : "Show details"}
+                    >
+                      Details
+                      {expandedId === course.id ? (<ChevronUp />) : (<ChevronDown />)}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      title="Edit curriculum"
+                      asChild
+                    >
+                      <Link to={`/admin/courses/${course.id}`}>
+                        <List />
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
                       onClick={() => onEdit(course)}
                       title="Edit course"
                     >
@@ -87,15 +107,6 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
                       title="Delete course"
                     >
                       <Trash />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => toggleExpand(course.id)}
-                      title={expandedId === course.id ? "Hide details" : "Show details"}
-                    >
-                      Details
-                      {expandedId === course.id ? (<ChevronUp />) : (<ChevronDown />)}
                     </Button>
                   </div>
                 </td>

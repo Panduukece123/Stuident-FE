@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/components/ui/input-group";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import CurriculumService from "@/services/admin/CurriculumService";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,6 +37,61 @@ const schemaCurriculum = z.object({
     video_url: z.string().min(1, "Video URL wajib diisi!"),
 })
 
+export const CurriculumDeleteDialog = ({
+    open,
+    onOpenChange,
+    curriculum,
+    onFinish,
+}) => {
+    const [loading, setLoading] = useState(false);
+
+    const onDelete = async () => {
+        if (!curriculum) return;
+        setLoading(true);
+        try {
+            await CurriculumService.deleteCurriculum(curriculum.id, curriculum.course_id);
+            if (onFinish) await onFinish();
+            onOpenChange(false);
+        } catch (error) {
+            console.error("Gagal melakukan aksi curriculum:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogPortal>
+                <DialogContent className={"[&>button:first-of-type]:hidden"}>
+                    <DialogHeader>
+                        <DialogTitle>Hapus Curriculum</DialogTitle>
+                        <DialogDescription>
+                            Apakah Anda yakin ingin menghapus curriculum ini?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            disabled={loading}
+                            onClick={() => onOpenChange(false)}
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            disabled={loading}
+                            onClick={onDelete}
+                        >
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Hapus
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </DialogPortal>
+        </Dialog>
+    )
+}
+
 export const CurriculumDialog = ({
     open,
     onOpenChange,
@@ -59,16 +113,29 @@ export const CurriculumDialog = ({
     useEffect(() => {
         if (open) {
             if (curriculum) 
-                reset(curriculum);
+                reset({
+                    section: curriculum.section || "",
+                    section_order: curriculum.section_order ?? 0,
+                    order: curriculum.order ?? 0,
+                    title: curriculum.title || "",
+                    description: curriculum.description || "",
+                    duration: curriculum.duration || "",
+                    video_url: curriculum.video_url || "",
+                });
             else 
                 reset(initialFormData);
         }
     }, [open, curriculum, reset]);
 
     const onSubmit = async (data) => {
+        // console.log("Data yang akan dikirim:", data);
         setLoading(true);
         try {
-            await CurriculumService.postCurriculum(courseId, data);
+            if (curriculum) {
+                await CurriculumService.putCurriculum(curriculum.id, courseId, data);
+            } else {
+                await CurriculumService.postCurriculum(courseId, data);
+            }
             if (onFinish) await onFinish();
             onOpenChange(false);
         } catch (error) {
@@ -82,7 +149,10 @@ export const CurriculumDialog = ({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogPortal>
                 
-                <DialogContent>
+                <DialogContent
+                    className={"sm:w-max [&>button:first-of-type]:hidden"}
+                    onInteractOutside={(e) => {e.preventDefault();}}
+                >
 
                     <DialogHeader>
                         <DialogTitle>
@@ -211,7 +281,7 @@ export const CurriculumDialog = ({
                                         <Input
                                             {...field}
                                             id="video_url"
-                                            placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                                            placeholder="https://..."
                                         />
                                         {fieldState.invalid && (<FieldError errors={[fieldState.error]} />)}
                                     </Field>

@@ -1,13 +1,12 @@
 import * as React from "react";
-import { Input } from "@/components/ui/input";
 import { Link, useParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import CurriculumTable from "@/components/admin/table/CurriculumTable";
 import CurriculumService from "@/services/admin/CurriculumService";
 import courseService from "@/services/CourseService";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { SearchIcon } from "lucide-react";
-import { CurriculumDialog } from "@/components/admin/dialog/CreateEditCurriculumDialog";
+import { Loader2, SearchIcon } from "lucide-react";
+import { CurriculumDeleteDialog, CurriculumDialog } from "@/components/admin/dialog/CurriculumDialogs";
 
 const AdminCurriculumCourse = () => {
     const { id } = useParams();
@@ -16,6 +15,7 @@ const AdminCurriculumCourse = () => {
     const [curriculums, setCurriculums] = React.useState([]);
 
     const [openDialog, setOpenDialog] = React.useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
     const [editCurriculum, setEditCurriculum] = React.useState(null);
 
     const [isLoading, setIsLoading] = React.useState(false);
@@ -35,6 +35,16 @@ const AdminCurriculumCourse = () => {
         }
     }, [id]);
 
+    const handleEdit = (curriculum) => {
+        setEditCurriculum(curriculum);
+        setOpenDialog(true);
+    };
+
+    const handleDelete = (curriculum) => {
+        setEditCurriculum(curriculum);
+        setOpenDeleteDialog(true);
+    };
+
     React.useEffect(() => {
         fetchData();
     }, [id, fetchData]);
@@ -50,7 +60,9 @@ const AdminCurriculumCourse = () => {
                     <Button asChild>
                         <Link to="/admin/courses">Back</Link>
                     </Button>
-                    <p className="font-medium text-lg md:text-xl">{course.title}</p>
+                    <p className="font-medium text-lg md:text-xl">
+                        {isLoading ? "Loading..." : course.title}
+                    </p>
                 </div>
 
                 {/* Actions */}
@@ -72,10 +84,15 @@ const AdminCurriculumCourse = () => {
 
             {/* Table */}
             {isLoading ? (
-                <div>Loading...</div>
+                <div className="flex justify-center w-full p-4 border border-neutral-200 rounded-sm bg-neutral-50 text-center">
+                    <Loader2 className="mr-4 animate-spin" />
+                    Loading...
+                </div>
             ) : (
                 <CurriculumTable
                     curriculums={curriculums}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
                 />
             )}
 
@@ -83,6 +100,13 @@ const AdminCurriculumCourse = () => {
                 open={openDialog}
                 onOpenChange={setOpenDialog}
                 courseId={id}
+                curriculum={editCurriculum}
+                onFinish={fetchData}
+            />
+
+            <CurriculumDeleteDialog
+                open={openDeleteDialog}
+                onOpenChange={setOpenDeleteDialog}
                 curriculum={editCurriculum}
                 onFinish={fetchData}
             />

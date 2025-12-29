@@ -5,7 +5,8 @@ import * as React from 'react';
 
 const CurriculumTable = ({
     curriculums,
-    onRefresh
+    onEdit,
+    onDelete
 }) => {
     const [expandedId, setExpandedId] = React.useState(null);
 
@@ -26,6 +27,13 @@ const CurriculumTable = ({
                 </TableHeader>
 
                 <TableBody>
+                    {curriculums.length === 0 && (
+                        <TableRow>
+                            <TableCell colSpan={3} className="text-center">
+                                <p className='text-muted-foreground font-light'>No results...</p>
+                            </TableCell>
+                        </TableRow>
+                    )}
                     {curriculums?.map((curriculum) => (
                         <React.Fragment key={curriculum.id}>
                             <TableRow>
@@ -45,6 +53,7 @@ const CurriculumTable = ({
                                         size="sm"
                                         variant="outline"
                                         title="Update curriculum"
+                                        onClick={() => onEdit(curriculum)}
                                     >
                                         <Edit />
                                     </Button>
@@ -52,6 +61,7 @@ const CurriculumTable = ({
                                         size="sm"
                                         variant="destructive"
                                         title="Delete curriculum"
+                                        onClick={() => onDelete(curriculum)}
                                     >
                                         <Trash />
                                     </Button>
@@ -74,7 +84,7 @@ const CurriculumTable = ({
                                                     src={curriculum.video_url}
                                                     allow="encrypted-media"
                                                     allowFullScreen
-                                                    className="w-64 aspect-video rounded-lg"
+                                                    className="w-64 aspect-video rounded-sm"
                                                 ></iframe>
                                             </div>
                                         </div>

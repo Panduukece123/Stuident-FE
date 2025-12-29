@@ -11,13 +11,13 @@ const CurriculumService = {
         return response.data;
     },
 
-    putCurriculum: async (curriculumId, curriculum) => {
-        const response = await api.put(`/curriculums/${curriculumId}`, curriculum);
+    putCurriculum: async (curriculumId, courseId, curriculum) => {
+        const response = await api.put(`/courses/${courseId}/curriculums/${curriculumId}`, curriculum);
         return response.data;
     },
 
-    deleteCurriculum: async (curriculumId) => {
-        const response = await api.delete(`/curriculums/${curriculumId}`);
+    deleteCurriculum: async (curriculumId, courseId) => {
+        const response = await api.delete(`/courses/${courseId}/curriculums/${curriculumId}`);
         return response.data;
     },
 }
