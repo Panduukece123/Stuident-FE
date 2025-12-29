@@ -1,65 +1,11 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 
-export const OrderHistoryDetail = ({ order, onBack }) => {
-  const navigate = useNavigate();
+export const OrderHistoryDetail = ({ order}) => {
   if (!order) return null;
 
   const isMentoring = order.type === "mentoring_session";
   const isSubscription = order.type === "subscription";
-  const isPaid = order.status === "paid";
-  const isPending = order.status === "pending";
 
-  const handleStartLearning = () => {
-    if (!isPaid) return;
-
-    switch (order.type) {
-      case "course_enrollment": {
-        const courseId = order.item_details?.course_id;
-        if (courseId) navigate(`/my-courses/learn/${courseId}`);
-        break;
-      }
-
-      case "subscription":
-        navigate("/my-subscription");
-        break;
-
-      case "mentoring_session": {
-        const mentoringId = order.item_details?.id;
-        if (mentoringId) navigate(`/mentoring/${mentoringId}`);
-        break;
-      }
-
-      default:
-        console.warn("Unknown order type:", order.type);
-    }
-  };
-
-  const handlePendingAction = () => {
-    console.log("CLICKED", order);
-
-    if (!isPending) return;
-    switch (order.type) {
-      case "course_enrollment": {
-        const courseId = order.item_details?.id;
-        if (courseId) navigate(`/course/show/${courseId}`);
-        break;
-      }
-
-      case "subscription":
-        navigate("/my-subscription");
-        break;
-
-      case "mentoring_session": {
-        const mentoringId = order.item_details?.id;
-        if (mentoringId) navigate(`/mentoring/${mentoringId}`);
-        break;
-      }
-
-      default:
-        console.warn("Unknown order type:", order.type);
-    }
-  };
 
   const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
@@ -168,30 +114,7 @@ export const OrderHistoryDetail = ({ order, onBack }) => {
         </div>
 
         {/* ACTION */}
-        <div className="flex flex-col gap-3 pt-6">
-          <button
-            onClick={onBack}
-            className="w-full py-2.5 border border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition"
-          >
-            Order History
-          </button>
-
-          {isPaid ? (
-            <button
-              onClick={handleStartLearning}
-              className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-semibold"
-            >
-              Mulai Belajar
-            </button>
-          ) : (
-            <button
-              onClick={handlePendingAction}
-              className="w-full py-2.5 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition"
-            >
-              Selesaikan Pembayaran
-            </button>
-          )}
-        </div>
+       
       </div>
     </div>
   );

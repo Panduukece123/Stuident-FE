@@ -1,9 +1,20 @@
 import api from "./Api";
 
 const MentoringService = {
-  getMySessions: async () => {
+  getAllSessions: async () => {
     const token = localStorage.getItem("token");
     const response = await api.get("/mentoring-sessions", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
+  getMySessions: async () => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/my-mentoring-sessions", {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
@@ -33,6 +44,24 @@ const MentoringService = {
     });
     return response.data;
   },
+
+  submitMentoringSession: async (payload) => {
+  const token = localStorage.getItem("token");
+
+  const response = await api.post(
+    "/mentoring-sessions",
+    payload, // ✅ BODY
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  return response.data;
+},
+
 
   getNeedAssessment: async (id) => {
     const token = localStorage.getItem("token");
