@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Clock,
   CalendarDays,
+  FileText,
 } from "lucide-react";
 
 export const MentorDetail = () => {
@@ -29,9 +30,6 @@ export const MentorDetail = () => {
     }
   }, [id]);
 
-  // =========================
-  // Fetch Mentor Detail
-  // =========================
   const fetchMentorDetail = async () => {
     try {
       setLoading(true);
@@ -44,25 +42,18 @@ export const MentorDetail = () => {
     }
   };
 
-  // =========================
-  // Fetch Mentor Schedule
-  // =========================
   const fetchMentorSchedule = async () => {
     try {
       const res = await MentoringService.getMentorSchedule(id, {
         from_date: "2026-01-01",
         to_date: "2026-12-31",
       });
-
       setSchedules(res.data || []);
     } catch (err) {
       console.error("Failed to load mentor schedule", err);
     }
   };
 
-  // =========================
-  // Loading & Error
-  // =========================
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -82,21 +73,18 @@ export const MentorDetail = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          className="text-gray-600 hover:text-blue-600"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Kembali
-        </Button>
-      </div>
+      <Button
+        variant="ghost"
+        className="text-gray-600 hover:text-blue-600"
+        onClick={() => navigate(-1)}
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Kembali
+      </Button>
 
-      {/* Profile Card */}
       <Card className="border-none shadow-xl bg-gradient-to-br from-white to-gray-50">
         <CardContent className="p-8 space-y-8">
-          {/* Top */}
+          {/* Profile */}
           <div className="flex flex-col md:flex-row gap-8">
             <img
               src={
@@ -117,25 +105,31 @@ export const MentorDetail = () => {
                 {mentor.institution || "Independent Mentor"}
               </p>
 
+              {/* Meta */}
               <div className="flex flex-wrap gap-4 text-sm text-gray-600 font-medium">
-                {mentor.education_level && (
+                {mentor.education_level && mentor.major && (
                   <span className="flex items-center gap-1">
                     <GraduationCap size={16} className="text-blue-500" />
                     {mentor.education_level} – {mentor.major}
                   </span>
                 )}
 
-                <span className="flex items-center gap-1">
-                  <MapPin size={16} />
-                  {mentor.address || "Indonesia"}
-                </span>
+                {mentor.address && (
+                  <span className="flex items-center gap-1">
+                    <MapPin size={16} />
+                    {mentor.address}
+                  </span>
+                )}
 
-                <span className="flex items-center gap-1">
-                  <Mail size={16} />
-                  {mentor.email}
-                </span>
+                {mentor.email && (
+                  <span className="flex items-center gap-1">
+                    <Mail size={16} />
+                    {mentor.email}
+                  </span>
+                )}
               </div>
 
+              {/* Status */}
               {mentor.status === "active" ? (
                 <div className="flex items-center gap-2 text-xs text-emerald-600 font-bold">
                   <ShieldCheck size={14} />
@@ -147,17 +141,32 @@ export const MentorDetail = () => {
                   {mentor.status || "Status tidak diketahui"}
                 </div>
               )}
+              {mentor.specialization && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {mentor.specialization.split(",").map((item, i) => (
+                    <Badge key={i} variant="secondary">
+                      {item.trim()}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              {mentor.cv_path && (
+                <Button
+                  variant="outline"
+                  className="mt-3 w-fit gap-2"
+                  onClick={() => window.open(mentor.cv_path, "_blank")}
+                >
+                  <FileText size={16} />
+                  Lihat CV
+                </Button>
+              )}
             </div>
           </div>
 
           {/* About */}
           <div className="space-y-3">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <div className="h-6 w-1 bg-blue-600 rounded-full" />
-              Tentang Mentor
-            </h3>
-
-            <p className="text-gray-600 leading-relaxed bg-white p-5 rounded-2xl border shadow-sm">
+            <h3 className="text-lg font-bold">Tentang Mentor</h3>
+            <p className="text-gray-600 bg-white p-5 rounded-2xl border">
               {mentor.bio ||
                 "Mentor profesional dengan pengalaman luas di bidangnya."}
             </p>
@@ -165,64 +174,53 @@ export const MentorDetail = () => {
 
           {/* Schedule */}
           <div className="space-y-3">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <div className="h-6 w-1 bg-red-500 rounded-full" />
-              Jadwal
-            </h3>
+            <h3 className="text-lg font-bold">Jadwal</h3>
 
             {schedules.length === 0 ? (
               <p className="text-sm text-gray-400 italic">
                 Belum ada jadwal terbooking
               </p>
             ) : (
-              <div className="space-y-2">
-                {schedules.map((item) => {
-                  const date = new Date(item.schedule);
-
-                  return (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between p-4 bg-red-50 border border-red-100 rounded-xl"
-                    >
-                      <div className="flex items-center gap-3">
-                        <CalendarDays className="text-red-500" size={18} />
-                        <div>
-                          <p className="text-sm font-semibold text-gray-800">
-                            {date.toLocaleDateString("id-ID", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {date.toLocaleTimeString("id-ID", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}{" "}
-                            WIB
-                          </p>
-                        </div>
+              schedules.map((item) => {
+                const date = new Date(item.schedule);
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-4 bg-red-50 border rounded-xl"
+                  >
+                    <div className="flex items-center gap-3">
+                      <CalendarDays size={18} className="text-red-500" />
+                      <div>
+                        <p className="text-sm font-semibold">
+                          {date.toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {date.toLocaleTimeString("id-ID", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}{" "}
+                          WIB
+                        </p>
                       </div>
-
-                      <Badge className="bg-red-100 text-red-600 text-[10px]">
-                        Booked
-                      </Badge>
                     </div>
-                  );
-                })}
-              </div>
+                    <Badge className="bg-red-100 text-red-600 text-[10px]">
+                      Booked
+                    </Badge>
+                  </div>
+                );
+              })
             )}
           </div>
-
-          {/* CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-6">
-            <Button
-              className="flex-1 h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg"
-              onClick={() => navigate(`/my-mentor/${mentor.id}/booking`)}
-            >
-              Book Mentoring Session
-            </Button>
-          </div>
+          <Button
+            className="w-full h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700 rounded-xl"
+            onClick={() => navigate(`/my-mentor/${mentor.id}/booking`)}
+          >
+            Book Mentoring Session
+          </Button>
         </CardContent>
       </Card>
     </div>
