@@ -8,7 +8,8 @@ import {
   BookOpen,
   LogOut,
   Package2,
-  GraduationCap
+  GraduationCap,
+  CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "../../../assets/images/stuident-logo.svg";
@@ -23,6 +24,7 @@ export const AdminSidebar = ({ className }) => {
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
     { name: "Scholarships", href: "/admin/scholarships", icon: GraduationCap },
+    { name: "Transactions", href: "/admin/transactions", icon: CreditCard },
   ];
 
   const handleLogout = async () => {
