@@ -13,6 +13,7 @@ const ProfileService = {
     });
     return response.data;
   },
+  
 
   // 2. GET ME
   getMe: async () => {
@@ -449,6 +450,19 @@ const ProfileService = {
     });
     return response.data;
   },
+
+  getCV: async () => {
+  const token = localStorage.getItem("token");
+  const response = await api.get("/auth/profile/cv", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json", // Kita minta JSON
+    },
+  });
+  return response.data; 
+},
+
+  
 
 
 };
