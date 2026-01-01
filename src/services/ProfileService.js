@@ -194,12 +194,9 @@ const ProfileService = {
     const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
 
     if (Array.isArray(data)) {
-      // Ubah nama parameter jadi 'item' (karena ini objek enrollment, bukan course langsung)
       return data.map((item) => {
         const courseData = item.course || {};
 
-        // 1. LOGIKA GAMBAR
-        // Di JSON kamu key-nya adalah "image", bukan "image_url"
         let imageUrl = courseData.image;
 
         if (imageUrl && !imageUrl.startsWith("http")) {

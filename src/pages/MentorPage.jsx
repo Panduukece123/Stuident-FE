@@ -1,30 +1,32 @@
 import React, { useEffect, useState, useRef } from "react";
 import MentoringService from "@/services/MentoringService";
-import { MentorSessionCard } from "@/components/shared/MentorSessionCard";
-import { Button } from "@/components/ui/button";
+import { MentorCard } from "@/components/shared/MentorCard";
 
 export const MentorPage = () => {
   const [loading, setLoading] = useState(true);
-  const [academicSessions, setAcademicSessions] = useState([]);
-  const [lifeSessions, setLifeSessions] = useState([]);
+  const [mentors, setMentors] = useState([]);
+  const [mySessions, setMySessions] = useState([]);
 
   const academicRef = useRef(null);
   const lifeRef = useRef(null);
 
   useEffect(() => {
-    fetchSessions();
+    fetchAllData();
   }, []);
 
-  const fetchSessions = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
-      const res = await MentoringService.getAllSessions();
-      const sessions = res.data || res;
 
-      setAcademicSessions(sessions.filter((s) => s.type === "academic"));
-      setLifeSessions(sessions.filter((s) => s.type === "life_plan"));
+      const [mentorRes, mySessionRes] = await Promise.all([
+        MentoringService.getAllmentor(),
+        MentoringService.getMySessions(),
+      ]);
+
+      setMentors(mentorRes.data || []);
+      setMySessions(mySessionRes.data || []);
     } catch (error) {
-      console.error("Failed to fetch mentoring sessions", error);
+      console.error("Failed to fetch mentor data", error);
     } finally {
       setLoading(false);
     }
@@ -37,23 +39,27 @@ export const MentorPage = () => {
     const y =
       ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
-    window.scrollTo({
-      top: y,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: y, behavior: "smooth" });
   };
 
+  const myMentors = Array.from(
+    new Map(
+      mySessions.map((session) => [session.mentor.id, session.mentor])
+    ).values()
+  );
+
+  const academicMentors = mentors;
+  const lifeMentors = mentors;
   if (loading) {
     return (
       <p className="text-center mt-20 text-muted-foreground">
-        Loading mentoring sessions...
+        Loading mentors...
       </p>
     );
   }
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16 py-10 space-y-16">
-      {/* ================= HEADER ================= */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">My Mentor</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -61,7 +67,6 @@ export const MentorPage = () => {
           mentor pilihan
         </p>
       </div>
-
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 bg-gray-50">
         {/* Academic Coaching Card */}
         <div
@@ -172,40 +177,38 @@ export const MentorPage = () => {
           </ul>
         </div>
       </section>
-      
-      <section ref={academicRef} className="space-y-4">
-        <h2 className="text-xl font-semibold">🎓 Academic Coaching</h2>
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold">Mentoring yang Kamu Ikuti</h2>
 
-        {academicSessions.length === 0 ? (
-          <p className="text-muted-foreground">
-            Belum ada sesi academic coaching.
-          </p>
+        {myMentors.length === 0 ? (
+          <div className="text-sm text-muted-foreground bg-gray-50 p-6 rounded-xl text-center">
+            Kamu belum memiliki sesi mentoring
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {academicSessions.map((session) => (
-              <MentorSessionCard
-                key={session.id}
-                session={session}
-                onClick={() => console.log("Go to session", session.id)}
-              />
+            {myMentors.map((mentor) => (
+              <MentorCard key={`my-${mentor.id}`} mentor={mentor} isActive />
             ))}
           </div>
         )}
       </section>
+      <section ref={academicRef} className="space-y-4">
+        <h2 className="text-xl font-semibold">🎓 Academic Coaching</h2>
 
-      {/* ================= LIFE SECTION ================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {academicMentors.map((mentor) => (
+            <MentorCard key={`academic-${mentor.id}`} mentor={mentor} />
+          ))}
+        </div>
+      </section>
       <section ref={lifeRef} className="space-y-4">
         <h2 className="text-xl font-semibold">🌱 Life Coaching</h2>
 
-        {lifeSessions.length === 0 ? (
-          <p className="text-muted-foreground">Belum ada sesi life coaching.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {lifeSessions.map((session) => (
-             <MentorSessionCard session={session} />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {lifeMentors.map((mentor) => (
+            <MentorCard key={`life-${mentor.id}`} mentor={mentor} />
+          ))}
+        </div>
       </section>
     </div>
   );
