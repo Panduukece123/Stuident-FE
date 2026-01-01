@@ -33,7 +33,8 @@ import CorporateLayout from "./layouts/CorporateLayout";
 import { CorporateScholarships } from "./pages/corporate/CorporateScholarships";
 import { MyProfileMySession } from "./pages/profile/MyProfileMySession";
 import MyMentoringSessionDetail from "./pages/profile/MyMentoringSessionDetail";
-
+import { MentorPage } from "./pages/MentorPage";
+import { MentorSessionDetail } from "./pages/Mentor/MentorSessionDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,10 +71,16 @@ function App() {
           <Route path="/" element={<AppLayout />}>
             <Route index element={<HomePage />} />
             <Route path="e-learning" element={<ElearningPage />} />
+            <Route path="my-mentor" element={<MentorPage />} />
+            <Route
+              path="/mentoring-sessions/:id"
+              element={<MentorSessionDetail />}
+            />
             <Route path="course">
               <Route path="show/:id" element={<CourseShowPage />} />
             </Route>
             <Route path="our-services" element={<OurServices />} />
+
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
             <Route path="auth/callback" element={<AuthCallbackPage />} />
@@ -88,8 +95,14 @@ function App() {
                 path="my-enrolled-courses"
                 element={<MyProfileEnrolledCourse />}
               />
-              <Route path="my-mentoring-sessions" element={<MyProfileMySession />} />
-              <Route path="my-mentoring-sessions/:id" element={<MyMentoringSessionDetail />} />
+              <Route
+                path="my-mentoring-sessions"
+                element={<MyProfileMySession />}
+              />
+              <Route
+                path="my-mentoring-sessions/:id"
+                element={<MyMentoringSessionDetail />}
+              />
             </Route>
 
             <Route path="article" element={<ArticlePage />} />
