@@ -34,7 +34,7 @@ import { CorporateScholarships } from "./pages/corporate/CorporateScholarships";
 import { MyProfileMySession } from "./pages/profile/MyProfileMySession";
 import MyMentoringSessionDetail from "./pages/profile/MyMentoringSessionDetail";
 import { MentorPage } from "./pages/MentorPage";
-import { MentorSessionDetail } from "./pages/Mentor/MentorSessionDetail";
+import { MentorDetail } from "./pages/Mentor/MentorDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -72,10 +72,7 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="e-learning" element={<ElearningPage />} />
             <Route path="my-mentor" element={<MentorPage />} />
-            <Route
-              path="/mentoring-sessions/:id"
-              element={<MentorSessionDetail />}
-            />
+            <Route path="my-mentor/:id" element={<MentorDetail />} />
             <Route path="course">
               <Route path="show/:id" element={<CourseShowPage />} />
             </Route>
