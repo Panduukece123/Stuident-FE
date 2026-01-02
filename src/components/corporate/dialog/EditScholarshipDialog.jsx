@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +18,8 @@ import {
 // --- SCHEMA VALIDASI ---
 const scholarshipSchema = z.object({
   name: z.string().min(1, "Nama program wajib diisi"),
-  image: z.string().optional(), // URL Gambar (Opsional)
+  // Image diubah jadi any() agar support File object atau URL string
+  image: z.any().optional(), 
   study_field: z.string().min(1, "Bidang studi wajib diisi"),
   location: z.string().min(1, "Lokasi wajib diisi"),
   deadline: z.string().min(1, "Deadline wajib diisi"),
@@ -28,10 +29,13 @@ const scholarshipSchema = z.object({
 });
 
 export const EditScholarshipDialog = ({ open, onOpenChange, itemToEdit, onSave, isLoading }) => {
+  // State Preview
+  const [previewImage, setPreviewImage] = useState(null);
+
   const form = useForm({
     resolver: zodResolver(scholarshipSchema),
     defaultValues: {
-      name: "", image: "", study_field: "", location: "", deadline: "", status: "open", benefit: "", description: ""
+      name: "", image: null, study_field: "", location: "", deadline: "", status: "open", benefit: "", description: ""
     },
   });
 
@@ -40,17 +44,33 @@ export const EditScholarshipDialog = ({ open, onOpenChange, itemToEdit, onSave, 
     if (itemToEdit && open) {
       form.reset({
         name: itemToEdit.name || "",
-        image: itemToEdit.image || "", // Isi URL gambar jika ada
+        // Image kita set null dulu, user upload baru jika ingin ganti
+        image: null, 
         study_field: itemToEdit.study_field || "",
         location: itemToEdit.location || "",
-        // Format tanggal YYYY-MM-DD untuk input type="date"
         deadline: itemToEdit.deadline ? itemToEdit.deadline.split("T")[0] : "",
         status: itemToEdit.status || "open",
         benefit: itemToEdit.benefit || "",
         description: itemToEdit.description || "",
       });
+
+      // Set preview gambar lama
+      if (itemToEdit.image) {
+        setPreviewImage(itemToEdit.image); // Gunakan URL dari backend
+      } else {
+        setPreviewImage(null);
+      }
     }
   }, [itemToEdit, open, form]);
+
+  // Handle File Change
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      form.setValue("image", file); // Simpan File object ke form
+      setPreviewImage(URL.createObjectURL(file)); // Update preview ke gambar baru
+    }
+  };
 
   const onSubmit = (data) => {
     onSave(data);
@@ -73,13 +93,28 @@ export const EditScholarshipDialog = ({ open, onOpenChange, itemToEdit, onSave, 
             {form.formState.errors.name && <span className="text-xs text-red-500">{form.formState.errors.name.message}</span>}
           </div>
 
-          {/* 2. IMAGE URL (BANNER) */}
+          {/* 2. IMAGE UPLOAD (Ganti Input Text jadi File) */}
           <div className="space-y-2">
-            <Label htmlFor="image" className="flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-neutral-500" /> URL Banner Gambar
+            <Label htmlFor="image" className="flex items-center gap-2 font-medium">
+                <ImageIcon className="w-4 h-4 text-neutral-500" /> Banner Gambar
             </Label>
-            <Input id="image" placeholder="https://..." {...form.register("image")} />
-            <p className="text-[10px] text-neutral-500">Masukkan link gambar (JPG/PNG) untuk banner beasiswa.</p>
+            
+            {/* Preview Area */}
+            {previewImage && (
+                <div className="mb-2">
+                     <p className="text-xs text-muted-foreground mb-1">Preview Gambar:</p>
+                    <img src={previewImage} alt="Preview" className="h-32 w-auto object-cover rounded-md border" />
+                </div>
+            )}
+
+            {/* Input File */}
+            <Input 
+                id="image" 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange} 
+            />
+            <p className="text-[10px] text-neutral-500">Biarkan kosong jika tidak ingin mengubah gambar.</p>
           </div>
 
           {/* 3. GRID: LOKASI & BIDANG STUDI */}
@@ -129,7 +164,7 @@ export const EditScholarshipDialog = ({ open, onOpenChange, itemToEdit, onSave, 
             <Label htmlFor="benefit" className="font-semibold">Fasilitas & Benefit</Label>
             <Textarea 
                 id="benefit" 
-                placeholder="Sebutkan cakupan beasiswa (biaya kuliah, uang saku, dll)..." 
+                placeholder="Sebutkan cakupan beasiswa..." 
                 className="h-24 resize-none"
                 {...form.register("benefit")} 
             />
@@ -143,7 +178,7 @@ export const EditScholarshipDialog = ({ open, onOpenChange, itemToEdit, onSave, 
             </Label>
             <Textarea 
                 id="description" 
-                placeholder="Jelaskan detail persyaratan dan informasi program..." 
+                placeholder="Jelaskan detail persyaratan..." 
                 className="h-40"
                 {...form.register("description")} 
             />

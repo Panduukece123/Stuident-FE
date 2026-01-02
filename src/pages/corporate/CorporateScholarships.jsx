@@ -147,7 +147,7 @@ export const CorporateScholarships = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Button onClick={() => setIsAddOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => setIsAddOpen(true)} className="bg-primary hover:bg-primary/90">
             <Plus className="mr-2 h-4 w-4" /> Buat Baru
           </Button>
         </div>

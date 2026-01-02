@@ -24,6 +24,8 @@ export const AdminSidebar = ({ className }) => {
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
     { name: "Scholarships", href: "/admin/scholarships", icon: GraduationCap },
+    { name: "Organizations", href: "/admin/organizations", icon: Settings },
+    { name: "Articles", href: "/admin/articles", icon: Package2 },
     { name: "Transactions", href: "/admin/transactions", icon: CreditCard },
   ];
 

@@ -62,7 +62,9 @@ export const AdminHeader = () => {
     if (path.includes("/admin/users")) return "User Management";
     if (path.includes("/admin/courses")) return "Courses";
     if (path.includes("/admin/scholarships")) return "Scholarships";
-    if (path.includes("/admin/settings")) return "Settings";
+    if (path.includes("/admin/organizations")) return "Organizations";
+    if (path.includes("/admin/articles")) return "Articles";
+    if (path.includes("/admin/transactions")) return "Transactions";
     
     return "Admin Panel"; // Default title
   };

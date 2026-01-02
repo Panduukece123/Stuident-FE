@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,15 +15,14 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-
-// Import Service Organisasi yang baru dibuat
 import OrganizationService from "@/services/corporate/OrganizationService";
 
 // --- SCHEMA VALIDASI ---
 const scholarshipSchema = z.object({
   organization_id: z.string().min(1, "Organisasi wajib dipilih"),
   name: z.string().min(1, "Nama beasiswa wajib diisi"),
-  image: z.string().optional(),
+  // Image diubah jadi any() atau optional karena nanti bentuknya File object
+  image: z.any().optional(),
   study_field: z.string().min(1, "Bidang studi wajib diisi"),
   location: z.string().min(1, "Lokasi wajib diisi"),
   deadline: z.string().min(1, "Deadline wajib diisi"),
@@ -33,12 +32,15 @@ const scholarshipSchema = z.object({
 });
 
 export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading }) => {
+  // State untuk preview gambar
+  const [previewImage, setPreviewImage] = useState(null);
+
   const form = useForm({
     resolver: zodResolver(scholarshipSchema),
     defaultValues: {
       organization_id: "",
       name: "",
-      image: "",
+      image: null, // Default null untuk file
       study_field: "",
       description: "",
       benefit: "",
@@ -48,25 +50,23 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
     },
   });
 
-  // --- FETCH LIST ORGANISASI ---
   const { data: rawOrgs, isLoading: loadingOrgs } = useQuery({
     queryKey: ["organizations-list"],
     queryFn: OrganizationService.getOrganizations,
-    enabled: open, // Fetch hanya saat dialog dibuka
+    enabled: open,
   });
 
-  // Parsing data (antisipasi wrapper .data)
   const organizations = Array.isArray(rawOrgs) 
     ? rawOrgs 
     : (Array.isArray(rawOrgs?.data) ? rawOrgs.data : []);
 
-  // Reset form saat dialog dibuka
-  React.useEffect(() => {
+  // Reset form & preview saat dialog dibuka
+  useEffect(() => {
     if (open) {
       form.reset({
         organization_id: "",
         name: "",
-        image: "",
+        image: null,
         study_field: "",
         description: "",
         benefit: "",
@@ -74,8 +74,18 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
         deadline: "",
         status: "open",
       });
+      setPreviewImage(null); // Reset preview
     }
   }, [open, form]);
+
+  // Handle File Change
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      form.setValue("image", file); // Set value ke RHF
+      setPreviewImage(URL.createObjectURL(file)); // Buat preview lokal
+    }
+  };
 
   const onSubmit = (data) => {
     onSave(data);
@@ -91,7 +101,7 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-2">
           
-          {/* 1. PILIH ORGANISASI (DROPDOWN) */}
+          {/* 1. PILIH ORGANISASI */}
           <div className="space-y-2">
             <Label htmlFor="organization_id" className="flex items-center gap-2 font-semibold">
                 <Building2 className="w-4 h-4 text-neutral-500" /> Pilih Organisasi
@@ -107,14 +117,10 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
                 <SelectContent>
                     {organizations.length > 0 ? (
                         organizations.map((org) => (
-                            <SelectItem key={org.id} value={String(org.id)}>
-                                {org.name}
-                            </SelectItem>
+                            <SelectItem key={org.id} value={String(org.id)}>{org.name}</SelectItem>
                         ))
                     ) : (
-                        <div className="p-2 text-sm text-neutral-500 text-center">
-                            Tidak ada data organisasi
-                        </div>
+                        <div className="p-2 text-sm text-neutral-500 text-center">Tidak ada data</div>
                     )}
                 </SelectContent>
             </Select>
@@ -130,12 +136,27 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
             {form.formState.errors.name && <span className="text-xs text-red-500">{form.formState.errors.name.message}</span>}
           </div>
 
-          {/* 3. IMAGE URL */}
+          {/* 3. IMAGE UPLOAD (Ganti Input Text jadi File) */}
           <div className="space-y-2">
             <Label htmlFor="image" className="flex items-center gap-2 font-medium">
-                <ImageIcon className="w-4 h-4 text-neutral-500" /> URL Banner Gambar
+                <ImageIcon className="w-4 h-4 text-neutral-500" /> Banner Gambar
             </Label>
-            <Input id="image" placeholder="https://..." {...form.register("image")} />
+            
+            {/* Preview Area */}
+            {previewImage && (
+                <div className="mb-2">
+                    <img src={previewImage} alt="Preview" className="h-32 w-auto object-cover rounded-md border" />
+                </div>
+            )}
+            
+            {/* Input File */}
+            <Input 
+                id="image" 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange} 
+            />
+            <p className="text-[10px] text-neutral-500">Format: JPG, PNG, GIF (Max 2MB)</p>
           </div>
 
           {/* 4. GRID: LOKASI & BIDANG STUDI */}
@@ -167,10 +188,7 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
             </div>
             <div className="space-y-2">
               <Label htmlFor="status" className="font-medium">Status</Label>
-              <Select 
-                  onValueChange={(val) => form.setValue("status", val)} 
-                  defaultValue="open"
-              >
+              <Select onValueChange={(val) => form.setValue("status", val)} defaultValue="open">
                   <SelectTrigger><SelectValue placeholder="Pilih status" /></SelectTrigger>
                   <SelectContent>
                       <SelectItem value="open">Open (Dibuka)</SelectItem>
@@ -185,7 +203,7 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
             <Label htmlFor="benefit" className="font-semibold">Fasilitas & Benefit</Label>
             <Textarea 
                 id="benefit" 
-                placeholder="Sebutkan cakupan beasiswa (biaya kuliah, uang saku, dll)..." 
+                placeholder="Sebutkan cakupan beasiswa..." 
                 className="h-24 resize-none"
                 {...form.register("benefit")} 
             />
@@ -200,7 +218,7 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
             <Textarea 
                 id="description" 
                 rows={4} 
-                placeholder="Jelaskan detail persyaratan dan informasi program..." 
+                placeholder="Jelaskan detail persyaratan..." 
                 className="h-32"
                 {...form.register("description")} 
             />
