@@ -10,7 +10,7 @@ export const MentorCard = ({ mentor }) => {
   const goToDetail = () => {
     navigate(`/my-mentor/${mentor.id}`);
   };
-
+ 
   return (
     <Card
       onClick={goToDetail}
@@ -30,10 +30,11 @@ export const MentorCard = ({ mentor }) => {
           alt={mentor.name}
           className="w-16 h-16 rounded-2xl object-cover ring-4 ring-gray-50"
         />
+
         {/* Info */}
         <div className="flex-1 min-w-0">
           {/* Top badges */}
-          <div className="flex gap-2 mb-1">
+          <div className="flex flex-wrap gap-2 mb-1">
             <Badge className="text-[9px] uppercase font-bold bg-blue-50 text-blue-700">
               Mentor
             </Badge>
