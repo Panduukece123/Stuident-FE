@@ -462,6 +462,17 @@ const ProfileService = {
   
 
 
+  getMyApplications: async (params = {}) => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/my-applications", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      params: params,
+    });
+    return response.data; 
+  },
 };
 
 export default ProfileService;

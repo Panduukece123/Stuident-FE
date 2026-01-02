@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // Import komponen Select Shadcn
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +30,8 @@ export const CreateUserDialog = ({
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "Student",
+    role: "student", // Default pakai huruf kecil
+    password: "",
   });
 
   useEffect(() => {
@@ -39,32 +40,59 @@ export const CreateUserDialog = ({
         setFormData({
           name: userToEdit.name,
           email: userToEdit.email,
-          role: userToEdit.role,
+          role: userToEdit.role, // Pastikan dari backend juga lowercase
+          password: "",
         });
       } else {
         setFormData({
           name: "",
           email: "",
-          role: "Student",
+          role: "student", // Default saat create baru
+          password: "",
         });
       }
     }
   }, [open, userToEdit]);
 
-  // Handle untuk Input biasa (Name & Email)
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  // Handle khusus untuk Select Shadcn (karena dia return value langsung)
   const handleRoleChange = (value) => {
     setFormData((prev) => ({ ...prev, role: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    
+    // Copy data agar state asli tidak terganggu
+    const payload = { ...formData };
+
+    // --- 1. Handling Password Confirmation ---
+    // Laravel biasanya butuh 'password_confirmation' saat create user
+    if (!userToEdit) {
+        // Mode Create: Copy password ke confirmation
+        payload.password_confirmation = formData.password;
+    } else {
+        // Mode Edit:
+        if (!payload.password) {
+            // Jika kosong, hapus field agar backend tidak mengupdate password
+            delete payload.password;
+        } else {
+            // Jika diisi, sertakan konfirmasi
+            payload.password_confirmation = formData.password;
+        }
+    }
+
+    // --- 2. Final Check Role ---
+    // Pastikan role dikirim sebagai lowercase (jaga-jaga)
+    if (payload.role) {
+        payload.role = payload.role.toLowerCase();
+    }
+
+    console.log("Payload Final:", payload); // Cek console untuk memastikan
+    onSave(payload);
   };
 
   return (
@@ -108,7 +136,22 @@ export const CreateUserDialog = ({
               />
             </div>
 
-            {/* Select Role (Shadcn Version) */}
+            {/* Input Password */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="password" className="text-right">Password</Label>
+              <div className="col-span-3 space-y-1">
+                <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder={userToEdit ? "Leave blank to keep current" : "Min. 8 characters"}
+                    required={!userToEdit} 
+                />
+              </div>
+            </div>
+
+            {/* Select Role - VALUES SUDAH DIPERBAIKI KE LOWERCASE */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="role" className="text-right">Role</Label>
               <div className="col-span-3">
@@ -116,13 +159,15 @@ export const CreateUserDialog = ({
                   value={formData.role} 
                   onValueChange={handleRoleChange}
                 >
-                  <SelectTrigger className={"w-full"} id="role">
+                  <SelectTrigger className="w-full" id="role">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Student">Student</SelectItem>
-                    <SelectItem value="Mentor">Mentor</SelectItem>
-                    <SelectItem value="Admin">Admin</SelectItem>
+                    {/* Value harus lowercase sesuai request backend */}
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="mentor">Mentor</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="corporate">Corporate</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
