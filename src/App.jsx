@@ -37,6 +37,9 @@ import MyMentoringSessionDetail from "./pages/profile/MyMentoringSessionDetail";
 import { MentorPage } from "./pages/MentorPage";
 import { MentorDetail } from "./pages/Mentor/MentorDetail";
 import { MyProfileScholarshipApplication } from "./pages/profile/MyProfileScholarshipApplication";
+import { ManageArticles } from "./pages/corporate/CorporateArticles";
+import { ManageOrganizations } from "./pages/admin/AdminOrganizations";
+import { CorporateManageOrganizations } from "./pages/corporate/CorporateOrganizations";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,12 +65,16 @@ function App() {
               </Route>
               <Route path="scholarships" element={<CorporateScholarships />} />
               <Route path="transactions" element={<AdminTransactions />} />
+              <Route path="organizations" element={<ManageOrganizations />} />
+              <Route path="articles" element={<ManageArticles />} />
             </Route>
           </Route>
 
           <Route element={<CorporateRoute />}>
             <Route path="corporate" element={<CorporateLayout />}>
               <Route path="scholarships" element={<CorporateScholarships />} />
+              <Route path="organizations" element={<CorporateManageOrganizations/>} />
+              <Route path="articles" element={<ManageArticles />} />
             </Route>
           </Route>
 

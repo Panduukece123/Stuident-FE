@@ -22,7 +22,7 @@ export const CorporateSidebar = ({ className }) => {
   const menus = [
     { name: "Kelola Beasiswa", href: "/corporate/scholarships", icon: GraduationCap },
     { name: "Kelola Artikel", href: "/corporate/articles", icon: FileText },
-    { name: "Profil Perusahaan", href: "/corporate/profile", icon: Building2 },
+    { name: "Kelola Organisasi", href: "/corporate/organizations", icon: Building2 },
   ];
 
   const handleLogout = async () => {
