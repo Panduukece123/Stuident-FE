@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom"; // 1. Tambah Import ini
 import MentoringService from "@/services/MentoringService";
 import { MentorCard } from "@/components/shared/MentorCard";
+import { SessionCard } from "@/components/shared/SessionCard"; // 2. Tambah Import ini
 
 export const MentorPage = () => {
+  const navigate = useNavigate(); // 3. Inisialisasi navigate
   const [loading, setLoading] = useState(true);
   const [mentors, setMentors] = useState([]);
   const [mySessions, setMySessions] = useState([]);
@@ -50,6 +53,7 @@ export const MentorPage = () => {
 
   const academicMentors = mentors;
   const lifeMentors = mentors;
+
   if (loading) {
     return (
       <p className="text-center mt-20 text-muted-foreground">
@@ -60,6 +64,8 @@ export const MentorPage = () => {
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16 py-10 space-y-16">
+      
+      {/* HEADER */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">My Mentor</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -67,11 +73,13 @@ export const MentorPage = () => {
           mentor pilihan
         </p>
       </div>
+
+      {/* MARKETING CARDS (Tetap Ada) */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 bg-gray-50">
         {/* Academic Coaching Card */}
         <div
           onClick={() => scrollToSection(academicRef)}
-          className="bg-white border-2 border-blue-400 rounded-[2rem] p-8 shadow-sm flex flex-col"
+          className="bg-white border-2 border-blue-400 rounded-[2rem] p-8 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow"
         >
           <h2 className="text-2xl font-black text-center italic tracking-wider mb-6">
             ACADEMIC COACHING
@@ -125,13 +133,12 @@ export const MentorPage = () => {
         {/* Life Coaching Card */}
         <div
           onClick={() => scrollToSection(lifeRef)}
-          className="bg-white border-2 border-blue-400 rounded-[2rem] p-8 shadow-sm flex flex-col"
+          className="bg-white border-2 border-blue-400 rounded-[2rem] p-8 shadow-sm flex flex-col cursor-pointer hover:shadow-md transition-shadow"
         >
           <h2 className="text-2xl font-black text-center italic tracking-wider mb-6">
             LIFE COACHING
           </h2>
 
-          {/* Placeholder untuk Gambar/Icon besar */}
           <div className="w-full h-48 rounded-lg overflow-hidden mb-6">
             <img
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD2dqfI0MC0J6jszIAR_QRLYjbXp3-iqWgJQ&s"
@@ -177,22 +184,32 @@ export const MentorPage = () => {
           </ul>
         </div>
       </section>
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Mentoring yang Kamu Ikuti</h2>
 
-        {myMentors.length === 0 ? (
-          <div className="text-sm text-muted-foreground bg-gray-50 p-6 rounded-xl text-center">
-            Kamu belum memiliki sesi mentoring
-          </div>
+      <section className="space-y-4 pt-4 border-t">
+        <h2 className="text-xl font-semibold">Jadwal Sesi Mentoring</h2>
+        
+        {mySessions.length === 0 ? (
+           <div className="rounded-xl border border-dashed bg-neutral-50 p-10 text-center text-neutral-500">
+             Belum ada sesi mentoring yang terdaftar.
+           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {myMentors.map((mentor) => (
-              <MentorCard key={`my-${mentor.id}`} mentor={mentor} isActive />
-            ))}
-          </div>
+           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+             {mySessions.map((session) => (
+               <SessionCard
+                 key={session.id}
+                 session={session}
+                 onClick={() =>
+                   navigate(`/profile/my-mentoring-sessions/${session.id}`)
+                 }
+               />
+             ))}
+           </div>
         )}
       </section>
-      <section ref={academicRef} className="space-y-4">
+      {/* ========================================================= */}
+
+      {/* SECTION: ACADEMIC LIST (Tetap Ada) */}
+      <section ref={academicRef} className="space-y-4 scroll-mt-20">
         <h2 className="text-xl font-semibold">🎓 Academic Coaching</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -201,7 +218,9 @@ export const MentorPage = () => {
           ))}
         </div>
       </section>
-      <section ref={lifeRef} className="space-y-4">
+
+      {/* SECTION: LIFE LIST (Tetap Ada) */}
+      <section ref={lifeRef} className="space-y-4 scroll-mt-20">
         <h2 className="text-xl font-semibold">🌱 Life Coaching</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

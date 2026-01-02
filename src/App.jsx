@@ -36,6 +36,7 @@ import { MyProfileMySession } from "./pages/profile/MyProfileMySession";
 import MyMentoringSessionDetail from "./pages/profile/MyMentoringSessionDetail";
 import { MentorPage } from "./pages/MentorPage";
 import { MentorDetail } from "./pages/Mentor/MentorDetail";
+import { MyProfileScholarshipApplication } from "./pages/profile/MyProfileScholarshipApplication";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -101,6 +102,10 @@ function App() {
               <Route
                 path="my-mentoring-sessions/:id"
                 element={<MyMentoringSessionDetail />}
+              />
+              <Route
+                path="my-scholarship-applications"
+                element={<MyProfileScholarshipApplication />}
               />
             </Route>
 

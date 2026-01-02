@@ -223,6 +223,15 @@ export const ProfileLayout = () => {
             </Link>
             {/* ------------------------------------- */}
 
+            <Link to="/profile/my-scholarship-applications">
+              <Button
+                variant="ghost"
+                className={getSidebarClass("/profile/my-scholarship-applications")}
+              >
+                <GraduationCap className="mr-3 h-5 w-5" /> Scholarships
+              </Button>
+            </Link>
+
             <div className="my-2 h-px w-full bg-neutral-100" />
             <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2 mt-2">
               Account

@@ -103,14 +103,20 @@ export const EditUserDialog = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Opsional: Ubah specialization kembali jadi array jika backend butuh array
-    // const payload = {
-    //    ...formData,
-    //    specialization: formData.specialization.split(',').map(s => s.trim())
-    // }
-    
-    // Kirim data update
-    onSave(formData); 
+    // Copy data
+    const payload = { ...formData };
+
+    // FIX: Ubah string "React, Laravel" kembali menjadi Array ["React", "Laravel"]
+    // jika backend/database menyimpannya sebagai JSON/Array.
+    if (payload.specialization && typeof payload.specialization === 'string') {
+        payload.specialization = payload.specialization
+            .split(',')
+            .map(item => item.trim()) // Hapus spasi
+            .filter(item => item !== ""); // Hapus string kosong
+    }
+
+    console.log("Payload Update:", payload); // Cek console sebelum kirim
+    onSave(payload); 
   };
 
   return (
