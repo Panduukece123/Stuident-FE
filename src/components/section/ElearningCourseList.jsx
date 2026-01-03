@@ -1,28 +1,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CourseCard } from "../shared/CourseCard";
+import { CourseCard } from "../shared/CourseCard"; // Sesuaikan path import
 
 export const ElearningCourseList = ({ title, subtitle, courses = [] }) => {
-  // 1. Filter dulu datanya di sini
-  // Hanya ambil yang type-nya "course" (pastikan huruf kecil/besar sesuai API)
-  const filteredCourses = courses.filter((course) => course.type === 'course');
-
-  // Opsional: Kalau mau cek apakah datanya kosong setelah difilter
-  if (filteredCourses.length === 0) {
-     // Bisa return null atau pesan kosong, tapi kalau mau hidden biarkan lanjut ke bawah
-  }
-
+  // HAPUS LOGIC FILTER DI SINI. TERIMA APA ADANYA.
+  
   return (
     <section className="py-12 px-6 bg-background border-t">
-      <div className="">
+      <div>
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-2">{title}</h2>
           <p className="text-muted-foreground">{subtitle}</p>
         </div>
 
+        {/* Pastikan lg:grid-cols-4 agar muat 4 baris */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* 2. Map dari hasil filter, bukan dari props asli */}
-          {filteredCourses.map((course, index) => (
+          {courses.map((course, index) => (
             <Link 
               to={`/course/show/${course.id}`} 
               key={course.id || index} 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
+
+// IMPORT COMPONENTS
 import { ElearningBanner } from "../components/section/ElearningBanner";
 import { ElearningCategories } from "../components/section/ElearningCategories";
 import { ElearningCourseList } from "../components/section/ElearningCourseList";
@@ -10,13 +12,13 @@ import { ElearningBootcampList } from "@/components/section/ElearningBootcampLis
 import { ElearningEnrolledList } from "@/components/section/ElearningEnrolledList";
 import { BookOpen } from "lucide-react";
 import { ElearningPageSkeleton } from "@/components/skeleton/ElearningPageSkeleton";
+import { InfoSubscription } from "@/components/section/InfoSubscription";
+import { UpgradeSubscriptionDialog } from "@/components/dialog/UpgradeSubsDialog";
 
-// IMPORT LAYANAN & COMPONENT SUBSCRIPTION
+// IMPORT SERVICES
 import ElearningService from "@/services/elearningService";
 import ProfileService from "@/services/ProfileService";
 import { subscriptionService } from "@/services/SubscriptionService";
-import { InfoSubscription } from "@/components/section/InfoSubscription";
-import { UpgradeSubscriptionDialog } from "@/components/dialog/UpgradeSubsDialog";
 
 export const ElearningPage = () => {
   // --- SETUP SCROLL LOGIC ---
@@ -24,15 +26,16 @@ export const ElearningPage = () => {
   const token = localStorage.getItem("token");
   const isLoggedIn = !!localStorage.getItem("token");
 
-  // State Pagination (biarkan seperti adanya)
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
-  const [popularPage, setPopularPage] = useState(1);
-  const popularLimit = 10;
-  const [bootcampPage, setBootcampPage] = useState(1);
-  const bootcampLimit = 10;
+  // --- CONFIG PAGINATION (SATU BARIS = 4 ITEM) ---
+  const ITEMS_PER_ROW = 4;
 
-  // --- LOGIC SUBSCRIPTION (PINDAHAN DARI INFOSUBSCRIPTION) ---
+  // State Pagination
+  const [enrolledPage, setEnrolledPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);   // Discovery
+  const [popularPage, setPopularPage] = useState(1);   // Popular (Regular Course)
+  const [bootcampPage, setBootcampPage] = useState(1); // Bootcamp
+
+  // --- LOGIC SUBSCRIPTION ---
   const [subscriptions, setSubscriptions] = useState([]);
   const [subsLoading, setSubsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -58,15 +61,12 @@ export const ElearningPage = () => {
     fetchSubscriptions();
   }, []);
 
-  // Handler: Saat tombol Plan diklik di Child Component
   const handlePlanClick = (selectedPlan) => {
     setTargetPlan(selectedPlan);
     setIsDialogOpen(true);
   };
 
-  // Handler: Confirm Upgrade
   const handleConfirmUpgrade = async (selectedPaymentMethod) => {
-    // Cari Subscription ID yang sedang aktif
     const activeSub = subscriptions.find((sub) => sub.status === "active");
     const activeId = activeSub ? activeSub.id : null;
 
@@ -83,11 +83,8 @@ export const ElearningPage = () => {
       };
 
       await subscriptionService.upgradeSubscription(activeId, payload);
-
       setIsDialogOpen(false);
       alert(`Berhasil upgrade ke ${targetPlan}!`);
-
-      // Refresh Data setelah sukses
       fetchSubscriptions();
     } catch (error) {
       console.error("Upgrade failed:", error);
@@ -101,7 +98,7 @@ export const ElearningPage = () => {
   };
   // --- END LOGIC SUBSCRIPTION ---
 
-  // --- QUERY ELEARNING LAINNYA ---
+  // --- QUERY DATA ---
   const {
     data: courses = [],
     isLoading: loadingCourses,
@@ -135,7 +132,7 @@ export const ElearningPage = () => {
     staleTime: 1000 * 60 * 2,
   });
 
-  // Effect Scroll
+  // Effect Scroll to Hash
   useEffect(() => {
     if (!loadingCourses && hash) {
       const id = hash.replace("#", "");
@@ -148,30 +145,43 @@ export const ElearningPage = () => {
     }
   }, [loadingCourses, hash]);
 
-  // Logic Data Source
+
+  // --- LOGIC DATA SOURCE, FILTERING & SLICING (UPDATED) ---
+
+  // 1. FILTER DULU (Pisahkan Course Biasa dan Bootcamp)
+  // Pastikan properti 'type' sesuai dengan response API (case-sensitive)
+  const allRegularCourses = courses.filter((c) => c.type === 'course');
+  const allBootcamps = courses.filter((c) => c.type === 'bootcamp');
+
+  // 2. Enrolled Courses Slicing
+  const idxLastEnrolled = enrolledPage * ITEMS_PER_ROW;
+  const idxFirstEnrolled = idxLastEnrolled - ITEMS_PER_ROW;
+  const currentEnrolledCourses = enrolledCourses.slice(idxFirstEnrolled, idxLastEnrolled);
+  const totalEnrolledPages = Math.ceil(enrolledCourses.length / ITEMS_PER_ROW);
+
+  // 3. Discovery / Recommendations Slicing
+  // (Discovery biasanya menampilkan campuran, jadi kita pakai logic source awal)
   const recommendedCourses = Array.isArray(recData?.data) ? recData.data : [];
-  const discoverySource =
-    isLoggedIn && recommendedCourses.length > 0 ? recommendedCourses : courses;
+  const discoverySource = isLoggedIn && recommendedCourses.length > 0 ? recommendedCourses : courses;
+  
+  const idxLastDiscovery = currentPage * ITEMS_PER_ROW;
+  const idxFirstDiscovery = idxLastDiscovery - ITEMS_PER_ROW;
+  const currentDiscoveryCourses = discoverySource.slice(idxFirstDiscovery, idxLastDiscovery);
+  const totalDiscoveryPages = Math.ceil(discoverySource.length / ITEMS_PER_ROW);
 
-  // Pagination Logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentDiscoveryCourses = discoverySource.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalDiscoveryPages = Math.ceil(discoverySource.length / itemsPerPage);
+  // 4. Popular Courses Slicing (PAKE DATA HASIL FILTER: allRegularCourses)
+  const idxLastPop = popularPage * ITEMS_PER_ROW;
+  const idxFirstPop = idxLastPop - ITEMS_PER_ROW;
+  const currentPopularCourses = allRegularCourses.slice(idxFirstPop, idxLastPop);
+  const totalPopularPages = Math.ceil(allRegularCourses.length / ITEMS_PER_ROW);
 
-  const idxLastPop = popularPage * popularLimit;
-  const idxFirstPop = idxLastPop - popularLimit;
-  const currentPopularCourses = courses.slice(idxFirstPop, idxLastPop);
-  const totalPopularPages = Math.ceil(courses.length / popularLimit);
+  // 5. Bootcamp Courses Slicing (PAKE DATA HASIL FILTER: allBootcamps)
+  const idxLastBoot = bootcampPage * ITEMS_PER_ROW;
+  const idxFirstBoot = idxLastBoot - ITEMS_PER_ROW;
+  const currentBootcampCourses = allBootcamps.slice(idxFirstBoot, idxLastBoot);
+  const totalBootcampPages = Math.ceil(allBootcamps.length / ITEMS_PER_ROW);
 
-  const idxLastBoot = bootcampPage * bootcampLimit;
-  const idxFirstBoot = idxLastBoot - bootcampLimit;
-  const currentBootcampCourses = courses.slice(idxFirstBoot, idxLastBoot);
-  const totalBootcampPages = Math.ceil(courses.length / bootcampLimit);
-
+  // Get Unique Categories for Filter UI
   const uniqueCategories = [
     ...new Set(courses.map((course) => course.category)),
   ];
@@ -196,6 +206,7 @@ export const ElearningPage = () => {
     );
   }
 
+  // Komponen Pagination Helper
   const PaginationControl = ({ page, total, onPageChange }) => {
     if (total <= 1) return null;
     return (
@@ -203,7 +214,7 @@ export const ElearningPage = () => {
         <button
           onClick={() => onPageChange(page - 1)}
           disabled={page === 1}
-          className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent cursor-pointer"
+          className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent cursor-pointer text-sm"
         >
           Previous
         </button>
@@ -213,7 +224,7 @@ export const ElearningPage = () => {
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page === total}
-          className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent cursor-pointer"
+          className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent cursor-pointer text-sm"
         >
           Next
         </button>
@@ -227,16 +238,24 @@ export const ElearningPage = () => {
         <ElearningBanner />
         <ElearningCategories categories={uniqueCategories} />
 
+        {/* --- SECTION ENROLLED COURSES --- */}
         {isLoggedIn &&
           (enrolledCourses.length > 0 ? (
-            <ElearningEnrolledList
-              title="Kursus yang Sedang Diikuti"
-              subtitle="Lanjutkan progres belajar Anda."
-              courses={enrolledCourses}
-            />
+            <div>
+              <ElearningEnrolledList
+                title="Kursus yang Sedang Diikuti"
+                subtitle="Lanjutkan progres belajar Anda."
+                courses={currentEnrolledCourses}
+              />
+              <PaginationControl
+                page={enrolledPage}
+                total={totalEnrolledPages}
+                onPageChange={setEnrolledPage}
+              />
+            </div>
           ) : (
             <section className="px-6 py-12">
-              <div className="mb-6">
+              <div className="mb-6 container mx-auto">
                 <h2 className="text-2xl font-bold mb-2">
                   Kursus yang Sedang Diikuti
                 </h2>
@@ -244,23 +263,26 @@ export const ElearningPage = () => {
                   Lanjutkan progres belajar Anda.
                 </p>
               </div>
-              <div className="w-full py-12 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-center gap-4 bg-gray-50/50">
-                <div className="bg-white p-4 rounded-full shadow-sm">
-                  <BookOpen className="h-8 w-8 text-gray-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Belum ada kursus yang diikuti
-                  </h3>
-                  <p className="text-sm text-gray-500 max-w-sm mx-auto mt-1">
-                    Anda belum mendaftar di kursus manapun. Yuk, mulai
-                    perjalanan belajar Anda sekarang!
-                  </p>
+              <div className="container mx-auto">
+                <div className="w-full py-12 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center text-center gap-4 bg-gray-50/50">
+                  <div className="bg-white p-4 rounded-full shadow-sm">
+                    <BookOpen className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Belum ada kursus yang diikuti
+                    </h3>
+                    <p className="text-sm text-gray-500 max-w-sm mx-auto mt-1">
+                      Anda belum mendaftar di kursus manapun. Yuk, mulai
+                      perjalanan belajar Anda sekarang!
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>
           ))}
 
+        {/* --- SECTION DISCOVERY / REKOMENDASI --- */}
         <div>
           <ElearningList
             title={
@@ -286,11 +308,12 @@ export const ElearningPage = () => {
           onSubscribe={handlePlanClick}
         />
 
+        {/* --- SECTION POPULAR (Regular Courses Only) --- */}
         <div id="course" className="scroll-mt-10">
           <ElearningCourseList
             title="Kursus Terpopuler"
             subtitle="Lihat apa yang sedang dipelajari oleh ribuan anggota lain."
-            courses={currentPopularCourses}
+            courses={currentPopularCourses} 
           />
           <PaginationControl
             page={popularPage}
@@ -301,6 +324,7 @@ export const ElearningPage = () => {
 
         <InfoBootcamp />
 
+        {/* --- SECTION BOOTCAMP (Bootcamp Only) --- */}
         <div id="bootcamp" className="scroll-mt-10">
           <ElearningBootcampList
             title="Kursus Bootcamp"
