@@ -34,11 +34,11 @@ export const ArticleList = ({ articles = [] }) => {
                   <h3 className="font-bold text-lg text-gray-900 mb-3 leading-snug">
                     {article.title}
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                  <div className="text-gray-600 text-sm leading-relaxed line-clamp-3">
                     <div className="article-content">
                       <ReactMarkdown>{article.description}</ReactMarkdown>
                     </div>
-                  </p>
+                  </div>
                 </CardContent>
                 <CardFooter className="pb-6 px-6">
                   <Button

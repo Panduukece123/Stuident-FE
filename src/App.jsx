@@ -15,8 +15,8 @@ import { OurServices } from "./pages/OurServices";
 import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
 import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
 import { EnrolledCourseShowPage } from "./pages/course/EnrolledCourseShowPage";
-import { ArticlePage } from "./pages/ArticlePage";
-import { ArticleDetailPage } from "./pages/ArticleDetailPage";
+import { ArticlePage } from "./pages/article/ArticlePage";
+import { ArticleDetailPage } from "./pages/article/ArticleDetailPage";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ScholarshipDetail from "./pages/scholarsip/Detail/ScholarshipDetailPage";

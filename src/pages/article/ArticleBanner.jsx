@@ -13,11 +13,11 @@ export const ArticleBanner = ({ article }) => {
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
             {article.title}
           </h1>
-          <p className="text-gray-600 leading-relaxed text-lg line-clamp-3">
+          <div className="text-gray-600 leading-relaxed text-lg line-clamp-3">
             <div className="article-content">
               <ReactMarkdown>{article.description}</ReactMarkdown>
             </div>
-          </p>
+          </div>
           <Button
             className=" cursor-pointer rounded-full px-8 py-6 text-base font-medium bg-white text-[#007EA7] border-2 border-[#E5E7EB] hover:bg-gray-50 hover:text-[#005F7F] transition-colors shadow-sm"
             variant="outline"

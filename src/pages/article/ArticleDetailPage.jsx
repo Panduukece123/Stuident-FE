@@ -61,16 +61,12 @@ export const ArticleDetailPage = () => {
     });
   };
 
-  return (
+ return (
     <div className="min-h-screen bg-gray-50/50 pb-20">
-      {/* Header Image */}
+      {/* Header Image & Back Button (Tetap sama) */}
       <div className="w-full h-[400px] md:h-[500px] relative">
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent z-10" />
-        <img
-          src={article.image}
-          alt={article.title}
-          className="w-full h-full object-cover"
-        />
+        <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
         <div className="absolute top-8 left-4 md:left-8 z-20">
           <Button
             variant="ghost"
@@ -84,36 +80,50 @@ export const ArticleDetailPage = () => {
       </div>
 
       {/* Content Container */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-20">
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 md:p-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-20">
+        <div className="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 p-8 md:p-16">
+          
           {/* Meta Info */}
-          <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-500">
-            <Badge
-              variant="secondary"
-              className="bg-blue-50 text-blue-700 hover:bg-blue-100"
-            >
-              {article.category || "General"}
+          <div className="flex flex-wrap items-center justify-center gap-6 mb-10 text-sm font-medium text-gray-500">
+            <Badge variant="secondary" className="bg-blue-50 text-blue-600 px-4 py-1 rounded-full">
+              {article.category || "Education"}
             </Badge>
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4 text-blue-500" />
               <span>{formatDate(article.created_at)}</span>
             </div>
             <div className="flex items-center gap-2">
-              <User className="h-4 w-4" />
+              <User className="h-4 w-4 text-blue-500" />
               <span>{article.author || "Admin"}</span>
             </div>
           </div>
 
-          {/* Title */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+          {/* Title - Dibuat lebih elegan */}
+          <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-12 leading-[1.2] text-center max-w-4xl mx-auto">
             {article.title}
           </h1>
 
-          {/* Content */}
-          <div className="article-content">
-            <ReactMarkdown>
-              {article.content || article.description}
-            </ReactMarkdown>
+          <hr className="mb-12 border-gray-100" />
+
+          <div className="article-content flex justify-center">
+            <article className="prose prose-blue prose-lg md:prose-xl max-w-none 
+              prose-headings:text-gray-900 prose-headings:font-bold
+              prose-p:text-gray-600 prose-p:leading-relaxed
+              prose-li:text-gray-600
+              prose-strong:text-gray-900 prose-strong:font-semibold
+              prose-img:rounded-3xl prose-img:shadow-lg">
+              
+              <ReactMarkdown
+                components={{
+                  h2: ({node, ...props}) => <h2 className="text-2xl md:text-3xl mt-12 mb-6 pb-2 border-b-2 border-blue-50 w-fit" {...props} />,
+                  ul: ({node, ...props}) => <ul className="list-disc pl-6 space-y-3" {...props} />,
+                  ol: ({node, ...props}) => <ol className="list-decimal pl-6 space-y-3" {...props} />,
+                  strong: ({node, ...props}) => <strong className="text-blue-900 bg-blue-50/50 px-1 rounded" {...props} />,
+                }}
+              >
+                {article.content || article.description}
+              </ReactMarkdown>
+            </article>
           </div>
         </div>
       </div>
