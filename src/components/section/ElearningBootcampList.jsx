@@ -1,28 +1,37 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { CourseCard } from "../shared/CourseCard";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
-export const ElearningBootcampList = ({ title, subtitle, courses = [] }) => {
-  // 1. Filter dulu datanya di sini
-  // Hanya ambil yang type-nya "course" (pastikan huruf kecil/besar sesuai API)
-  const filteredCourses = courses.filter((course) => course.type === 'bootcamp');
-
-  // Opsional: Kalau mau cek apakah datanya kosong setelah difilter
-  if (filteredCourses.length === 0) {
-     // Bisa return null atau pesan kosong, tapi kalau mau hidden biarkan lanjut ke bawah
-  }
-
+export const ElearningBootcampList = ({ title, subtitle, courses = [], searchQuery, onSearchChange }) => {
   return (
-    <section className="py-12 px-6 bg-background border-t">
+    <section className="pt-12 pb-4 px-6 bg-background border-t">
       <div className="">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">{title}</h2>
-          <p className="text-muted-foreground">{subtitle}</p>
+        
+        {/* --- HEADER (JUDUL + SEARCH) --- */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+            <div>
+                <h2 className="text-2xl font-bold mb-2">{title}</h2>
+                <p className="text-muted-foreground">{subtitle}</p>
+            </div>
+
+            {onSearchChange && (
+                <div className="w-full md:w-72 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input 
+                        value={searchQuery}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        placeholder="Cari..."
+                        className="pl-9 bg-white"
+                    />
+                </div>
+            )}
         </div>
 
+        {/* Grid sudah benar lg:grid-cols-4 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* 2. Map dari hasil filter, bukan dari props asli */}
-          {filteredCourses.map((course, index) => (
+          {courses.map((course, index) => (
             <Link 
               to={`/course/show/${course.id}`} 
               key={course.id || index} 
@@ -32,6 +41,13 @@ export const ElearningBootcampList = ({ title, subtitle, courses = [] }) => {
             </Link>
           ))}
         </div>
+        
+        {/* Opsional: Handling jika kosong */}
+        {courses.length === 0 && (
+           <div className="text-center text-gray-500 py-10 col-span-full">
+             Belum ada bootcamp tersedia.
+           </div>
+        )}
       </div>
     </section>
   );

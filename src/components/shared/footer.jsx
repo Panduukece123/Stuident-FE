@@ -9,14 +9,12 @@ const navigation = [
       { label: "E-Learning", href: "#" },
       { label: "Bootcamp", href: "#" },
       { label: "My Mentor", href: "#" },
-      { label: "Corporate Service", href: "#" },
     ],
   },
   {
     title: "Perusahaan",
     links: [
-      { label: "Tentang Kami", href: "#" },
-      { label: "Karier", href: "#" },
+      { label: "Corporate Service", href: "#" },
       { label: "Artikel", href: "#" },
       { label: "Kontak Kami", href: "#" },
     ],

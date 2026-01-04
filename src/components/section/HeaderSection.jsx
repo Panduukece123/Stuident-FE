@@ -1,26 +1,37 @@
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { BookOpenCheck, Users, Award, MonitorPlay } from "lucide-react"; // Icon pendukung
+import { BookOpenCheck, Users, Award, MonitorPlay } from "lucide-react"; 
 
 export function Header() {
   const features = [
     {
-      icon: <BookOpenCheck className="h-8 w-8 text-blue-600 mb-2" />,
+      icon: <BookOpenCheck className="h-6 w-6 text-blue-600" />,
+      // Warna Border & Background Icon (Biru)
+      borderColor: "border-blue-200", 
+      iconBg: "bg-blue-50",
       title: "Kurikulum Terstruktur",
       desc: "Materi disusun bertahap dari dasar hingga mahir, sesuai standar industri terkini.",
     },
     {
-      icon: <Users className="h-8 w-8 text-green-600 mb-2" />,
+      icon: <Users className="h-6 w-6 text-green-600" />,
+      // Warna Border & Background Icon (Hijau)
+      borderColor: "border-green-200",
+      iconBg: "bg-green-50",
       title: "Mentoring Eksklusif",
       desc: "Bimbingan langsung dari praktisi ahli yang siap membantu kesulitan belajarmu.",
     },
     {
-      icon: <MonitorPlay className="h-8 w-8 text-purple-600 mb-2" />,
+      icon: <MonitorPlay className="h-6 w-6 text-purple-600" />,
+      // Warna Border & Background Icon (Ungu)
+      borderColor: "border-purple-200",
+      iconBg: "bg-purple-50",
       title: "Akses Seumur Hidup",
       desc: "Bebas akses materi video dan modul pembelajaran kapan saja dan di mana saja.",
     },
     {
-      icon: <Award className="h-8 w-8 text-orange-600 mb-2" />,
+      icon: <Award className="h-6 w-6 text-orange-600" />,
+      // Warna Border & Background Icon (Orange)
+      borderColor: "border-orange-200",
+      iconBg: "bg-orange-50",
       title: "Sertifikat Kompetensi",
       desc: "Dapatkan sertifikat resmi sebagai bukti keahlian untuk menunjang karirmu.",
     },
@@ -28,28 +39,38 @@ export function Header() {
 
   return (
     <div className="w-full px-6">
-      <div className="mx-auto max-w-7xl flex flex-col items-center">
+      <div className="mx-auto max-w-7xl">
         
-
-        {/* --- KARTU KEUNGGULAN --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+        {/* --- GRID KEUNGGULAN --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((item, index) => (
-            <Card 
+            <div 
               key={index} 
-              className="border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white/80 backdrop-blur-sm"
+              // Style Utama:
+              // 1. bg-white: Background putih bersih
+              // 2. border-2: Garis pinggir agak tebal (2px) biar warnanya kelihatan
+              // 3. ${item.borderColor}: Warna garis dinamis sesuai data di atas
+              // 4. rounded-2xl: Sudut melengkung
+              // 5. h-full: Tinggi rata
+              className={`flex flex-col items-start p-6 bg-white border-2 ${item.borderColor} rounded-2xl h-full`}
             >
-              <CardHeader>
+              
+              {/* Icon Container: Warnanya matching sama border */}
+              <div className={`h-12 w-12 flex items-center justify-center rounded-xl ${item.iconBg} mb-4`}>
                 {item.icon}
-                <CardTitle className="text-xl font-bold text-slate-800">
-                  {item.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-slate-500 leading-relaxed">
-                  {item.desc}
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+
+              {/* Judul */}
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                {item.title}
+              </h3>
+
+              {/* Deskripsi */}
+              <p className="text-sm text-slate-500 leading-relaxed">
+                {item.desc}
+              </p>
+
+            </div>
           ))}
         </div>
 
