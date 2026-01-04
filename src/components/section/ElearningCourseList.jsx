@@ -1,16 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CourseCard } from "../shared/CourseCard"; // Sesuaikan path import
+import { CourseCard } from "../shared/CourseCard"; 
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
-export const ElearningCourseList = ({ title, subtitle, courses = [] }) => {
-  // HAPUS LOGIC FILTER DI SINI. TERIMA APA ADANYA.
-  
+export const ElearningCourseList = ({ title, subtitle, courses = [], searchQuery, onSearchChange }) => {
   return (
-    <section className="py-12 px-6 bg-background border-t">
+    <section className="pt-12 pb-4 px-6 bg-background border-t">
       <div>
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">{title}</h2>
-          <p className="text-muted-foreground">{subtitle}</p>
+        
+        {/* --- HEADER (JUDUL + SEARCH) --- */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+            <div>
+                <h2 className="text-2xl font-bold mb-2">{title}</h2>
+                <p className="text-muted-foreground">{subtitle}</p>
+            </div>
+
+            {onSearchChange && (
+                <div className="w-full md:w-72 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input 
+                        value={searchQuery}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        placeholder="Cari..."
+                        className="pl-9 bg-white"
+                    />
+                </div>
+            )}
         </div>
 
         {/* Pastikan lg:grid-cols-4 agar muat 4 baris */}
