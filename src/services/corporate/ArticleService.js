@@ -13,6 +13,17 @@ const ArticleService = {
     return response.data;
   },
 
+  getMyArticles: async () => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/my-articles", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
   // GET DETAIL ARTICLE
   getArticleDetail: async (id) => {
     const token = localStorage.getItem("token");

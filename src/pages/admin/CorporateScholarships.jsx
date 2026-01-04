@@ -14,7 +14,7 @@ import { CreateScholarshipDialog } from "@/components/corporate/dialog/CreateSch
 import { EditScholarshipDialog } from "@/components/corporate/dialog/EditScholarshipDialog";
 import { ViewScholarshipDialog } from "@/components/corporate/dialog/ViewScholarshipDialog";
 
-export const CorporateManageScholarships = () => {
+export const ManageScholarships = () => {
   const queryClient = useQueryClient();
   // user.id tidak kita pakai untuk organization_id lagi
   const user = JSON.parse(localStorage.getItem("user") || "{}");

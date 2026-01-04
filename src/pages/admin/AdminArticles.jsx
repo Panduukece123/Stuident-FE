@@ -12,7 +12,7 @@ import { EditArticleDialog } from "@/components/admin/dialog/EditArticleDialog";
 import { ArticleDetailDialog } from "@/components/admin/dialog/ArticleDetailDialog"; // <--- IMPORT INI
 import ArticleService from "@/services/corporate/ArticleService";
 
-export const CorporateManageArticles = () => {
+export const ManageArticles = () => {
   const queryClient = useQueryClient();
   
   // State Search & Add
@@ -30,7 +30,7 @@ export const CorporateManageArticles = () => {
   // --- 1. GET ALL ARTICLES ---
   const { data: result, isLoading: loadingData } = useQuery({
     queryKey: ["admin-articles"],
-    queryFn: ArticleService.getMyArticles,
+    queryFn: ArticleService.getArticles,
   });
 
   const articles = Array.isArray(result) ? result : (result?.data || []);

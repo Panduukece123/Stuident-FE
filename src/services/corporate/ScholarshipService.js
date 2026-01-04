@@ -13,6 +13,17 @@ const ScholarshipService = {
     return response.data;
   },
 
+  getMyScholarships: async () => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/my-scholarships", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
   // GET DETAIL
   getScholarshipDetail: async (id) => {
     const token = localStorage.getItem("token");
