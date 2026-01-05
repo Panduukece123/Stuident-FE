@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import CourseService from "@/services/admin/CourseService";
 import CreateEditCourseDialog from "@/components/admin/dialog/CreateEditCourseDialog";
 import CourseTable from "@/components/admin/table/CourseTable";
+import { CourseViewDialog } from "@/components/admin/dialog/CourseDialogs";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  // const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // TODO for custom delete dialog
+  const [openViewDialog, setOpenViewDialog] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -32,6 +36,12 @@ const AdminCourses = () => {
   useEffect(() => {
     fetchCourses();
   }, []);
+
+  // View course details (by: Zidan)
+  const handleView = (course) => {
+    setEditingCourse(course);
+    setOpenViewDialog(true);
+  };
 
   // Save course (create atau update)
   const handleSave = async (courseData) => {
@@ -78,30 +88,42 @@ const AdminCourses = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div className="relative w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search course..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+        <div>
+          <h1 className="text-xl font-medium tracking-tight text-neutral-800">Courses Management</h1>
+          <p className="text-muted-foreground">List and manage all courses.</p>
         </div>
-        <Button
-          onClick={() => {
-            setEditingCourse(null);
-            setOpenDialog(true);
-          }}
-        >
-          <Plus className="h-4 w-4 mr-2" /> Add Course
-        </Button>
+        <div className="flex flex-row gap-2 md:gap-4 items-center">
+          <InputGroup>
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+            <InputGroupInput
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </InputGroup>
+          <Button
+            onClick={() => {
+              setEditingCourse(null);
+              setOpenDialog(true);
+            }}
+          >
+            <Plus/>
+            Add A Course
+          </Button>
+        </div>
       </div>
 
       {loading ? (
-        <div>Loading courses...</div>
+        <div className="flex justify-center w-full p-4 border border-neutral-200 rounded-sm bg-neutral-50 text-center">
+          <Loader2 className="mr-4 animate-spin" />
+          Loading...
+        </div>
       ) : (
         <CourseTable
           courses={filteredCourses}
+          onView={handleView}
           onEdit={(course) => {
             setEditingCourse(course);
             setOpenDialog(true);
@@ -116,6 +138,11 @@ const AdminCourses = () => {
         onSave={handleSave}
         course={editingCourse}
         saving={saving} // pass untuk disable submit
+      />
+      <CourseViewDialog
+        open={openViewDialog}
+        onOpenChange={setOpenViewDialog}
+        course={editingCourse}
       />
     </div>
   );

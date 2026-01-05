@@ -6,7 +6,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@/
 import { Textarea } from "@/components/ui/textarea";
 import CurriculumService from "@/services/admin/CurriculumService";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { ImageOff, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
@@ -311,4 +311,75 @@ export const CurriculumDialog = ({
             </DialogPortal>
         </Dialog>
     );
+};
+
+export const CurriculumViewDialog = ({
+    open,
+    onOpenChange,
+    curriculum,
+}) => {
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogPortal>
+                <DialogContent>
+                    
+                    <DialogHeader>
+                        <DialogTitle>
+                            Curriculum Details
+                        </DialogTitle>
+                        <DialogDescription>
+                            Detailed information of {curriculum?.title}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex flex-col gap-2 max-h-[50vh] overflow-y-auto p-2">
+                        <div>
+                            <p className="text-sm font-medium">Curriculum Title</p>
+                            <p className="text-sm">{curriculum?.title}</p>
+                            <p className="text-xs font-light">Order: {curriculum?.order}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium">Curriculum Section</p>
+                            <p className="text-sm">{curriculum?.section}</p>
+                            <p className="text-xs font-light">Order: {curriculum?.section_order}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium">Description</p>
+                            <p className="text-sm">{curriculum?.description}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium">Curriculum Duration</p>
+                            <p className="text-sm">{curriculum?.duration}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium">Video</p>
+                            {curriculum?.video_url ? (
+                                <iframe
+                                    src={curriculum?.video_url}
+                                    allow="encrypted-media"
+                                    allowFullScreen
+                                    className="aspect-video rounded"
+                                ></iframe>
+                            ) : (
+                                <div className="aspect-video flex items-center justify-center gap-2 bg-neutral-100 text-muted-foreground border rounded">
+                                    <ImageOff />
+                                    <p>No video</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                        >
+                            Close
+                        </Button>
+                    </DialogFooter>
+
+                </DialogContent>
+            </DialogPortal>
+        </Dialog>
+    )
 };
