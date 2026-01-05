@@ -104,15 +104,10 @@ export const MentorPage = () => {
         <div className="flex flex-col items-center space-y-12">
           {/* My Mentor Title */}
           <div className="text-center">
-            <h1 className="text-7xl md:text-8xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-b from-black to-neutral-500 tracking-tighter">
-              MY
+            <h1 className="text-3xl md:text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-b from-black to-neutral-500 tracking-tighter">
+              My Mentoring
             </h1>
-            <div className="flex flex-row items-center justify-center text-6xl md:text-8xl font-black">
-              <span className="bg-[#ffda39] text-black px-8 py-3 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transform -rotate-1 border-4 border-black">
-                MENTOR
-              </span>
-            </div>
-            <p className="mt-8 text-neutral-500 font-medium max-w-lg mx-auto text-lg leading-relaxed">
+            <p className="mt-8 text-neutral-500 font-light max-w-lg mx-auto text-lg leading-relaxed">
               Kelola sesi mentoring akademik dan pengembangan diri kamu bersama
               mentor pilihan
             </p>
@@ -126,7 +121,7 @@ export const MentorPage = () => {
             onClick={() => scrollToSection(academicRef)}
             className="cursor-pointer group bg-white border-4 border-blue-400 rounded-[3rem] p-10 flex flex-col"
           >
-            <h2 className="text-3xl font-black text-center italic tracking-tighter mb-8 group-hover:text-blue-500 transition-colors">
+            <h2 className="text-3xl font-black text-center tracking-tighter mb-8 transition-colors">
               ACADEMIC COACHING
             </h2>
             <div className="w-full h-56 rounded-[2rem] overflow-hidden mb-8 border-2 border-neutral-100">
@@ -145,7 +140,7 @@ export const MentorPage = () => {
                 7 Benefits From Academic Coaching
               </p>
             </div>
-            <ul className="grid grid-cols-1 gap-3 text-sm font-bold italic text-neutral-700">
+            <ul className="grid grid-cols-1 gap-3 text-sm italic text-neutral-700">
               {[
                 "Pre-Assessment",
                 "Habit & Grit Tracker",
@@ -168,7 +163,7 @@ export const MentorPage = () => {
             onClick={() => scrollToSection(lifeRef)}
             className="cursor-pointer group bg-white border-4 border-emerald-400 rounded-[3rem] p-10 flex flex-col"
           >
-            <h2 className="text-3xl font-black text-center italic tracking-tighter mb-8 group-hover:text-emerald-500 transition-colors">
+            <h2 className="text-3xl font-black text-center tracking-tighter mb-8 transition-colors">
               LIFE COACHING
             </h2>
             <div className="w-full h-56 rounded-[2rem] overflow-hidden mb-8 border-2 border-neutral-100">
@@ -187,7 +182,7 @@ export const MentorPage = () => {
                 7 Benefits From Life Coaching
               </p>
             </div>
-            <ul className="grid grid-cols-1 gap-3 text-sm font-bold italic text-neutral-700">
+            <ul className="grid grid-cols-1 gap-3 text-sm italic text-neutral-700">
               {[
                 "Personality mapping",
                 "Strength assessment",

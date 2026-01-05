@@ -26,8 +26,8 @@ const ElearningService = {
             title: course.title || "Untitled Course",
             level: course.level || "Beginner",
             type : course.type || "course",
-            rating: course.rating || 4.8,
-            reviews: course.reviews_count || 120,
+            rating: course.reviews_avg_rating || 0,
+            reviews: course.total_reviews || 0,
             description: course.description || "No description available.",
             price: course.price ? Number(course.price) : 0,
             image: imageUrl || DEFAULT_IMAGE, // Pakai hasil olahan tadi
