@@ -14,35 +14,48 @@ export const MentorPage = () => {
   const [mentors, setMentors] = useState([]);
   const [mySessions, setMySessions] = useState([]);
 
-  /* 🔍 SEARCH */
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  /* 🏷️ FILTER BADGE */
   const [filterType, setFilterType] = useState("both");
 
   const academicRef = useRef(null);
   const lifeRef = useRef(null);
 
+  // ✅ CEK LOGIN TANPA AUTHSERVICE
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
+
+  /* ================= FETCH ================= */
+
   useEffect(() => {
-    fetchAllData();
+    fetchMentors();
+
+    if (isLoggedIn) {
+      fetchMySessions();
+    }
   }, []);
 
-  const fetchAllData = async () => {
+  const fetchMentors = async () => {
     try {
       setLoading(true);
-      const [mentorRes, mySessionRes] = await Promise.all([
-        MentoringService.getAllmentor(),
-        MentoringService.getMySessions(),
-      ]);
-      setMentors(mentorRes?.data ?? []);
-      setMySessions(mySessionRes?.data ?? []);
-    } catch (error) {
-      console.error("Failed to fetch mentor data", error);
+      const res = await MentoringService.getAllmentor();
+      setMentors(res?.data ?? []);
+    } catch (err) {
+      console.error("Failed to fetch mentors", err);
     } finally {
       setLoading(false);
     }
   };
+
+  const fetchMySessions = async () => {
+    try {
+      const res = await MentoringService.getMySessions();
+      setMySessions(res?.data ?? []);
+    } catch (err) {
+      console.warn("Skip my sessions (not logged in)");
+    }
+  };
+
+  /* ================= SEARCH ================= */
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -70,7 +83,10 @@ export const MentorPage = () => {
   const scrollToSection = (ref) => {
     if (!ref.current) return;
     const yOffset = -100;
-    const y = ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    const y =
+      ref.current.getBoundingClientRect().top +
+      window.pageYOffset +
+      yOffset;
     window.scrollTo({ top: y, behavior: "smooth" });
   };
 
@@ -84,11 +100,8 @@ export const MentorPage = () => {
 
   return (
     <div className="w-full flex flex-col bg-white">
-      {/* 1. BANNER SECTION (Full Width) */}
       <MyMentorBanner />
-
-      {/* 2. MAIN CONTENT SECTION (Centered & Padded) */}
-      <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16 py-16 space-y-24 max-w-[1600px] mx-auto">
+        <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16 py-16 space-y-24 max-w-[1600px] mx-auto">
         
         {/* HEADER & SEARCH AREA */}
         <div className="flex flex-col items-center space-y-12">
@@ -174,7 +187,9 @@ export const MentorPage = () => {
             </ul>
           </div>
         </section>
-       <div className="flex justify-center w-full">
+
+        {/* SEARCH */}
+        <div className="flex justify-center w-full">
           <div className="w-full max-w-4xl bg-neutral-50 p-4 md:p-6 rounded-[2.5rem] border-2 border-neutral-100 shadow-sm flex flex-col md:flex-row items-center gap-4">
             <div className="flex-1 w-full">
               <Input
@@ -201,11 +216,13 @@ export const MentorPage = () => {
           </div>
         </div>
 
-        {/* 4. SESSIONS & MENTOR LISTS */}
-        <div className="space-y-24">
-          {/* My Sessions */}
+        {/* ================= MY SESSIONS (LOGIN ONLY) ================= */}
+        {isLoggedIn && (
           <section className="space-y-6 pt-12 border-t-2 border-neutral-100">
-            <h2 className="text-2xl font-black tracking-tight uppercase">Jadwal Sesi Mentoring</h2>
+            <h2 className="text-2xl font-black uppercase">
+              Jadwal Sesi Mentoring
+            </h2>
+
             {mySessions.length === 0 ? (
               <div className="rounded-[2rem] border-4 border-dashed border-neutral-100 bg-neutral-50 p-12 text-center font-bold text-neutral-400">
                 Belum ada sesi mentoring yang terdaftar.
@@ -216,47 +233,47 @@ export const MentorPage = () => {
                   <SessionCard
                     key={session.id}
                     session={session}
-                    onClick={() => navigate(`/profile/my-mentoring-sessions/${session.id}`)}
+                    onClick={() =>
+                      navigate(`/profile/my-mentoring-sessions/${session.id}`)
+                    }
                   />
                 ))}
               </div>
             )}
           </section>
+        )}
 
-          {/* Academic List */}
-          <section ref={academicRef} className="space-y-8 scroll-mt-24">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">🎓</span>
-              <h2 className="text-2xl font-black uppercase tracking-tight">Academic Coaching</h2>
+        <section ref={academicRef} className="space-y-8 scroll-mt-24">
+          <h2 className="text-2xl font-black">🎓 Academic Coaching</h2>
+          {academicMentors.length === 0 ? (
+            <p className="text-neutral-400 font-bold italic">
+              Mentor academic tidak ditemukan.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {academicMentors.map((mentor) => (
+                <MentorCard key={mentor.id} mentor={mentor} />
+              ))}
             </div>
-            {academicMentors.length === 0 ? (
-              <p className="text-neutral-400 font-bold italic p-10 bg-neutral-50 rounded-2xl border-2 border-dashed">Mentor academic tidak ditemukan.</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {academicMentors.map((mentor) => (
-                  <MentorCard key={`academic-${mentor.id}`} mentor={mentor} />
-                ))}
-              </div>
-            )}
-          </section>
+          )}
+        </section>
 
-          {/* Life List */}
-          <section ref={lifeRef} className="space-y-8 scroll-mt-24">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">🌱</span>
-              <h2 className="text-2xl font-black uppercase tracking-tight">Life Coaching</h2>
+        
+        <section ref={lifeRef} className="space-y-8 scroll-mt-24">
+          <h2 className="text-2xl font-black">🌱 Life Coaching</h2>
+          {lifeMentors.length === 0 ? (
+            <p className="text-neutral-400 font-bold italic">
+              Mentor life tidak ditemukan.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {lifeMentors.map((mentor) => (
+                <MentorCard key={mentor.id} mentor={mentor} />
+              ))}
             </div>
-            {lifeMentors.length === 0 ? (
-              <p className="text-neutral-400 font-bold italic p-10 bg-neutral-50 rounded-2xl border-2 border-dashed">Mentor life tidak ditemukan.</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {lifeMentors.map((mentor) => (
-                  <MentorCard key={`life-${mentor.id}`} mentor={mentor} />
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
+          )}
+        </section>
+
       </div>
     </div>
   );
