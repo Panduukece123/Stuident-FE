@@ -1,18 +1,12 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Edit, Eye, List, MoreHorizontal, Pencil, Trash } from 'lucide-react';
+import { Eye, ImageOff, List, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { Link } from "react-router";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-const CourseTable = ({ courses, onEdit, onDelete }) => {
-  const [expandedId, setExpandedId] = useState(null);
-
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
+const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
   const getAccessBadgeColor = (type) => {
     switch (type) {
       case "free":
@@ -29,6 +23,7 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
   return (
     <div className="rounded-md border bg-white">
       <Table>
+        
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
@@ -56,11 +51,17 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
               <TableRow>
                 <TableCell>{course.id}</TableCell>
                 <TableCell>
-                  <img
-                    src={course.image}
-                    alt={course.title}
-                    className="w-24 h-16 object-cover rounded-md shadow-sm"
-                  />
+                  {course.image ? (
+                    <img
+                      src={course.image}
+                      alt={course.title}
+                      className="w-16 md:w-24 aspect-video object-cover rounded shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-16 md:w-24 aspect-video flex items-center justify-center gap-2 bg-neutral-100 text-muted-foreground border rounded shadow-sm">
+                      <ImageOff />
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell>{course.title}</TableCell>
                 <TableCell>{course.instructor}</TableCell>
@@ -90,7 +91,7 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
 
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => toggleExpand(course.id)}>
+                      <DropdownMenuItem onClick={() => onView(course)}>
                         <Eye />
                         View Details
                       </DropdownMenuItem>
@@ -112,63 +113,6 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
-
-              {expandedId === course.id && (
-                <TableRow>
-                  <TableCell colSpan={8} className="p-0">
-                    <div className="flex flex-col md:flex-row gap-4">
-                      <div className="flex-1 space-y-1 text-sm">
-                        <p>
-                          <strong>Category:</strong> {course.category}
-                        </p>
-                        <p>
-                          <strong>Type:</strong> {course.type}
-                        </p>
-                        <p>
-                          <strong>Level:</strong> {course.level}
-                        </p>
-                        <p>
-                          <strong>Duration:</strong> {course.duration}
-                        </p>
-                        <p>
-                          <strong>Total Curriculum Duration:</strong>{" "}
-                          {course.total_curriculum_duration}
-                        </p>
-                        <p>
-                          <strong>Total Videos:</strong> {course.total_videos}
-                        </p>
-                        <p>
-                          <strong>Video Duration:</strong> {course.video_duration}
-                        </p>
-                        <p>
-                          <strong>Certificate:</strong>{" "}
-                          {course.certificate_url ? (
-                            <a
-                              href={course.certificate_url}
-                              target="_blank"
-                              className="text-blue-600 underline"
-                            >
-                              Download
-                            </a>
-                          ) : (
-                            "-"
-                          )}
-                        </p>
-                        <p>
-                          <strong>Enrollments:</strong> {course.enrollments_count}
-                        </p>
-                        <p>
-                          <strong>Average Rating:</strong>{" "}
-                          {course.reviews_avg_rating}
-                        </p>
-                        <p>
-                          <strong>Description:</strong> {course.description}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
             </Fragment>
           ))}
         </TableBody>

@@ -6,7 +6,7 @@ import CurriculumService from "@/services/admin/CurriculumService";
 import courseService from "@/services/CourseService";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { ArrowLeft, Loader2, Plus, SearchIcon } from "lucide-react";
-import { CurriculumDeleteDialog, CurriculumDialog } from "@/components/admin/dialog/CurriculumDialogs";
+import { CurriculumDeleteDialog, CurriculumDialog, CurriculumViewDialog } from "@/components/admin/dialog/CurriculumDialogs";
 
 const AdminCurriculumCourse = () => {
     const { id } = useParams();
@@ -16,6 +16,7 @@ const AdminCurriculumCourse = () => {
 
     const [openDialog, setOpenDialog] = React.useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
+    const [openViewDialog, setOpenViewDialog] = React.useState(false);
     
     const [editCurriculum, setEditCurriculum] = React.useState(null); // null = new
 
@@ -35,6 +36,11 @@ const AdminCurriculumCourse = () => {
             setIsLoading(false);
         }
     }, [id]);
+
+    const handleView = (curriculum) => {
+        setEditCurriculum(curriculum);
+        setOpenViewDialog(true);
+    };
 
     const handleEdit = (curriculum) => {
         setEditCurriculum(curriculum);
@@ -98,11 +104,13 @@ const AdminCurriculumCourse = () => {
             ) : (
                 <CurriculumTable
                     curriculums={curriculums}
+                    onView={handleView}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                 />
             )}
 
+            {/* Dialogs */}
             <CurriculumDialog
                 open={openDialog}
                 onOpenChange={setOpenDialog}
@@ -110,14 +118,17 @@ const AdminCurriculumCourse = () => {
                 curriculum={editCurriculum}
                 onFinish={fetchData}
             />
-
             <CurriculumDeleteDialog
                 open={openDeleteDialog}
                 onOpenChange={setOpenDeleteDialog}
                 curriculum={editCurriculum}
                 onFinish={fetchData}
             />
-
+            <CurriculumViewDialog
+                open={openViewDialog}
+                onOpenChange={setOpenViewDialog}
+                curriculum={editCurriculum}
+            />
         </div>
     )
 };

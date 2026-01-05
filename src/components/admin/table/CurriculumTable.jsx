@@ -1,20 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronDown, ChevronUp, Edit, Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
+import { Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import * as React from 'react';
 
 const CurriculumTable = ({
     curriculums,
+    onView,
     onEdit,
     onDelete
 }) => {
-    const [expandedId, setExpandedId] = React.useState(null);
-
-    const toggleExpand = (id) => {
-        setExpandedId(expandedId === id ? null : id);
-    };
-
     return (
         <div className="rounded-md border bg-white">
             {/* Table */}
@@ -50,7 +45,7 @@ const CurriculumTable = ({
 
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                            <DropdownMenuItem onClick={() => toggleExpand(curriculum.id)}>
+                                            <DropdownMenuItem onClick={() => onView(curriculum)}>
                                                 <Eye/>
                                                 View Details
                                             </DropdownMenuItem>
@@ -66,30 +61,6 @@ const CurriculumTable = ({
                                     </DropdownMenu>
                                 </TableCell>
                             </TableRow>
-
-                            {expandedId === curriculum.id && (
-                                <TableRow className={"bg-white hover:bg-white"}>
-                                    <TableCell colSpan={3}>
-                                        <div className={"p-2 md:p-4 grid grid-cols-2"}>
-                                            <div>
-                                                <p className={"font-medium"}>Description</p>
-                                                <p>{curriculum.description}</p>
-                                                <p className={"font-medium"}>Duration</p>
-                                                <p>{curriculum.duration}</p>
-                                            </div>
-                                            <div>
-                                                <p className={"font-medium"}>Video URL</p>
-                                                <iframe
-                                                    src={curriculum.video_url}
-                                                    allow="encrypted-media"
-                                                    allowFullScreen
-                                                    className="w-64 aspect-video rounded-sm"
-                                                ></iframe>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            )}
                         </React.Fragment>
                     ))}
                 </TableBody>

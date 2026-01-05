@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import CourseService from "@/services/admin/CourseService";
 import CreateEditCourseDialog from "@/components/admin/dialog/CreateEditCourseDialog";
 import CourseTable from "@/components/admin/table/CourseTable";
+import { CourseViewDialog } from "@/components/admin/dialog/CourseDialogs";
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  // const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // TODO for custom delete dialog
+  const [openViewDialog, setOpenViewDialog] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -32,6 +35,12 @@ const AdminCourses = () => {
   useEffect(() => {
     fetchCourses();
   }, []);
+
+  // View course details (by: Zidan)
+  const handleView = (course) => {
+    setEditingCourse(course);
+    setOpenViewDialog(true);
+  };
 
   // Save course (create atau update)
   const handleSave = async (courseData) => {
@@ -98,10 +107,14 @@ const AdminCourses = () => {
       </div>
 
       {loading ? (
-        <div>Loading courses...</div>
+        <div className="flex justify-center w-full p-4 border border-neutral-200 rounded-sm bg-neutral-50 text-center">
+          <Loader2 className="mr-4 animate-spin" />
+          Loading...
+        </div>
       ) : (
         <CourseTable
           courses={filteredCourses}
+          onView={handleView}
           onEdit={(course) => {
             setEditingCourse(course);
             setOpenDialog(true);
@@ -116,6 +129,11 @@ const AdminCourses = () => {
         onSave={handleSave}
         course={editingCourse}
         saving={saving} // pass untuk disable submit
+      />
+      <CourseViewDialog
+        open={openViewDialog}
+        onOpenChange={setOpenViewDialog}
+        course={editingCourse}
       />
     </div>
   );
