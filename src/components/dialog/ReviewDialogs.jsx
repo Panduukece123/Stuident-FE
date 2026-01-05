@@ -7,12 +7,12 @@ import {
     DialogPortal,
     DialogTitle,
     DialogContent,
-} from "./ui/dialog";
+} from "../ui/dialog";
 import { Loader2, Star } from "lucide-react";
-import { Label } from "./ui/label";
-import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from "./ui/select";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+import { Label } from "../ui/label";
+import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from "../ui/select";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";

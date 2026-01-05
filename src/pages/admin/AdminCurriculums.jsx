@@ -5,7 +5,7 @@ import CurriculumTable from "@/components/admin/table/CurriculumTable";
 import CurriculumService from "@/services/admin/CurriculumService";
 import courseService from "@/services/CourseService";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Loader2, SearchIcon } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, SearchIcon } from "lucide-react";
 import { CurriculumDeleteDialog, CurriculumDialog } from "@/components/admin/dialog/CurriculumDialogs";
 
 const AdminCurriculumCourse = () => {
@@ -16,7 +16,8 @@ const AdminCurriculumCourse = () => {
 
     const [openDialog, setOpenDialog] = React.useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
-    const [editCurriculum, setEditCurriculum] = React.useState(null);
+    
+    const [editCurriculum, setEditCurriculum] = React.useState(null); // null = new
 
     const [isLoading, setIsLoading] = React.useState(false);
 
@@ -57,8 +58,11 @@ const AdminCurriculumCourse = () => {
 
                 {/* Details */}
                 <div className="flex flex-row gap-2 md:gap-4 items-center">
-                    <Button asChild>
-                        <Link to="/admin/courses">Back</Link>
+                    <Button variant="outline" asChild>
+                        <Link to="/admin/courses">
+                            <ArrowLeft/>
+                            Back
+                        </Link>
                     </Button>
                     <p className="font-medium text-lg md:text-xl">
                         {isLoading ? "Loading..." : course.title}
@@ -78,7 +82,10 @@ const AdminCurriculumCourse = () => {
                             setOpenDialog(true);
                             setEditCurriculum(null);
                         }}
-                    >Add A Curriculum</Button>
+                    >
+                        <Plus />
+                        Add A Curriculum
+                    </Button>
                 </div>
             </div>
 

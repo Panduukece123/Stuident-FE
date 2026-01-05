@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronDown, ChevronUp, Edit, Trash } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit, Eye, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import * as React from 'react';
 
 const CurriculumTable = ({
@@ -15,11 +16,11 @@ const CurriculumTable = ({
     };
 
     return (
-        <div>
+        <div className="rounded-md border bg-white">
             {/* Table */}
-            <Table className={"border border-neutral-200 rounded bg-white"}>
+            <Table>
                 <TableHeader>
-                    <TableRow className={"bg-neutral-50 hover:bg-neutral-50"}>
+                    <TableRow>
                         <TableHead>Section</TableHead>
                         <TableHead>Title</TableHead>
                         <TableHead>Actions</TableHead>
@@ -39,32 +40,30 @@ const CurriculumTable = ({
                             <TableRow>
                                 <TableCell>{curriculum.section}</TableCell>
                                 <TableCell className={"font-medium"}>{curriculum.title}</TableCell>
-                                <TableCell className={"flex flex-row gap-2 align-middle"}>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        title={expandedId === curriculum.id ? "Collapse details" : "Expand details"}
-                                        onClick={() => toggleExpand(curriculum.id)}
-                                    >
-                                        Details
-                                        {expandedId === curriculum.id ? (<ChevronUp />): (<ChevronDown />)}
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        title="Update curriculum"
-                                        onClick={() => onEdit(curriculum)}
-                                    >
-                                        <Edit />
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="destructive"
-                                        title="Delete curriculum"
-                                        onClick={() => onDelete(curriculum)}
-                                    >
-                                        <Trash />
-                                    </Button>
+                                <TableCell>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button size="sm" variant="ghost">
+                                                <MoreHorizontal />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                            <DropdownMenuItem onClick={() => toggleExpand(curriculum.id)}>
+                                                <Eye/>
+                                                View Details
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => onEdit(curriculum)}>
+                                                <Pencil />
+                                                Edit
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => onDelete(curriculum)}>
+                                                <Trash />
+                                                Delete
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </TableCell>
                             </TableRow>
 
