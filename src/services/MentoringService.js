@@ -25,12 +25,13 @@ const MentoringService = {
 
   getAllmentor: async () => {
     const token = localStorage.getItem("token");
-    const response = await api.get("/mentors", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
+    const headers = {
+      Accept: "application/json",
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const response = await api.get("/mentors", { headers });
     return response.data;
   },
 
@@ -44,7 +45,7 @@ const MentoringService = {
     });
     return response.data;
   },
-  
+
   getMentorSchedule: async (mentorId, params = {}) => {
     const token = localStorage.getItem("token");
 
