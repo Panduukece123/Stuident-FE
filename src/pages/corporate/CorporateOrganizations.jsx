@@ -49,6 +49,7 @@ export const CorporateManageOrganizations = () => {
     companies: organizations.filter(o => o.type === 'company').length,
     universities: organizations.filter(o => o.type === 'university').length,
     communities: organizations.filter(o => o.type === 'community').length,
+    goverments: organizations.filter(o => o.type === 'government').length,
   };
 
   // --- 4. DELETE MUTATION ---
@@ -86,7 +87,7 @@ export const CorporateManageOrganizations = () => {
     <div className="flex flex-col gap-6 pb-20">
       
       {/* SECTION A: STATISTICS CARDS */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total</CardTitle>
@@ -125,6 +126,16 @@ export const CorporateManageOrganizations = () => {
             <CardContent>
                 <div className="text-2xl font-bold">{loadingData ? "..." : stats.communities}</div>
                 <p className="text-xs text-muted-foreground">Groups & NGOs</p>
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Goverments</CardTitle>
+                <Users className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{loadingData ? "..." : stats.goverments}</div>
+                <p className="text-xs text-muted-foreground">Government agencies</p>
             </CardContent>
         </Card>
       </div>
