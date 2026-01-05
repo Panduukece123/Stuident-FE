@@ -23,6 +23,7 @@ const ScholarshipApplicationPage = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [applicationId, setApplicationId] = useState(null);
+  const [profileCv, setProfileCv] = useState(null); // CV from profile
 
   // Document states
   const [documents, setDocuments] = useState({
@@ -62,6 +63,24 @@ const ScholarshipApplicationPage = () => {
     queryFn: async () => {
       const response = await ProfileService.getMe();
       return response.data || response;
+    },
+  });
+
+  // Fetch CV from profile
+  const { data: cvData, isLoading: cvLoading } = useQuery({
+    queryKey: ["profile-cv"],
+    queryFn: async () => {
+      const response = await ProfileService.getCV();
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data?.data?.cv_url) {
+        setProfileCv({
+          url: data.data.cv_url,
+          name: data.data.cv_filename || "CV dari Profil",
+          fromProfile: true,
+        });
+      }
     },
   });
 
@@ -130,6 +149,22 @@ const ScholarshipApplicationPage = () => {
     setDocuments((prev) => ({ ...prev, [field]: null }));
   };
 
+  // Handler untuk menggunakan CV dari profil
+  const handleUseProfileCv = () => {
+    if (cvData?.data?.cv_url) {
+      setDocuments((prev) => ({
+        ...prev,
+        cv: {
+          name: cvData.data.cv_filename || "CV dari Profil",
+          size: "-",
+          type: "PDF",
+          fromProfile: true,
+          url: cvData.data.cv_url,
+        },
+      }));
+    }
+  };
+
   const handleSaveDraft = () => {
     if (!documents.cv) {
       Swal.fire({ icon: "warning", title: "Perhatian", text: "CV wajib diupload!" });
@@ -137,7 +172,17 @@ const ScholarshipApplicationPage = () => {
     }
 
     const formData = new FormData();
-    if (documents.cv?.file) formData.append("cv_path", documents.cv.file);
+    
+    // Handle CV - bisa dari file upload atau dari profil
+    if (documents.cv?.fromProfile && documents.cv?.url) {
+      // CV dari profil - kirim URL
+      formData.append("cv_from_profile", "true");
+      formData.append("cv_url", documents.cv.url);
+    } else if (documents.cv?.file) {
+      // CV dari upload file
+      formData.append("cv_path", documents.cv.file);
+    }
+    
     if (documents.transcript?.file) formData.append("transcript_path", documents.transcript.file);
     if (documents.recommendation?.file) formData.append("recommendation_path", documents.recommendation.file);
     
@@ -207,6 +252,8 @@ const ScholarshipApplicationPage = () => {
             onReset={() => window.location.reload()}
             onContinue={handleSaveDraft}
             isPending={saveDraftMutation.isPending}
+            profileCv={cvData?.data}
+            onUseProfileCv={handleUseProfileCv}
           />
         )}
 

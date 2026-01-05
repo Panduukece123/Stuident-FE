@@ -292,12 +292,6 @@ const ScholarshipDetail = () => {
                 </Button>
                
 
-                <Button
-                  variant="outline"
-                  className=" cursor-pointer w-full h-12 text-lg border-[#bcf0f4] bg-[#e0fbfc] text-[#3DBDC2] hover:bg-[#d1f7f9] hover:text-[#2da8ad] font-semibold rounded-lg border-none"
-                >
-                  Keep
-                </Button>
 
                 <div className="pt-4 border-t border-gray-100">
                   <p className="text-sm text-gray-500 mb-2">

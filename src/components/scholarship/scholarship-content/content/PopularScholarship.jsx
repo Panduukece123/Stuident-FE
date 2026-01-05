@@ -1,11 +1,10 @@
-import { Card, CardContent } from "@/components/ui/card";
 import React, { useRef } from "react";
-import { Link } from "react-router";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Flame, Sparkles } from "lucide-react"; // Tambah icon Flame/Sparkles
 import { Button } from "@/components/ui/button";
 import scholarshipService from "@/services/ScholarshipService";
 import { useScholarship } from "@/context/ScholarshipContext";
 import { useQuery } from "@tanstack/react-query";
+import { ScholarshipCard } from "@/components/shared/ScholarshipCard";
 
 const PopularScholarship = () => {
   const scrollContainerRef = useRef(null);
@@ -15,9 +14,7 @@ const PopularScholarship = () => {
     queryKey: ["popularity-scholarships", filters],
     queryFn: async () => {
       const params = { status: filters.status || "open", ...filters };
-      const response = await scholarshipService.getPopularityScholarships(
-        params
-      );
+      const response = await scholarshipService.getPopularityScholarships(params);
       if (!response.sukses) {
         throw new Error("Failed to fetch popular scholarships");
       }
@@ -32,7 +29,7 @@ const PopularScholarship = () => {
 
   const scroll = (direction) => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 354;
+      const scrollAmount = 320; 
       const newScrollPosition =
         scrollContainerRef.current.scrollLeft +
         (direction === "left" ? -scrollAmount : scrollAmount);
@@ -45,95 +42,83 @@ const PopularScholarship = () => {
 
   const handleSeeMore = () => {
     setShowAllList(true);
-
     updateFilter("sort", "popular");
   };
 
   return (
-    <div className="flex flex-col gap-6 mb-4">
-      <div className="flex flex-row justify-between items-center mx-4 px-2">
-        <h3 className="font-medium text-2xl">Popular Scholarship</h3>
+    <div className="relative flex flex-col gap-6 mb-10 py-8 bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 rounded-3xl mx-4 lg:mx-8 border border-blue-100/50 shadow-lg overflow-hidden">
+      
+      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+      <div className="relative z-10 flex flex-row justify-between items-center px-6 lg:px-10">
+        <div className="flex items-center gap-3">
+          <div className="bg-orange-100 p-2 rounded-full">
+            <Flame className="w-6 h-6 text-orange-500 fill-orange-500 animate-pulse" />
+          </div>
+          <div>
+            <h3 className="font-bold text-2xl text-gray-900 flex items-center gap-2">
+              Beasiswa Populer
+              <Sparkles className="w-4 h-4 text-yellow-500" />
+            </h3>
+            <p className="text-sm text-gray-500 hidden md:block">
+              Beasiswa yang paling populer di platform kami
+            </p>
+          </div>
+        </div>
 
         <div
           onClick={handleSeeMore}
-          className="text-lg font-medium text-sky-400 opacity-75 hover:text-sky-600 transition duration-150 cursor-pointer"
+          className="group flex items-center gap-1 text-sm font-semibold text-primary cursor-pointer px-3 py-1.5 rounded-full hover:bg-primary/10 transition-all duration-200"
         >
-          See More
+          Lihat Semua
+          <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </div>
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex justify-center items-center py-24">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
         </div>
       ) : (
-        <div className="relative">
+        <div className="relative group/slider">
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hover:bg-slate-100 rounded-2xl"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/80 backdrop-blur-sm shadow-md border-gray-200 hover:bg-white hover:scale-105 transition-all hidden md:flex opacity-0 group-hover/slider:opacity-100"
             onClick={() => scroll("left")}
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-5 w-5 text-gray-700" />
           </Button>
 
+          {/* Container Card */}
           <div
             ref={scrollContainerRef}
-            className="flex flex-row gap-2 overflow-x-auto px-4 scroll-smooth scrollbar-hide py-2" // Tambah py-2 biar shadow ga kepotong
+            className="flex flex-row gap-5 overflow-x-auto px-6 lg:px-10 py-4 scroll-smooth scrollbar-hide snap-x snap-mandatory"
           >
             {scholarships.map((scholarship) => (
-              <Link  to={`/scholarship/show/${scholarship.id}`}>
-
-             
-              <Card
-                key={scholarship.id}
-                className=" hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-0 w-[350px] min-w-[350px] h-[520px] m-0 bg-white overflow-hidden border-none shadow-md mx-4 mb-2 flex flex-col"
-              >
-                
-                <img
-                  src={scholarship.image || "https://placehold.co/300x200"}
-                  alt={scholarship.name}
-                  className="w-full h-60 object-cover cursor-pointer"
+              <div key={scholarship.id} className="snap-center w-[325px] min-w-[320px] flex-shrink-0 transition-transform duration-300 hover:-translate-y-1">
+                <ScholarshipCard
+                  id={scholarship.id}
+                  name={scholarship.name}
+                  organization={scholarship.organization?.name}
+                  description={scholarship.description}
+                  location={scholarship.location}
+                  status={scholarship.status}
+                  studyField={scholarship.study_field}
+                  deadline={scholarship.deadline}
+                  image={scholarship.image}
                 />
-
-                <CardContent className="p-4 flex flex-col flex-1">
-                  <h3 className="font-semibold text-lg mb-2 cursor-pointer line-clamp-2 min-h-14">
-                    {scholarship.name}
-                  </h3>
-
-                  <p className="text-sm text-muted-foreground text-justify mb-4 line-clamp-3">
-                    {scholarship.description}
-                  </p>
-
-                  <div className="flex gap-2 justify-center mb-2 text-xs flex-wrap">
-                    <span className="bg-primary/10 px-2 py-1 rounded-full">
-                      {scholarship.location}
-                    </span>
-                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                      {scholarship.status}
-                    </span>
-                  </div>
-                  <Link
-                    to={`/scholarship/show/${scholarship.id}`}
-                    className="w-full mt-auto"
-                  >
-                    <Button className="cursor-pointer w-full mt-auto bg-[#3DBDC2] text-white hover:bg-[#2da8ad] transition-colors">
-                      See Detail
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-               </Link>
+              </div>
             ))}
           </div>
 
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hover:bg-slate-100 rounded-2xl"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/80 backdrop-blur-sm shadow-md border-gray-200 hover:bg-white hover:scale-105 transition-all hidden md:flex opacity-0 group-hover/slider:opacity-100"
             onClick={() => scroll("right")}
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-5 w-5 text-gray-700" />
           </Button>
         </div>
       )}
