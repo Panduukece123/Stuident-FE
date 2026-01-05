@@ -32,7 +32,10 @@ export const ScholarshipCard = ({
   };
 
   return (
+    
     <Card className="overflow-hidden flex flex-col h-full p-0 gap-0 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+      <Link to={`/scholarship/show/${id}`}>
+      
       <div className="h-40 bg-muted w-full relative">
         {image ? (
           <img src={image} alt={name} className="w-full h-full object-cover" />
@@ -52,12 +55,13 @@ export const ScholarshipCard = ({
           {status?.toUpperCase()}
         </span>
       </div>
+      </Link>
 
       <CardContent className="flex-1 p-4 flex flex-col gap-2">
         <CardTitle className="text-lg line-clamp-2 min-h-[3.5rem]">
           {name}
         </CardTitle>
-
+        
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <MapPin className="w-3 h-3" />
           <span className="line-clamp-1">{organization || "Unknown"}</span>
@@ -87,7 +91,7 @@ export const ScholarshipCard = ({
         <Link to={`/scholarship/show/${id}`}>
           <Button
             size="sm"
-            className="bg-[#3DBDC2] hover:bg-[#2da8ad] text-white"
+            className="bg-[#3DBDC2] hover:bg-[#2da8ad] text-white cursor-pointer"
           >
             Lihat Detail
           </Button>

@@ -20,10 +20,10 @@ const FilterDropdown = ({ label, options, onValueChange, value, onClear }) => {
     <div className="relative">
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger
-          className="w-[180px] cursor-pointer h-12 rounded-md border-gray-300 shadow-sm text-base font-medium transition-all hover:border-gray-400"
+          className="w-[180px] cursor-pointer h-12 rounded-md border-gray-300 shadow-sm text-base font-medium text-white transition-all hover:border-gray-400"
           aria-label={`Filter berdasarkan ${label}`}
         >
-          <SelectValue placeholder={label} />
+          <SelectValue className="text-white" placeholder={label} />
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (

@@ -180,8 +180,9 @@ export const ScholarshipHero = () => {
                     </form>
 
                     {/* FILTER DROPDOWNS */}
-                    <div className="flex flex-wrap justify-center gap-2 w-full max-w-2xl">
+                    <div className="flex flex-wrap justify-center gap-2 w-full max-w-2xl ">
                       <FilterDropdown
+                        className="text-white"
                         label="Lokasi"
                         options={locationOptions}
                         value={filters.location}

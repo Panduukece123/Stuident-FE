@@ -94,15 +94,39 @@ const ScholarshipApplicationPage = () => {
   });
 
   // Mutations
-  const saveDraftMutation = useMutation({
+ const saveDraftMutation = useMutation({
     mutationFn: (formData) => scholarshipService.saveDraft(id, formData),
     onSuccess: (response) => {
       setApplicationId(response.data.id);
-      Swal.fire({ icon: "success", title: "Berhasil", text: "Draft berhasil disimpan!", timer: 2000, showConfirmButton: false });
+      Swal.fire({ 
+        icon: "success", 
+        title: "Berhasil", 
+        text: "Draft berhasil disimpan!", 
+        timer: 2000, 
+        showConfirmButton: false 
+      });
       setCurrentStep(2);
     },
     onError: (error) => {
-      Swal.fire({ icon: "error", title: "Error", text: error.response?.data?.message || "Gagal menyimpan draft" });
+      // PERBAIKAN DISINI
+      console.log("Error Detail:", error.response?.data); // Cek console untuk debug
+
+      // Prioritaskan error.response.data.pesan sesuai format JSON backend Anda
+      const errorMessage = 
+        error.response?.data?.pesan || 
+        error.response?.data?.message || 
+        "Terjadi kesalahan inputan / Anda telah mengirim lamaran ini sebelumnya";
+
+      Swal.fire({ 
+        icon: "error", 
+        title: "Gagal", 
+        text: errorMessage 
+      }).then(() => {
+        // Opsional: Jika errornya karena sudah melamar, mungkin mau redirect user kembali?
+        if (errorMessage.toLowerCase().includes("sudah memiliki lamaran")) {
+            navigate(`/scholarship/show/${id}`); 
+        }
+      });
     },
   });
 
