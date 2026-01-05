@@ -1,5 +1,5 @@
 import React from "react";
-import { Upload, Pencil } from "lucide-react";
+import { Upload, Pencil, Link2, FileCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,21 +20,53 @@ const StepDocuments = ({
   onReset,
   onContinue,
   isPending,
+  profileCv,       
+  onUseProfileCv,  
 }) => (
   <Card className="mb-8 border-none shadow-sm">
     <CardContent className="p-6">
       <h2 className="text-base font-bold text-gray-800 mb-6 font-sans">Documents Requirement</h2>
       
       <div className="space-y-6">
-        <DocumentRow 
-          title="Curriculum Vitae" 
-          required 
-          document={documents.cv}
-          onDelete={() => handleDeleteDocument("cv")}
-          onBrowse={() => cvInputRef.current.click()}
-          inputRef={cvInputRef}
-          onChange={(e) => handleFileChange("cv", e)}
-        />
+        {/* CV Section with Profile Sync Option */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-gray-700 font-sans">Curriculum Vitae</span>
+              <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded font-bold">Required!</span>
+            </div>
+            
+            {/* Tombol Sync dari Profil - hanya tampil jika ada CV di profil dan belum ada CV di documents */}
+            {profileCv?.cv_url && !documents.cv && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onUseProfileCv}
+                className="text-xs h-8 border-primary/30 text-primary hover:bg-primary/5"
+              >
+                <Link2 size={14} className="mr-1.5" />
+                Gunakan CV dari Profil
+              </Button>
+            )}
+          </div>
+          
+          {/* Info jika CV dari profil digunakan */}
+          {documents.cv?.fromProfile && (
+            <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+              <FileCheck size={16} className="text-green-600" />
+              <span className="text-xs text-green-700">CV di-sync dari profil Anda</span>
+            </div>
+          )}
+          
+          <DocumentRow 
+            standalone
+            document={documents.cv}
+            onDelete={() => handleDeleteDocument("cv")}
+            onBrowse={() => cvInputRef.current.click()}
+            inputRef={cvInputRef}
+            onChange={(e) => handleFileChange("cv", e)}
+          />
+        </div>
         <DocumentRow 
           title="Grade Transcripts" 
           document={documents.transcript}

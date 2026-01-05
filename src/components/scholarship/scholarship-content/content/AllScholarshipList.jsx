@@ -6,6 +6,7 @@ import scholarshipService from "@/services/ScholarshipService";
 import { useScholarship } from "@/context/ScholarshipContext";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
+import { ScholarshipCard } from "@/components/shared/ScholarshipCard";
 
 const AllScholarshipList = () => {
   const { filters } = useScholarship();
@@ -69,7 +70,7 @@ const AllScholarshipList = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 mx-4 mb-16">
+    <div className="flex flex-col gap-6 mx-4 mb-16 mt-16">
       <div className="flex flex-row justify-between items-end px-1 border-b pb-4 border-gray-100">
         <div>
           <h3 className="font-bold text-2xl text-slate-800">Hasil Pencarian</h3>
@@ -87,82 +88,19 @@ const AllScholarshipList = () => {
 
         
         {scholarships.map((scholarship) => (
-          <Link to={`/scholarship/show/${scholarship.id}`}>
-
-         
-          <Card
-            key={scholarship.id}
-            className="p-0 group bg-white h-full flex flex-col overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 rounded-xl"
-          >
-            {/* Image Wrapper Relative untuk Badge Status */}
-            <div className="relative h-48 overflow-hidden">
-              <img
-                src={scholarship.image || "https://placehold.co/300x200"}
-                alt={scholarship.name}
-                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-              />
-              {/* Status Badge Overlay */}
-              <div className="absolute top-3 right-3">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm backdrop-blur-md ${
-                    scholarship.status === "open"
-                      ? "bg-green-500/90 text-white"
-                      : "bg-red-500/90 text-white"
-                  }`}
-                >
-                  {scholarship.status
-                    ? scholarship.status.toUpperCase()
-                    : "UNKNOWN"}
-                </span>
-              </div>
-            </div>
-
-            <CardContent className="p-5 flex flex-col flex-1">
-              <div className="text-xs font-semibold text-primary mb-2 uppercase tracking-wide">
-                {scholarship.study_field}
-              </div>
-
-              <h3 className="font-bold text-lg text-slate-800 mb-2 line-clamp-2 leading-tight min-h-12 group-hover:text-primary transition-colors">
-                {scholarship.name}
-              </h3>
-
-              <div className="flex items-center gap-2 mb-4 text-sm text-slate-500">
-                <Building2 size={14} className="text-slate-400" />
-                <span className="font-medium truncate">
-                  {scholarship.organization?.name || "Unknown Organization"}
-                </span>
-              </div>
-
-              <p className="text-sm text-slate-600 mb-6 line-clamp-3 leading-relaxed">
-                {scholarship.description}
-              </p>
-
-              <div className="mt-auto pt-4 border-t border-slate-100">
-                <div className="flex justify-between items-center mb-4 text-xs text-slate-500">
-                  <div className="flex items-center gap-1">
-                    <MapPin size={14} />
-                    <span className="truncate max-w-[120px]">
-                      {scholarship.location}
-                    </span>
-                  </div>
-                  {scholarship.deadline && (
-                    <div className="flex items-center gap-1">
-                      <CalendarDays size={14} />
-                      <span>
-                        {new Date(scholarship.deadline).toLocaleDateString()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <Link to={`/scholarship/show/${scholarship.id}`}>
-                <Button className="w-full bg-[#3DBDC2] hover:bg-[#2da8ad] text-white font-semibold h-10 rounded-lg shadow-sm transition-all active:scale-95">
-                  See Detail
-                </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-           </Link>
+          <ScholarshipCard
+                      key={scholarship.id}
+                      id={scholarship.id}
+                      name={scholarship.name}
+                      organization={scholarship.organization?.name}
+                      description={scholarship.description}
+                      location={scholarship.location}
+                      status={scholarship.status}
+                      studyField={scholarship.study_field}
+                      deadline={scholarship.deadline}
+                      image={scholarship.image}
+                    />
+          
         ))}
       </div>
     </div>
