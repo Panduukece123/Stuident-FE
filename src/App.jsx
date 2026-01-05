@@ -41,7 +41,7 @@ import { CorporateManageArticles } from "./pages/corporate/CorporateArticles";
 import { ManageOrganizations } from "./pages/admin/AdminOrganizations";
 import { CorporateManageOrganizations } from "./pages/corporate/CorporateOrganizations";
 import { ManageArticles } from "./pages/admin/AdminArticles";
-import { ManageScholarships } from "./pages/admin/CorporateScholarships";
+import { ManageScholarships } from "./pages/admin/AdminScholarships";
 
 const queryClient = new QueryClient({
   defaultOptions: {
