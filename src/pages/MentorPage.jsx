@@ -83,7 +83,7 @@ export const MentorPage = () => {
         {/* Academic Coaching Card */}
         <div
           onClick={() => scrollToSection(academicRef)}
-          className="bg-white border-2 border-blue-400 rounded-[2rem] p-8 shadow-sm flex flex-col"
+          className="bg-white border-2 border-blue-400 rounded-4xl p-8 shadow-sm flex flex-col"
         >
           <h2 className="text-2xl font-black text-center italic tracking-wider mb-6">
             ACADEMIC COACHING
@@ -137,7 +137,7 @@ export const MentorPage = () => {
         {/* Life Coaching Card */}
         <div
           onClick={() => scrollToSection(lifeRef)}
-          className="bg-white border-2 border-blue-400 rounded-[2rem] p-8 shadow-sm flex flex-col"
+          className="bg-white border-2 border-blue-400 rounded-4xl p-8 shadow-sm flex flex-col"
         >
           <h2 className="text-2xl font-black text-center italic tracking-wider mb-6">
             LIFE COACHING
