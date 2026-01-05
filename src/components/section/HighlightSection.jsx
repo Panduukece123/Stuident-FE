@@ -1,11 +1,13 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { Check } from "lucide-react";
+import { Link } from "react-router";
 
 export const Highlight = () => {
   return (
-    <div className="w-full p-4 py-8 md:p-6"> {/* Padding disesuaikan */}
-      
+    <div className="w-full p-4 py-8 md:p-6">
+      {" "}
+      {/* Padding disesuaikan */}
       {/* HEADER SECTION */}
       <div className="mb-10 md:mb-16 flex flex-col gap-3 items-center text-center">
         <h1 className="text-2xl md:text-3xl font-semibold leading-tight">
@@ -17,12 +19,9 @@ export const Highlight = () => {
           gaya dan kesibukan Anda.
         </p>
       </div>
-
       <div className="mx-auto max-w-7xl flex flex-col gap-8 md:gap-12">
-        
         {/* --- SECTION 1: E-LEARNING --- */}
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
-          
           {/* Image */}
           <div className="w-full lg:flex-1">
             {/* Shadow pakai primary biar ada glow sesuai tema */}
@@ -55,27 +54,35 @@ export const Highlight = () => {
               {[
                 "Akses materi video kualitas tinggi, modul, dan studi kasus 24/7.",
                 "Kurikulum terstruktur dari level pemula hingga mahir.",
-                "Akses seumur hidup ke komunitas eksklusif dan update materi."
+                "Akses seumur hidup ke komunitas eksklusif dan update materi.",
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3">
                   {/* Icon Container: Background primary transparan */}
                   <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                     <Check className="w-4 h-4 text-primary" />
                   </div>
-                  <p className="text-base text-slate-700 leading-relaxed">{item}</p>
+                  <p className="text-base text-slate-700 leading-relaxed">
+                    {item}
+                  </p>
                 </li>
               ))}
             </ul>
             <div className="pt-4">
               {/* Button default Shadcn biasanya sudah primary */}
-              <Button size="lg" className="w-full md:w-auto px-8">Jelajahi Materi</Button>
+              <Link to="/e-learning">
+                <Button
+                  size="lg"
+                  className="w-full md:w-auto px-8 cursor-pointer"
+                >
+                  Jelajahi Materi
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
 
         {/* --- SECTION 2: BOOTCAMP --- */}
         <div className="flex flex-col lg:flex-row-reverse items-center gap-10 lg:gap-20">
-          
           {/* Image */}
           <div className="w-full lg:flex-1">
             <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-primary/20 aspect-video lg:aspect-auto lg:h-[450px]">
@@ -106,25 +113,34 @@ export const Highlight = () => {
               {[
                 "Pembelajaran berbasis proyek (project-based learning) dengan studi kasus riil.",
                 "Sesi live coding dan feedback langsung dari instruktur ahli.",
-                "Jalur cepat karier dengan koneksi ke 500+ perusahaan partner."
+                "Jalur cepat karier dengan koneksi ke 500+ perusahaan partner.",
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                     <Check className="w-4 h-4 text-primary" />
                   </div>
-                  <p className="text-base text-slate-700 leading-relaxed">{item}</p>
+                  <p className="text-base text-slate-700 leading-relaxed">
+                    {item}
+                  </p>
                 </li>
               ))}
             </ul>
             <div className="pt-4">
-              <Button size="lg" className="w-full md:w-auto px-8">Lihat Pilihan Bootcamp</Button>
+              {/* Button default Shadcn biasanya sudah primary */}
+              <Link to="/e-learning#bootcamp">
+                <Button
+                  size="lg"
+                  className="w-full md:w-auto px-8 cursor-pointer"
+                >
+                  Lihat Pilihan Bootcamp
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
 
         {/* --- SECTION 3: MY MENTOR --- */}
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
-          
           {/* Image */}
           <div className="w-full lg:flex-1">
             <div className="relative overflow-hidden rounded-3xl shadow-2xl shadow-primary/20 aspect-video lg:aspect-auto lg:h-[450px]">
@@ -147,26 +163,32 @@ export const Highlight = () => {
                 My Mentor
               </h2>
               <p className="text-lg leading-relaxed text-slate-600">
-                Bimbingan karier privat 1-on-1 dengan praktisi terbaik di industri
-                untuk akselerasi karier Anda.
+                Bimbingan karier privat 1-on-1 dengan praktisi terbaik di
+                industri untuk akselerasi karier Anda.
               </p>
             </div>
             <ul className="space-y-4 list-none">
-                {[
+              {[
                 "Konsultasi deep-dive untuk bedah CV, portofolio, dan simulasi interview.",
                 "Roadmap karier yang dipersonalisasi langsung dari ahli di bidangnya.",
-                "Jadwal fleksibel penuh, tentukan sesi kapanpun Anda butuh bimbingan."
+                "Jadwal fleksibel penuh, tentukan sesi kapanpun Anda butuh bimbingan.",
               ].map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
                     <Check className="w-4 h-4 text-primary" />
                   </div>
-                  <p className="text-base text-slate-700 leading-relaxed">{item}</p>
+                  <p className="text-base text-slate-700 leading-relaxed">
+                    {item}
+                  </p>
                 </li>
               ))}
             </ul>
             <div className="pt-4">
-              <Button size="lg" className="w-full md:w-auto px-8">Cari Mentor Anda</Button>
+              <Link to="/my-mentor">
+                <Button size="lg" className="w-full md:w-auto px-8 cursor-pointer">
+                  Cari Mentor Anda
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

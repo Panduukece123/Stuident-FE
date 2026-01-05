@@ -1,7 +1,7 @@
 import React from "react";
 
 const partners = [
-  // TECH GIANTS
+  // --- TECH GIANTS (DEFAULT) ---
   { 
     name: "Google", 
     logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" 
@@ -27,30 +27,31 @@ const partners = [
     logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" 
   },
   
-  // INDONESIA & ASIA TECH
+  // --- GLOBAL TECH (PENGGANTI YANG ERROR) ---
+  // Adobe, Samsung, Intel diganti dengan link PNG yang stabil
   { 
-    name: "Gojek", 
-    logo: "https://upload.wikimedia.org/wikipedia/commons/9/9b/Gojek_logo_2019.svg" 
+    name: "Zoom", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Zoom_Communications_Logo.svg/2560px-Zoom_Communications_Logo.svg.png" 
   },
   { 
-    name: "Tokopedia", 
-    logo: "https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_of_Tokopedia.svg" 
+    name: "Spotify", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg" 
   },
   { 
-    name: "Traveloka", 
-    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Traveloka_Primary_Logo.svg/2560px-Traveloka_Primary_Logo.svg.png" 
+    name: "Salesforce", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/2560px-Salesforce.com_logo.svg.png" 
   },
   { 
-    name: "Shopee", 
-    logo: "https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" 
+    name: "Dropbox", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Dropbox_logo_2017.svg/2560px-Dropbox_logo_2017.svg.png" 
   },
   { 
-    name: "Lazada", 
-    logo: "https://upload.wikimedia.org/wikipedia/commons/4/4d/Lazada_Logo.svg" 
+    name: "IBM", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" 
   },
   { 
-    name: "Blibli", 
-    logo: "https://upload.wikimedia.org/wikipedia/commons/0/0c/Blibli_logo.svg" 
+    name: "Oracle", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" 
   },
 ];
 
@@ -81,8 +82,6 @@ export const Partner = () => {
               <img
                 src={item.logo}
                 alt={item.name}
-                // PERUBAHAN: Hapus 'grayscale' dan 'opacity'. 
-                // Tambah 'group-hover:scale-110' biar ada efek zoom dikit pas hover.
                 className="h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-110"
               />
             </div>

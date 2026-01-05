@@ -39,7 +39,7 @@ export const ElearningCategories = ({ categories = [], onCategoryClick }) => {
 
   return (
     // LAYOUT 1: Container persis kode pertama
-    <section className="py-12 px-6 bg-background">
+    <section className="py-6 px-6 bg-background">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">Pilihan E-Learning</h2>
         <p className="text-muted-foreground mb-8">
