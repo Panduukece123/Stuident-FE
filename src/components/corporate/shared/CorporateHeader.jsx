@@ -83,20 +83,6 @@ export const CorporateHeader = () => {
         {getPageTitle()}
       </h1>
 
-      {/* SEARCH BAR (Optional for Corporate) */}
-      <div className="w-full flex-1 ml-4 hidden md:block">
-        <form onSubmit={(e) => e.preventDefault()}>
-          <div className="relative w-full max-w-sm ml-auto">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Cari data..."
-              className="w-full appearance-none bg-background pl-8 shadow-sm"
-            />
-          </div>
-        </form>
-      </div>
-
       {/* USER DROPDOWN */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -133,15 +119,6 @@ export const CorporateHeader = () => {
                 <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
             </div>
           </DropdownMenuLabel>
-
-          <DropdownMenuSeparator />
-
-          <DropdownMenuGroup>
-            <DropdownMenuItem onClick={() => navigate("/corporate/profile")}>
-              <Building2 className="mr-2 h-4 w-4" />
-              <span>Profil Perusahaan</span>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
           
           <DropdownMenuSeparator />
           
