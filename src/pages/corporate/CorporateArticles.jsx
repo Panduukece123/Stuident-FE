@@ -38,8 +38,7 @@ export const CorporateManageArticles = () => {
   // --- HITUNG STATISTIK (Frontend Side) ---
   const stats = {
     total: articles.length,
-    categories: new Set(articles.map(item => item.category)).size,
-    authors: new Set(articles.map(item => item.author)).size, 
+    categories: new Set(articles.map(item => item.category)).size, 
   };
 
   // --- 2. MUTATIONS ---
@@ -105,7 +104,7 @@ export const CorporateManageArticles = () => {
     <div className="flex flex-col gap-4">
       
       {/* 1. STATISTIK SECTION */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Card Total */}
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -127,18 +126,6 @@ export const CorporateManageArticles = () => {
             <CardContent>
                 <div className="text-2xl font-bold">{loadingData ? "..." : stats.categories}</div>
                 <p className="text-xs text-muted-foreground">Unique topics</p>
-            </CardContent>
-        </Card>
-
-        {/* Card Authors */}
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Authors</CardTitle>
-                <Users className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">{loadingData ? "..." : stats.authors}</div>
-                <p className="text-xs text-muted-foreground">Active contributors</p>
             </CardContent>
         </Card>
       </div>

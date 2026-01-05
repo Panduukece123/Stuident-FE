@@ -7,7 +7,7 @@ import {
   User,
   Loader2,
   Edit,
-  Presentation, // Icon untuk Mentoring Session
+  Presentation,
 } from "lucide-react";
 import React, { useState, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -101,7 +101,8 @@ export const ProfileLayout = () => {
 
   const getSidebarClass = (path) => {
     const isActive = pathname === path;
-    return `w-full justify-start text-base h-10 px-4 ${
+    // PERUBAHAN: Menambahkan 'cursor-pointer' di string class
+    return `w-full justify-start text-base h-10 px-4 cursor-pointer ${
       isActive
         ? "text-primary font-medium"
         : "font-light text-neutral-700 hover:bg-neutral-100 hover:text-primary"
@@ -138,13 +139,13 @@ export const ProfileLayout = () => {
                     .join("")
                     .substring(0, 2)
                     .toUpperCase()
-                : "US"}
+                : "PG"} {/* PG = Pengguna */}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex flex-col space-y-1 text-center md:text-left">
             <h1 className="text-3xl font-bold tracking-tight">
-              {user?.name || "User"}
+              {user?.name || "Pengguna"}
             </h1>
             <p className="opacity-90">{user?.email}</p>
             <p className="opacity-90">{user?.phone || "-"}</p>
@@ -166,7 +167,7 @@ export const ProfileLayout = () => {
           />
           <Button
             variant="outline"
-            className="border-white/40 bg-white/10 text-white hover:bg-white hover:text-[#074799] backdrop-blur-sm transition-all"
+            className="border-white/40 cursor-pointer bg-white/10 text-white hover:bg-white hover:text-[#074799] backdrop-blur-sm transition-all"
             onClick={handleEditAvatarClick}
             disabled={isUploading}
           >
@@ -175,7 +176,8 @@ export const ProfileLayout = () => {
             ) : (
               <Edit className="mr-2 h-4 w-4" />
             )}
-            {isUploading ? "Uploading..." : "Edit Avatar"}
+            {/* Translate Button Text */}
+            {isUploading ? "Mengunggah..." : "Ubah Foto"}
           </Button>
         </div>
       </div>
@@ -191,7 +193,8 @@ export const ProfileLayout = () => {
                 variant="ghost"
                 className={getSidebarClass("/profile/my-profile")}
               >
-                <User className="mr-3 h-5 w-5" /> My Profile
+                {/* Translate: My Profile -> Profil Saya */}
+                <User className="mr-3 h-5 w-5" /> Profil Saya
               </Button>
             </Link>
             <Link to="/profile/my-enrolled-courses">
@@ -199,7 +202,8 @@ export const ProfileLayout = () => {
                 variant="ghost"
                 className={getSidebarClass("/profile/my-enrolled-courses")}
               >
-                <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
+                {/* Translate: Enrolled Courses -> Kursus Saya */}
+                <GraduationCap className="mr-3 h-5 w-5" /> Kursus Saya
               </Button>
             </Link>
             <Link to="/profile/my-order-history">
@@ -207,41 +211,43 @@ export const ProfileLayout = () => {
                 variant="ghost"
                 className={getSidebarClass("/profile/my-order-history")}
               >
-                <ShoppingCart className="mr-3 h-5 w-5" /> Order History
+                {/* Translate: Order History -> Riwayat Pesanan */}
+                <ShoppingCart className="mr-3 h-5 w-5" /> Riwayat Pesanan
               </Button>
             </Link>
 
-            {/* --- MENTORING SESSION (ALL ROLES) --- */}
-            {/* Langsung dirender tanpa cek kondisi role */}
+            {/* --- MENTORING SESSION --- */}
             <Link to="/profile/my-mentoring-sessions">
               <Button
                 variant="ghost"
                 className={getSidebarClass("/profile/my-mentoring-sessions")}
               >
-                <Presentation className="mr-3 h-5 w-5" /> Mentoring Sessions
+                {/* Translate: Mentoring Sessions -> Sesi Mentoring */}
+                <Presentation className="mr-3 h-5 w-5" /> Sesi Mentoring
               </Button>
             </Link>
-            {/* ------------------------------------- */}
 
             <Link to="/profile/my-scholarship-applications">
               <Button
                 variant="ghost"
                 className={getSidebarClass("/profile/my-scholarship-applications")}
               >
-                <GraduationCap className="mr-3 h-5 w-5" /> Scholarships
+                {/* Translate: Scholarships -> Beasiswa */}
+                <GraduationCap className="mr-3 h-5 w-5" /> Beasiswa
               </Button>
             </Link>
 
             <div className="my-2 h-px w-full bg-neutral-100" />
             <h2 className="px-4 text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2 mt-2">
-              Account
+              Akun {/* Translate: Account -> Akun */}
             </h2>
             <Button
               variant="ghost"
               onClick={handleLogout}
-              className="w-full justify-start text-base font-light text-red-500 hover:bg-red-50 hover:text-red-600 h-10 px-4"
+              className="w-full justify-start text-base font-light text-red-500 hover:bg-red-50 hover:text-red-600 h-10 px-4 cursor-pointer"
             >
-              <LogOut className="mr-3 h-5 w-5" /> Logout
+              {/* Translate: Logout -> Keluar */}
+              <LogOut className="mr-3 h-5 w-5" /> Keluar
             </Button>
           </div>
         </aside>

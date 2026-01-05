@@ -59,7 +59,7 @@ export const CorporateHeader = () => {
 
     if (path.includes("/corporate/scholarships")) return "Manajemen Beasiswa";
     if (path.includes("/corporate/articles")) return "Manajemen Artikel";
-    if (path.includes("/corporate/profile")) return "Profil Perusahaan";
+    if (path.includes("/corporate/organizations")) return "Manajemen Organisasi";
   };
 
   return (
