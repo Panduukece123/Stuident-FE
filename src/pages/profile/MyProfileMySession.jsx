@@ -5,6 +5,9 @@ import MentoringService from "@/services/MentoringService";
 import { SessionCard } from "@/components/shared/SessionCard";
 // Import skeleton baru
 import { MySessionSkeleton } from "@/components/skeleton/MySessionSkeleton";
+// Import tambahan untuk UI Kontak
+import { Button } from "@/components/ui/button";
+import { MessageCircle, HelpCircle } from "lucide-react";
 
 export const MyProfileMySession = () => {
   const navigate = useNavigate();
@@ -30,6 +33,33 @@ export const MyProfileMySession = () => {
       {/* Header */}
       <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
         <h1 className="text-xl text-neutral-800">My Mentoring Session</h1>
+      </div>
+
+      {/* --- SECTION KONTAK NARAHUBUNG (BARU) --- */}
+      <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-6 flex flex-col md:flex-row items-center md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="rounded-full bg-white p-3 text-primary shadow-sm border border-primary/10">
+            <HelpCircle className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg text-neutral-800">
+              Butuh Bantuan?
+            </h3>
+            <p className="text-sm text-neutral-600 mt-1 max-w-lg">
+              Jika Anda mengalami kendala teknis atau memiliki pertanyaan terkait
+              jadwal mentoring, silakan hubungi tim narahubung kami.
+            </p>
+          </div>
+        </div>
+        <a
+          href="http://wa.me/6285124423755" 
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button className="bg-green-600 hover:bg-green-700 text-white gap-2 cursor-pointer shadow-sm">
+            <MessageCircle className="h-4 w-4" /> Hubungi Narahubung
+          </Button>
+        </a>
       </div>
 
       {isError && (

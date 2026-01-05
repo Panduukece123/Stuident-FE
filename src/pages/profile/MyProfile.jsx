@@ -71,12 +71,11 @@ export const MyProfile = () => {
   const { user, achievements, experiences } = profileData || {};
 
   // --- LOGIC GABUNGAN (CHECKER) ---
-  // Gabungkan hasil dari kedua fetch diatas
   const activeCvPath = user?.cv_path || user?.cv || cvData?.cv_path;
   const activeCvUrl = cvData?.cv_url;
   const displayCvName =
     cvData?.cv_name ||
-    (activeCvPath ? activeCvPath.split("/").pop() : "My_CV.pdf");
+    (activeCvPath ? activeCvPath.split("/").pop() : "CV_Saya.pdf");
 
   // --- MUTATION UPLOAD CV ---
   const uploadCvMutation = useMutation({
@@ -173,21 +172,24 @@ export const MyProfile = () => {
   return (
     <div className="flex flex-col gap-6">
       <div className="w-full flex items-center justify-center bg-transparent border-b-2 border-b-primary p-2">
-        <h1 className="text-xl">My Profile</h1>
+        {/* Translate: My Profile -> Profil Saya */}
+        <h1 className="text-xl">Profil Saya</h1>
       </div>
 
       <div className="w-full flex flex-row gap-6">
         <div className="w-3/5 flex flex-col gap-4">
           {/* --- BIOGRAPHY --- */}
           <div className="flex flex-row justify-between">
-            <h2 className="text-2xl">Biography</h2>
+            {/* Translate: Biography -> Biografi */}
+            <h2 className="text-2xl">Biografi</h2>
             <Button
               variant="outline"
               className={"rounded-full"}
               onClick={() => setOpenBio(true)}
             >
               {" "}
-              <Edit /> Edit{" "}
+              {/* Translate: Edit -> Ubah */}
+              <Edit /> Ubah{" "}
             </Button>
             <EditBioDialog
               open={openBio}
@@ -198,20 +200,21 @@ export const MyProfile = () => {
           </div>
           <div className="bg-white p-4 border border-neutral-300 rounded-xl">
             <p className="font-light whitespace-pre-line">
-              {user?.bio || "User belum mengisi biodata."}
+              {user?.bio || "Pengguna belum mengisi biodata."}
             </p>
           </div>
 
           {/* --- EDUCATION --- */}
           <div className="flex flex-row justify-between">
-            <h2 className="text-2xl">Education</h2>
+            {/* Translate: Education -> Pendidikan */}
+            <h2 className="text-2xl">Pendidikan</h2>
             <Button
               variant="outline"
               className={"rounded-full"}
               onClick={() => setOpenEdu(true)}
             >
               {" "}
-              <Edit /> Edit{" "}
+              <Edit /> Ubah{" "}
             </Button>
             <EditEducationDialog
               open={openEdu}
@@ -224,12 +227,14 @@ export const MyProfile = () => {
             <h3 className="text-xl">{user?.institution || "-"}</h3>
             <div className="flex flex-col gap-1">
               <div className="flex items-center">
-                <span className="w-24">Major</span>
+                {/* Translate: Major -> Jurusan */}
+                <span className="w-24">Jurusan</span>
                 <span className="mr-2">:</span>
                 <span className="font-light">{user?.major || "-"}</span>
               </div>
               <div className="flex items-center">
-                <span className="w-24">Degree</span>
+                {/* Translate: Degree -> Gelar */}
+                <span className="w-24">Gelar</span>
                 <span className="mr-2">:</span>
                 <span className="font-light">
                   {user?.education_level || "-"}
@@ -240,14 +245,16 @@ export const MyProfile = () => {
 
           {/* --- EXPERIENCE --- */}
           <div className="flex flex-row justify-between">
-            <h2 className="text-2xl">Experience</h2>
+            {/* Translate: Experience -> Pengalaman */}
+            <h2 className="text-2xl">Pengalaman</h2>
             <Button
               variant="outline"
               className="rounded-full"
               onClick={handleAddExp}
             >
               {" "}
-              <Edit className="mr-2 h-4 w-4" /> Add New{" "}
+              {/* Translate: Add New -> Tambah Baru */}
+              <Edit className="mr-2 h-4 w-4" /> Tambah Baru{" "}
             </Button>
             <ExperienceDialog
               open={openExp}
@@ -282,10 +289,12 @@ export const MyProfile = () => {
                 <p className="text-sm text-neutral-600">{exp.description}</p>
                 <div className="flex flex-col gap-1 mt-2 text-sm">
                   <div className="flex items-center capitalize">
-                    <span className="w-20 font-medium">Type</span>: {exp.type}
+                    {/* Translate: Type -> Tipe */}
+                    <span className="w-20 font-medium">Tipe</span>: {exp.type}
                   </div>
                   <div className="flex items-center">
-                    <span className="w-20 font-medium">Date</span>:{" "}
+                    {/* Translate: Date -> Tanggal */}
+                    <span className="w-20 font-medium">Tanggal</span>:{" "}
                     {formatDate(exp.start_date)} - {formatDate(exp.end_date)}
                   </div>
                 </div>
@@ -300,27 +309,31 @@ export const MyProfile = () => {
                       )
                     }
                   >
-                    See Certificate
+                    {/* Translate: See Certificate -> Lihat Sertifikat */}
+                    Lihat Sertifikat
                   </Button>
                 )}
               </div>
             ))
           ) : (
             <div className="bg-white p-4 border border-neutral-300 rounded-xl text-center text-neutral-500 italic">
-              No experience added yet.
+              {/* Translate: No experience... -> Belum ada... */}
+              Belum ada pengalaman.
             </div>
           )}
 
           {/* --- ACHIEVEMENT --- */}
           <div className="flex flex-row justify-between">
-            <h2 className="text-2xl">Achievement</h2>
+            {/* Translate: Achievement -> Prestasi */}
+            <h2 className="text-2xl">Prestasi</h2>
             <Button
               variant="outline"
               className={"rounded-full"}
               onClick={handleAddAch}
             >
               {" "}
-              <Edit className="mr-2 h-4 w-4" /> Add New{" "}
+              {/* Translate: Add New -> Tambah Baru */}
+              <Edit className="mr-2 h-4 w-4" /> Tambah Baru{" "}
             </Button>
             <AchievementDialog
               open={openAch}
@@ -364,27 +377,30 @@ export const MyProfile = () => {
                       )
                     }
                   >
-                    See Certificate
+                    {/* Translate: See Certificate -> Lihat Sertifikat */}
+                    Lihat Sertifikat
                   </Button>
                 )}
               </div>
             ))
           ) : (
             <div className="bg-white p-4 border border-neutral-300 rounded-xl text-center text-neutral-500 italic">
-              No achievements yet.
+              {/* Translate: No achievements... -> Belum ada... */}
+              Belum ada prestasi.
             </div>
           )}
 
           {/* --- SPECIALIZATION --- */}
           <div className="flex flex-row justify-between">
-            <h2 className="text-2xl">Specialization</h2>
+            {/* Translate: Specialization -> Spesialisasi */}
+            <h2 className="text-2xl">Spesialisasi</h2>
             <Button
               variant="outline"
               className={"rounded-full"}
               onClick={() => setOpenSpec(true)}
             >
               {" "}
-              <Edit /> Edit{" "}
+              <Edit /> Ubah{" "}
             </Button>
             <EditSpecializationDialog
               open={openSpec}
@@ -441,7 +457,8 @@ export const MyProfile = () => {
                           {displayCvName}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          PDF Document
+                          {/* Translate: PDF Document -> Dokumen PDF */}
+                          Dokumen PDF
                         </span>
                       </div>
                     </div>
@@ -477,7 +494,8 @@ export const MyProfile = () => {
                       ) : (
                         <Edit className="mr-2 h-4 w-4" />
                       )}
-                      {isCvUploading ? "Uploading..." : "Ganti File"}
+                      {/* Translate: Uploading/Ganti File */}
+                      {isCvUploading ? "Mengunggah..." : "Ganti File"}
                     </Button>
                   </div>
                 </div>
@@ -493,7 +511,8 @@ export const MyProfile = () => {
                     ) : (
                       <Upload className="mr-2 h-4 w-4" />
                     )}
-                    {isCvUploading ? "Uploading..." : "Upload CV"}
+                    {/* Translate: Uploading/Upload CV -> Mengunggah/Unggah CV */}
+                    {isCvUploading ? "Mengunggah..." : "Unggah CV"}
                   </Button>
                 </div>
               )}
@@ -505,14 +524,15 @@ export const MyProfile = () => {
         <div className="w-2/5 flex flex-col gap-4">
           <div className="bg-white rounded-2xl border border-neutral-300 w-full p-4 h-fit flex flex-col gap-2">
             <div className="flex flex-row justify-between">
-              <h2 className="text-2xl">Profile</h2>
+              {/* Translate: Profile -> Profil */}
+              <h2 className="text-2xl">Profil</h2>
               <Button
                 variant="outline"
                 className={"rounded-full"}
                 onClick={() => setOpenPersonal(true)}
               >
                 {" "}
-                <Edit /> Edit{" "}
+                <Edit /> Ubah{" "}
               </Button>
               <EditPersonalDialog
                 open={openPersonal}
@@ -528,26 +548,30 @@ export const MyProfile = () => {
                 <span className="font-light">{user?.name || "-"}</span>
               </div>
               <div className="flex items-center">
-                <span className="w-24 font-medium">Gender</span>
+                {/* Translate: Gender -> Jenis Kelamin */}
+                <span className="w-24 font-medium">Jenis Kelamin</span>
                 <span className="mr-2">:</span>
                 <span className="font-light capitalize">
                   {user?.gender || "-"}
                 </span>
               </div>
               <div className="flex items-center">
-                <span className="w-24 font-medium">Birth Date</span>
+                {/* Translate: Birth Date -> Tanggal Lahir */}
+                <span className="w-24 font-medium">Tanggal Lahir</span>
                 <span className="mr-2">:</span>
                 <span className="font-light">
                   {formatDate(user?.birth_date)}
                 </span>
               </div>
               <div className="flex items-center">
-                <span className="w-24 font-medium">Phone</span>
+                {/* Translate: Phone -> Telepon */}
+                <span className="w-24 font-medium">Telepon</span>
                 <span className="mr-2">:</span>
                 <span className="font-light">{user?.phone || "-"}</span>
               </div>
               <div className="flex items-start">
-                <span className="w-24 font-medium shrink-0">Address</span>
+                {/* Translate: Address -> Alamat */}
+                <span className="w-24 font-medium shrink-0">Alamat</span>
                 <span className="mr-2 shrink-0">:</span>
                 <span className="font-light wrap-break-word flex-1">
                   {user?.address || "-"}
@@ -557,15 +581,17 @@ export const MyProfile = () => {
           </div>
           <Link to="portfolio">
             <div className="flex flex-row justify-between bg-white items-center rounded-2xl p-4 border border-neutral-300">
-              <h2 className="text-2xl">My Portfolio</h2>
+              {/* Translate: My Portfolio -> Portofolio Saya */}
+              <h2 className="text-2xl">Portofolio Saya</h2>
               <ArrowRight className="w-5 h-5" />
             </div>
           </Link>
           <div className="bg-white rounded-2xl border border-neutral-300 w-full p-4 h-fit flex flex-col gap-2">
             <div className="flex flex-row justify-between">
-              <h2 className="text-2xl">Link</h2>
+              {/* Translate: Link -> Tautan */}
+              <h2 className="text-2xl">Tautan</h2>
               <Button variant="outline" className={"rounded-full"}>
-                <Edit /> Edit
+                <Edit /> Ubah
               </Button>
             </div>
             <div className="flex flex-col gap-1 text-primary underline">
