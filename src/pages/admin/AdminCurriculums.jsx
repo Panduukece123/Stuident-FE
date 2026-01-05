@@ -7,6 +7,7 @@ import courseService from "@/services/CourseService";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { ArrowLeft, Loader2, Plus, SearchIcon } from "lucide-react";
 import { CurriculumDeleteDialog, CurriculumDialog, CurriculumViewDialog } from "@/components/admin/dialog/CurriculumDialogs";
+import { Input } from "@/components/ui/input";
 
 const AdminCurriculumCourse = () => {
     const { id } = useParams();
@@ -19,6 +20,7 @@ const AdminCurriculumCourse = () => {
     const [openViewDialog, setOpenViewDialog] = React.useState(false);
     
     const [editCurriculum, setEditCurriculum] = React.useState(null); // null = new
+    const [search, setSearch] = React.useState("");
 
     const [isLoading, setIsLoading] = React.useState(false);
 
@@ -56,8 +58,12 @@ const AdminCurriculumCourse = () => {
         fetchData();
     }, [id, fetchData]);
 
+    const filteredCurriculums = curriculums.filter((c) =>
+        c.title?.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
-        <div className="flex flex-col gap-4">
+        <div className="space-y-6">
             
             {/* Action Header */}
             <div className="flex flex-row justify-between">
@@ -81,7 +87,11 @@ const AdminCurriculumCourse = () => {
                         <InputGroupAddon>
                             <SearchIcon />
                         </InputGroupAddon>
-                        <InputGroupInput placeholder="Search" />
+                        <InputGroupInput
+                            placeholder="Search"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                     </InputGroup>
                     <Button
                         onClick={() => {
@@ -103,7 +113,7 @@ const AdminCurriculumCourse = () => {
                 </div>
             ) : (
                 <CurriculumTable
-                    curriculums={curriculums}
+                    curriculums={filteredCurriculums}
                     onView={handleView}
                     onEdit={handleEdit}
                     onDelete={handleDelete}

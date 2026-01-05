@@ -66,10 +66,13 @@ const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
                 <TableCell>{course.title}</TableCell>
                 <TableCell>{course.instructor}</TableCell>
                 <TableCell>
-                  {Number(course.price).toLocaleString("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                  })}
+                  {course.price <= 0 ? "Free" : 
+                  (
+                    Number(course.price).toLocaleString("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    })
+                  )}
                 </TableCell>
                 <TableCell>
                   <Badge
