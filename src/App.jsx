@@ -31,15 +31,17 @@ import AdminCurriculumCourse from "./pages/admin/AdminCurriculums";
 import AdminTransactions from "./pages/admin/AdminTransactions";
 import CorporateRoute from "./components/route/CorporateRoute";
 import CorporateLayout from "./layouts/CorporateLayout";
-import { CorporateScholarships } from "./pages/corporate/CorporateScholarships";
+import { CorporateManageScholarships } from "./pages/corporate/CorporateScholarships";
 import { MyProfileMySession } from "./pages/profile/MyProfileMySession";
 import MyMentoringSessionDetail from "./pages/profile/MyMentoringSessionDetail";
 import { MentorPage } from "./pages/MentorPage";
 import { MentorDetail } from "./pages/Mentor/MentorDetail";
 import { MyProfileScholarshipApplication } from "./pages/profile/MyProfileScholarshipApplication";
-import { ManageArticles } from "./pages/corporate/CorporateArticles";
+import { CorporateManageArticles } from "./pages/corporate/CorporateArticles";
 import { ManageOrganizations } from "./pages/admin/AdminOrganizations";
 import { CorporateManageOrganizations } from "./pages/corporate/CorporateOrganizations";
+import { ManageArticles } from "./pages/admin/AdminArticles";
+import { ManageScholarships } from "./pages/admin/CorporateScholarships";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,7 +65,7 @@ function App() {
                 <Route index element={<AdminCourses />} />
                 <Route path=":id" element={<AdminCurriculumCourse />} />
               </Route>
-              <Route path="scholarships" element={<CorporateScholarships />} />
+              <Route path="scholarships" element={<ManageScholarships />} />
               <Route path="transactions" element={<AdminTransactions />} />
               <Route path="organizations" element={<ManageOrganizations />} />
               <Route path="articles" element={<ManageArticles />} />
@@ -72,9 +74,9 @@ function App() {
 
           <Route element={<CorporateRoute />}>
             <Route path="corporate" element={<CorporateLayout />}>
-              <Route path="scholarships" element={<CorporateScholarships />} />
+              <Route path="scholarships" element={<CorporateManageScholarships/>} />
               <Route path="organizations" element={<CorporateManageOrganizations/>} />
-              <Route path="articles" element={<ManageArticles />} />
+              <Route path="articles" element={<CorporateManageArticles />} />
             </Route>
           </Route>
 
