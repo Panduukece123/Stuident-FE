@@ -30,6 +30,13 @@ export const getRecommendedScholarships = async () => {
   return response.data;
 };
 
+export const getScholarshipRecommendations = async (limit = 4) => {
+  const response = await api.get("/scholarships/recommendations", {
+    params: { limit },
+  });
+  return response.data;
+};
+
 export const getPopularityScholarships = async()=>{
   const response = await api.get("/scholarships",{
     params: {sort:'popular'}
@@ -95,6 +102,7 @@ export const submitApplication = async (applicationId) => {
 const scholarshipService = {
   getScholarships,
   getRecommendedScholarships,
+  getScholarshipRecommendations,
   getScholarshipById,
   getPopularityScholarships,
   applyScholarship,

@@ -1,28 +1,20 @@
 import React from "react";
-import { Loader2, Star, Sparkles } from "lucide-react"; // Tambah Star & Sparkles
+import { Loader2, Star } from "lucide-react";
 import scholarshipService from "@/services/ScholarshipService";
-import { useScholarship } from "@/context/ScholarshipContext";
 import { useQuery } from "@tanstack/react-query";
 import { ScholarshipCard } from "@/components/shared/ScholarshipCard";
 
 const RecomendContent = () => {
-  const { filters } = useScholarship();
-
   const { data: scholarships = [], isLoading } = useQuery({
-    queryKey: ["recommended-scholarships", filters],
+    queryKey: ["scholarship-recommendations"],
     queryFn: async () => {
-      const params = { is_recommended: 1, ...filters };
-      const response = await scholarshipService.getScholarships(params);
+      const response = await scholarshipService.getScholarshipRecommendations(4);
 
       if (!response.sukses) {
-        throw new Error("Failed to fetch recommended scholarships");
+        throw new Error("Failed to fetch scholarship recommendations");
       }
-      return response.data;
+      return response.data.recommendations || [];
     },
-    select: (data) =>
-      data
-        .sort((a, b) => new Date(b.deadline) - new Date(a.deadline))
-        .slice(0, 4),
     placeholderData: [],
   });
 

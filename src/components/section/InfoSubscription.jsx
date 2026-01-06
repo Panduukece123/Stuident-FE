@@ -116,7 +116,7 @@ export const InfoSubscription = ({ subscriptions, loading, onSubscribe }) => {
                 Premium
               </CardTitle>
               <div className={styles.priceFont}>
-                Rp 150rb
+                Rp 1.999.000
                 <span className="text-sm font-normal text-muted-foreground">/bln</span>
               </div>
               <CardDescription className={styles.descFont}>
@@ -169,7 +169,7 @@ export const InfoSubscription = ({ subscriptions, loading, onSubscribe }) => {
                 Regular
               </CardTitle>
               <div className={styles.priceFont}>
-                Rp 50rb
+                Rp 999.000
                 <span className="text-sm font-normal text-muted-foreground">/crs</span>
               </div>
               <CardDescription className={styles.descFont}>
