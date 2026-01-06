@@ -4,7 +4,6 @@ const ElearningService = {
   // 1. Fungsi Utama
   fetchCourses: async () => {
     try {
-      console.log(`Fetching all courses...`);
       const response = await api.get("/courses");
       const responseData = response.data;
       const data = responseData.data || [];
