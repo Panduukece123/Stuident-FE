@@ -192,6 +192,7 @@ export const CorporateCreateScholarshipDialog = ({ open, onOpenChange, onSave, i
                   <SelectTrigger><SelectValue placeholder="Pilih status" /></SelectTrigger>
                   <SelectContent>
                       <SelectItem value="open">Open (Dibuka)</SelectItem>
+                      <SelectItem value="coming_soon">Coming Soon (Mendatang)</SelectItem>
                       <SelectItem value="closed">Closed (Ditutup)</SelectItem>
                   </SelectContent>
               </Select>

@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select"; 
 import { Loader2 } from "lucide-react";
 
 export const CreateArticleDialog = ({ open, onOpenChange, onSave, isLoading }) => {
@@ -14,12 +21,15 @@ export const CreateArticleDialog = ({ open, onOpenChange, onSave, isLoading }) =
     category: "",
     author: "",
     content: "",
-    image: null, // File object
+    image: null,
   });
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+  const handleCategoryChange = (value) => {
+    setFormData((prev) => ({ ...prev, category: value }));
   };
 
   const handleFileChange = (e) => {
@@ -46,8 +56,18 @@ export const CreateArticleDialog = ({ open, onOpenChange, onSave, isLoading }) =
             </div>
             <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Input id="category" value={formData.category} onChange={handleChange} required placeholder="News, Tips, etc." />
+                    <Label>Category</Label>
+                    <Select onValueChange={handleCategoryChange} value={formData.category}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="education">Education</SelectItem>
+                            <SelectItem value="career">Career</SelectItem>
+                            <SelectItem value="scholarship">Scholarship</SelectItem>
+                            <SelectItem value="testimonial">Testimonial</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="author">Author</Label>
