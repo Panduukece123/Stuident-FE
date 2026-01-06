@@ -38,7 +38,7 @@ const CurriculumTable = ({
                                 <TableCell>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button size="sm" variant="ghost">
+                                            <Button size="icon" variant="ghost">
                                                 <MoreHorizontal />
                                             </Button>
                                         </DropdownMenuTrigger>

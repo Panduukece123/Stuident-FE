@@ -63,7 +63,7 @@ const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
                     </div>
                   )}
                 </TableCell>
-                <TableCell>{course.title}</TableCell>
+                <TableCell className={"font-medium"}>{course.title}</TableCell>
                 <TableCell>{course.instructor}</TableCell>
                 <TableCell>
                   {course.price <= 0 ? "Free" : 
@@ -87,7 +87,7 @@ const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="sm" variant="ghost">
+                      <Button size="icon" variant="ghost">
                         <MoreHorizontal />
                       </Button>
                     </DropdownMenuTrigger>
@@ -108,7 +108,7 @@ const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
                         <Pencil />
                         Edit Course
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onDelete(course.id)}>
+                      <DropdownMenuItem onClick={() => onDelete(course)}>
                         <Trash />
                         Delete Course
                       </DropdownMenuItem>
