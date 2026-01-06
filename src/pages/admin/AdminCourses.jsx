@@ -36,37 +36,32 @@ const AdminCourses = () => {
     fetchCourses();
   }, []);
 
- const handleSave = async (courseData) => {
+  const handleSave = async (courseData) => {
     setSaving(true);
     try {
       const formData = new FormData();
-      
-      // Mengonversi objek data dari React Hook Form ke FormData
       Object.keys(courseData).forEach((key) => {
-        // Pastikan hanya mengirim data yang ada nilainya
         if (courseData[key] !== null && courseData[key] !== undefined) {
-          // Khusus untuk File/Blob tetap dimasukkan, sisanya dikonversi ke string oleh FormData
           formData.append(key, courseData[key]);
         }
       });
 
       if (editingCourse) {
         await CourseService.updateCourse(editingCourse.id, formData);
+        await fetchCourses();
       } else {
-        await CourseService.createCourse(formData);
+        const response = await CourseService.createCourse(formData);
+        if (response.data) {
+          setCourses((prev) => [...prev, response.data]);
+        } else {
+          await fetchCourses();
+        }
       }
 
-      // Refresh data dari server
-      await fetchCourses();
-      
-      // Tutup dialog dan reset state editing
       setOpenDialog(false);
       setEditingCourse(null);
     } catch (err) {
-      // Menampilkan pesan error yang lebih spesifik jika ada dari server
-      const errorMsg = err.response?.data?.message || "Gagal menyimpan perubahan.";
-      alert(errorMsg);
-      console.error(err);
+      alert(err.response?.data?.message || "Gagal menyimpan.");
     } finally {
       setSaving(false);
     }
