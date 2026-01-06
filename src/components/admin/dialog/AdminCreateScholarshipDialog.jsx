@@ -26,7 +26,7 @@ const scholarshipSchema = z.object({
   study_field: z.string().min(1, "Bidang studi wajib diisi"),
   location: z.string().min(1, "Lokasi wajib diisi"),
   deadline: z.string().min(1, "Deadline wajib diisi"),
-  status: z.enum(["open", "closed"]),
+  status: z.enum(["open", "coming_soon", "closed"]),
   benefit: z.string().min(10, "Benefit wajib diisi (min 10 karakter)"),
   description: z.string().min(20, "Deskripsi wajib diisi (min 20 karakter)"),
 });
@@ -192,6 +192,7 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
                   <SelectTrigger><SelectValue placeholder="Pilih status" /></SelectTrigger>
                   <SelectContent>
                       <SelectItem value="open">Open (Dibuka)</SelectItem>
+                      <SelectItem value="coming_soon">Coming Soon (Mendatang)</SelectItem>
                       <SelectItem value="closed">Closed (Ditutup)</SelectItem>
                   </SelectContent>
               </Select>
