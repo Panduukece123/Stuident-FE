@@ -194,7 +194,7 @@ export const CourseDialog = ({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogPortal>
                 <DialogContent
-                    className={"w-lg! sm:w-max [&>button:first-of-type]:hidden"}
+                    className={"sm:w-max [&>button:first-of-type]:hidden"}
                     onInteractOutside={(e) => {e.preventDefault();}}
                 >
 
@@ -337,9 +337,6 @@ export const CourseDialog = ({
                                             <InputGroupAddon>
                                                 <InputGroupText>Rp.</InputGroupText>
                                             </InputGroupAddon>
-                                            <InputGroupAddon align="inline-end">
-                                                <InputGroupText className={"font-normal"}>,00</InputGroupText>
-                                            </InputGroupAddon>
                                         </InputGroup>
                                         {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                                     </Field>
@@ -384,13 +381,27 @@ export const CourseDialog = ({
                                 render={({ field, fieldState }) => (
                                     <Field>
                                         <FieldLabel>Image Thumbnail</FieldLabel>
+                                        <div className="bg-neutral-100 text-muted-foreground border aspect-video w-full rounded overflow-hidden">
+                                            {field.value ? (
+                                                <img
+                                                    src={field.value}
+                                                    alt="Image thumbnail of the course"
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="h-full w-full flex items-center justify-center gap-2">
+                                                    <ImageOff />
+                                                    <p className="text-sm">No image...</p>
+                                                </div>
+                                            )}
+                                        </div>
                                         <Input
                                             {...field}
                                             placeholder="https://..."
                                             type="text"
                                             value={typeof field.value === "string" ? field.value : ""}
                                         />
-                                        <p className="text-sm text-muted-foreground items-center">or</p>
+                                        <p className="text-sm text-muted-foreground text-center">Provide the image's URL or upload your own image here:</p>
                                         <Input
                                             //{...field} // Cannot do this anymore because of browser's security or somethin...
                                             type="file"
@@ -567,14 +578,20 @@ export const CourseViewDialog = ({
                         </div>
                         <div>
                             <p className="text-sm font-medium">Thumbnail:</p>
-                            {course?.image ? (
-                                <img src={course.image} alt={course?.title} className="aspect-video rounded-md" />
-                            ) : (
-                                <div className="aspect-video flex items-center justify-center gap-2 bg-neutral-100 text-muted-foreground border rounded">
-                                    <ImageOff />
-                                    <p>No thumbnail</p>
-                                </div>
-                            )}
+                            <div className="bg-neutral-100 text-muted-foreground border aspect-video w-full rounded-md overflow-hidden">
+                                {course?.image ? (
+                                    <img
+                                        src={course.image}
+                                        alt={course?.title}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="h-full w-full flex items-center justify-center gap-2">
+                                        <ImageOff />
+                                        <p className="text-sm">No image...</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div>
                             <p className="text-sm font-medium">Description:</p>
