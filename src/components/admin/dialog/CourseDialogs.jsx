@@ -171,7 +171,7 @@ export const CourseViewDialog = ({
                         </div>
                         <div>
                             <p className="text-sm font-medium">Description:</p>
-                            <p className="text-sm">{course?.instructor}</p>
+                            <p className="text-sm">{course?.description}</p>
                         </div>
                         <div>
                             <p className="text-sm font-medium">Overview Video Duration:</p>
