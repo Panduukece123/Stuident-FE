@@ -76,15 +76,24 @@ export const MentorPage = () => {
   const isAcademic = (mentor) => Number(mentor.academic_sessions_count) > 0;
   const isLife = (mentor) => Number(mentor.life_plan_sessions_count) > 0;
 
+  // Logika untuk mentor baru (keduanya 0)
+  const isNew = (mentor) =>
+    Number(mentor.academic_sessions_count) === 0 &&
+    Number(mentor.life_plan_sessions_count) === 0;
+
   const filteredMentors = mentors.filter((mentor) => {
     if (!matchSearch(mentor)) return false;
+    // Jika sedang mencari/filter tipe tertentu, biarkan logika lama
     if (filterType === "academic") return isAcademic(mentor);
     if (filterType === "life") return isLife(mentor);
-    return isAcademic(mentor) || isLife(mentor);
+
+    // Jika filter "both/all", tampilkan semua yang cocok dengan search
+    return true;
   });
 
   const academicMentors = filteredMentors.filter(isAcademic);
   const lifeMentors = filteredMentors.filter(isLife);
+  const newMentors = filteredMentors.filter(isNew); // Ambil mentor baru
 
   const scrollToSection = (ref) => {
     if (!ref.current) return;
@@ -271,7 +280,7 @@ export const MentorPage = () => {
               Mentor academic tidak ditemukan.
             </p>
           ) : (
-             <div className="grid grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-12">
+            <div className="grid grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-12">
               {academicMentors.map((mentor) => (
                 <MentorCard key={mentor.id} mentor={mentor} />
               ))}
@@ -294,6 +303,25 @@ export const MentorPage = () => {
             </div>
           )}
         </section>
+        {newMentors.length > 0 && (
+          <section className="space-y-8 scroll-mt-24 pt-12 border-t border-dashed border-neutral-200">
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-black">Mentor baru</h2>
+              <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                Segera IKuti
+              </span>
+            </div>
+            <p className="text-neutral-500 -mt-6">
+              Mentor-mentor baru yang akan segera membuka jadwal sesi mereka.
+            </p>
+
+            <div className="grid grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-12">
+              {newMentors.map((mentor) => (
+                <MentorCard key={mentor.id} mentor={mentor} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
