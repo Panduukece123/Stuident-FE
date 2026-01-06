@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus, RefreshCcw, Search } from "lucide-react";
 import CourseService from "@/services/admin/CourseService";
-import CreateEditCourseDialog from "@/components/admin/dialog/CreateEditCourseDialog";
 import CourseTable from "@/components/admin/table/CourseTable";
 import { CourseDeleteDialog, CourseDialog, CourseViewDialog } from "@/components/admin/dialog/CourseDialogs";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";

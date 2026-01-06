@@ -167,7 +167,7 @@ export default function CourseShowPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto pt-1 p-4 md:py-8 md:px-6 flex flex-col md:flex-row gap-4 md:gap-8">
+    <div className="max-w-6xl mx-auto pt-1 p-4 md:py-8 md:px-6 flex flex-col md:flex-row gap-4 md:gap-8">
       <div className="basis-full">
         {/* Legend Page */}
         <div className="w-full flex flex-row gap-4 items-center border-b">
@@ -283,76 +283,78 @@ export default function CourseShowPage() {
         </Tabs>
       </div>
 
-      <CardContent>
-        {course.type === "bootcamp" ? (
-          <section className="mb-4 pb-4 border-b">
-            <div className="mb-4">
-              <p className="text-muted-foreground font-light text-sm italic">
-                *Program Bootcamp dikelola secara melalui WhatsApp. Chat Admin
-                WhatsApp kami untuk informasi lebih lanjut
-              </p>
-            </div>
-            <div className="w-full flex flex-col gap-3">
-              {/* WhatsApp Button ala Temen Kamu */}
-              <a
-                href="https://wa.me/6285124423755"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-3 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg group"
-              >
-                <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                Chat WhatsApp
-              </a>
-            </div>
-          </section>
-        ) : (
-          /* LOGIKA UNTUK REGULAR COURSE (ALUR BIASA) */
-          <>
-            {userEnrollData ? (
-              <section className="mb-4 pb-4 border-b">
-                <div className="mb-4">
-                  <p className="text-muted-foreground font-light">Progress:</p>
-                  <p className="text-2xl">
-                    {userEnrollData?.progress
-                      ? `${userEnrollData?.progress}%`
-                      : "0%"}
-                  </p>
-                  <Progress value={userEnrollData?.progress || 0} />
-                </div>
-                <div className="w-full flex flex-col gap-2 pt-2 pb-2">
-                  <Button variant={"default"} asChild>
-                    <Link to={`/my-courses/learn/${course?.id}`}>Belajar</Link>
-                  </Button>
-                </div>
-              </section>
-            ) : (
-              <section className="mb-4 pb-4 border-b">
-                <div>
-                  <p className="text-muted-foreground font-light">Harga:</p>
-                  <p className="text-2xl" id="price">
-                    {course?.price <= 0 ? "Gratis" : formatPrice(course.price)}
-                  </p>
-                </div>
-                <div className="w-full flex flex-col gap-2 pt-2 pb-2">
-                  <Button variant={"default"} onClick={handleBuyClick}>
-                    Beli Sekarang
-                  </Button>
-                </div>
-              </section>
-            )}
-          </>
-        )}
+      <Card className="md:basis-lg h-fit md:sticky md:top-23 max-md:shadow-none">
+        <CardContent>
+          {course.type === "bootcamp" ? (
+            <section className="mb-4 pb-4 border-b">
+              <div className="mb-4">
+                <p className="text-muted-foreground font-light text-sm italic">
+                  *Program Bootcamp dikelola secara melalui WhatsApp. Chat Admin
+                  WhatsApp kami untuk informasi lebih lanjut
+                </p>
+              </div>
+              <div className="w-full flex flex-col gap-3">
+                {/* WhatsApp Button ala Temen Kamu */}
+                <a
+                  href="https://wa.me/6285124423755"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-3 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg group"
+                >
+                  <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  Chat WhatsApp
+                </a>
+              </div>
+            </section>
+          ) : (
+            /* LOGIKA UNTUK REGULAR COURSE (ALUR BIASA) */
+            <>
+              {userEnrollData ? (
+                <section className="mb-4 pb-4 border-b">
+                  <div className="mb-4">
+                    <p className="text-muted-foreground font-light">Progress:</p>
+                    <p className="text-2xl">
+                      {userEnrollData?.progress
+                        ? `${userEnrollData?.progress}%`
+                        : "0%"}
+                    </p>
+                    <Progress value={userEnrollData?.progress || 0} />
+                  </div>
+                  <div className="w-full flex flex-col gap-2 pt-2 pb-2">
+                    <Button variant={"default"} asChild>
+                      <Link to={`/my-courses/learn/${course?.id}`}>Belajar</Link>
+                    </Button>
+                  </div>
+                </section>
+              ) : (
+                <section className="mb-4 pb-4 border-b">
+                  <div>
+                    <p className="text-muted-foreground font-light">Harga:</p>
+                    <p className="text-2xl" id="price">
+                      {course?.price <= 0 ? "Gratis" : formatPrice(course.price)}
+                    </p>
+                  </div>
+                  <div className="w-full flex flex-col gap-2 pt-2 pb-2">
+                    <Button variant={"default"} onClick={handleBuyClick}>
+                      Beli Sekarang
+                    </Button>
+                  </div>
+                </section>
+              )}
+            </>
+          )}
 
-        <section>
-          <p className="text-muted-foreground font-light mb-3">
-            Bagikan kursus ini:
-          </p>
-          <ShareActionButtons
-            title={course?.title}
-            text={`Check out this course info: ${course?.title}`}
-          />
-        </section>
-      </CardContent>
+          <section>
+            <p className="text-muted-foreground font-light mb-3">
+              Bagikan kursus ini:
+            </p>
+            <ShareActionButtons
+              title={course?.title}
+              text={`Check out this course info: ${course?.title}`}
+            />
+          </section>
+        </CardContent>
+      </Card>
 
       {/* DIALOGS */}
       <CheckoutDialog
