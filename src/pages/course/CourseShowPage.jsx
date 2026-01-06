@@ -167,13 +167,13 @@ export default function CourseShowPage() {
       <div className="basis-full">
         {/* Legend Page */}
         <div className="w-full flex flex-row gap-4 items-center border-b">
-          <Link to="/e-learning">
-            {" "}
+          <Button className={"cursor-pointer"} variant="link" asChild>
             {/* Pastikan path sudah benar */}
-            <Button className={"rounded-full cursor-pointer"}>
-              <ChevronLeft /> Back
-            </Button>
-          </Link>
+            <Link to="/e-learning">
+              <ChevronLeft />
+              Back
+            </Link>
+          </Button>
 
           <Breadcrumb>
             <BreadcrumbList>
