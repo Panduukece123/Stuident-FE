@@ -4,19 +4,19 @@ import { Loader2, Plus, RefreshCcw, Search } from "lucide-react";
 import CourseService from "@/services/admin/CourseService";
 import CourseTable from "@/components/admin/table/CourseTable";
 import { CourseDeleteDialog, CourseDialog, CourseViewDialog } from "@/components/admin/dialog/CourseDialogs";
+import CreateEditCourseDialog from "@/components/admin/dialog/CreateEditCourseDialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
-
-  const [saving, setSaving] = useState(false);
   
   const [openDialog, setOpenDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  // const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openViewDialog, setOpenViewDialog] = useState(false);
   
   const [editingCourse, setEditingCourse] = useState(null);
+  const [saving, setSaving] = useState(false);
   
   const [loading, setLoading] = useState(false);
 
@@ -145,9 +145,20 @@ const AdminCourses = () => {
         />
       )}
       
+      {/* 
+      OBSOLETE, ORIGINALLY MADE BY ZIDAN
+
       <CourseDialog
         open={openDialog}
         onOpenChange={setOpenDialog}
+        course={editingCourse}
+        onFinish={fetchCourses}
+      /> 
+      */}
+      <CreateEditCourseDialog
+        open={openDialog}
+        onOpenChange={setOpenDialog}
+        onSave={handleSave}
         course={editingCourse}
         onFinish={fetchCourses}
         saving={saving}
@@ -157,12 +168,16 @@ const AdminCourses = () => {
         onOpenChange={setOpenViewDialog}
         course={editingCourse}
       />
+      {/* 
+      OBSOLETE, ORIGINALLY MADE BY ZIDAN
+
       <CourseDeleteDialog
         open={openDeleteDialog}
         onOpenChange={setOpenDeleteDialog}
         course={editingCourse}
         onFinish={fetchCourses}
       />
+      */}
     </div>
   );
 };
