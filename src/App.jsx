@@ -42,6 +42,7 @@ import { ManageOrganizations } from "./pages/admin/AdminOrganizations";
 import { CorporateManageOrganizations } from "./pages/corporate/CorporateOrganizations";
 import { ManageArticles } from "./pages/admin/AdminArticles";
 import { ManageScholarships } from "./pages/admin/AdminScholarships";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -137,6 +138,7 @@ function App() {
               element={<EnrolledCourseShowPage />}
             />
           </Route>
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
