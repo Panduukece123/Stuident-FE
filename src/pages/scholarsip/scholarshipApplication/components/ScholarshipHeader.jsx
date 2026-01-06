@@ -16,7 +16,7 @@ const ScholarshipHeader = ({ scholarship }) => {
       <p className="text-gray-400 text-xs font-medium mb-3">Applying for...</p>
       <div className="flex items-start gap-5">
         <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden shadow-sm">
-          <img src={scholarship?.image} alt="" className="w-full h-full object-cover" />
+          <img src={scholarship?.organization?.logo_full_url  } alt="" className="w-full h-full object-cover" />
         </div>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-800 leading-tight mb-1">

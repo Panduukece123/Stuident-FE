@@ -13,7 +13,7 @@ import { ElearningEnrolledList } from "@/components/section/ElearningEnrolledLis
 import { BookOpen } from "lucide-react";
 import { ElearningPageSkeleton } from "@/components/skeleton/ElearningPageSkeleton";
 import { InfoSubscription } from "@/components/section/InfoSubscription";
-import { UpgradeSubscriptionDialog } from "@/components/dialog/UpgradeSubsDialog";
+import { SubscriptionDialog } from "@/components/dialog/SubscriptionDialog";
 
 // IMPORT SERVICES
 import ElearningService from "@/services/elearningService";
@@ -55,7 +55,6 @@ export const ElearningPage = () => {
   const [subsLoading, setSubsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [targetPlan, setTargetPlan] = useState("");
-  const [isUpgrading, setIsUpgrading] = useState(false);
 
   const fetchSubscriptions = async () => {
     try {
@@ -77,23 +76,9 @@ export const ElearningPage = () => {
     setIsDialogOpen(true);
   };
 
-  const handleConfirmUpgrade = async (method) => {
-    const activeSub = subscriptions.find((sub) => sub.status === "active");
-    if (!activeSub) return alert("Tidak ada paket aktif.");
-    try {
-      setIsUpgrading(true);
-      await subscriptionService.upgradeSubscription(activeSub.id, {
-        plan: targetPlan,
-        payment_method: method,
-      });
-      setIsDialogOpen(false);
-      alert(`Berhasil upgrade ke ${targetPlan}!`);
-      fetchSubscriptions();
-    } catch (error) {
-      alert(error.response?.data?.message || "Gagal upgrade.");
-    } finally {
-      setIsUpgrading(false);
-    }
+  const handleSubscriptionSuccess = () => {
+    setIsDialogOpen(false);
+    fetchSubscriptions();
   };
 
   // --- QUERY DATA ---
@@ -395,12 +380,11 @@ export const ElearningPage = () => {
           />
         </div>
 
-        <UpgradeSubscriptionDialog
+        <SubscriptionDialog
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
           planName={targetPlan}
-          isLoading={isUpgrading}
-          onConfirm={handleConfirmUpgrade}
+          onSuccess={handleSubscriptionSuccess}
         />
       </main>
     </div>
