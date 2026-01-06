@@ -2,12 +2,26 @@ import api from "../Api"; // Sesuaikan import axios instance kamu
 
 const ScholarshipService = {
   // GET ALL (List)
-  getScholarships: async () => {
+  getScholarships: async ({
+    page = 1,
+    search = "",
+    status = "",
+    location = "",
+    study_field = "",
+  }) => {
     const token = localStorage.getItem("token");
     const response = await api.get("/scholarships", {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
+      },
+      // Sesuaikan endpoint backend
+      params: {
+        page,
+        search, // Biasanya backend mapping search ke nama beasiswa
+        status: status === "all" ? "" : status, 
+        location,
+        study_field,
       },
     });
     return response.data;
@@ -112,7 +126,11 @@ const ScholarshipService = {
 
   // GET APPLICANTS (Tambahan untuk melihat siapa yang daftar di beasiswa ini)
   getScholarshipApplicants: async (scholarshipId) => {
-    const response = await api.get(`/scholarships/${scholarshipId}/applications`);
+    const token = localStorage.getItem("token");
+    const response = await api.get('/scholarship-applications', {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { scholarship_id: scholarshipId } // Kirim filter ke backend
+    });
     return response.data;
   },
 
@@ -120,16 +138,20 @@ const ScholarshipService = {
   updateApplicantStatus: async (applicationId, status) => {
     // status = "accepted" | "rejected"
     const token = localStorage.getItem("token");
-    const response = await api.put(`/scholarship-applications/${applicationId}/status`, {
-      status: status
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
+    const response = await api.put(
+      `/scholarship-applications/${applicationId}/status`,
+      {
+        status: status,
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      }
+    );
     return response.data;
-  }
+  },
 };
 
 export default ScholarshipService;

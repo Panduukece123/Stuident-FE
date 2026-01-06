@@ -3,13 +3,20 @@ import api from "../Api";
 const UserService = {
   // ... method getUsers, createUser, updateUser, deleteUser (YANG LAMA TETAP DISINI) ...
 
-  getUsers: async () => {
+getUsers: async ({ page = 1, search = "", role = "" }) => { // Terima object
     const token = localStorage.getItem("token");
+
     const response = await api.get("/admin/users", {
       headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+      params: {
+        page: page,
+        search: search,
+        role: role === "all" ? "" : role,
+      },
     });
-    return response.data.data || response.data;
-  },
+
+    return response.data;
+},
 
   createUser: async (userData) => {
     const token = localStorage.getItem("token");

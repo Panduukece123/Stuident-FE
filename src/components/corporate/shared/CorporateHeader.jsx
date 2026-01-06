@@ -1,7 +1,7 @@
 import React from "react";
 import { Menu, Search, LogOut, User, Building2 } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom"; 
-import { useQuery, useQueryClient } from "@tanstack/react-query"; 
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CorporateSidebar } from "./CorporateSidebar"; // Import Sidebar yang baru
 import ProfileService from "@/services/ProfileService";
@@ -22,25 +22,25 @@ import authService from "@/services/AuthService";
 
 export const CorporateHeader = () => {
   const navigate = useNavigate();
-  const location = useLocation(); 
+  const location = useLocation();
   const token = localStorage.getItem("token");
   const queryClient = useQueryClient();
 
   // Fetch Data User
   const { data: profileData, isLoading } = useQuery({
-    queryKey: ["profile", token], 
+    queryKey: ["profile", token],
     queryFn: async () => {
       const result = await ProfileService.getProfile();
       return result.data || result;
     },
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
   });
 
   const user = profileData?.user || {};
 
   const handleLogout = async () => {
     try {
-      await authService.logout(); 
+      await authService.logout();
       console.log("Logout backend success");
     } catch (error) {
       console.warn("Logout backend failed (token might be expired):", error);
@@ -59,12 +59,12 @@ export const CorporateHeader = () => {
 
     if (path.includes("/corporate/scholarships")) return "Manajemen Beasiswa";
     if (path.includes("/corporate/articles")) return "Manajemen Artikel";
-    if (path.includes("/corporate/organizations")) return "Manajemen Organisasi";
+    if (path.includes("/corporate/organizations"))
+      return "Manajemen Organisasi";
   };
 
   return (
     <header className="flex h-14 items-center justify-between gap-4 border-b bg-white px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30 shadow-sm">
-      
       {/* MOBILE TRIGGER (Panggil CorporateSidebar) */}
       <Sheet>
         <SheetTrigger asChild>
@@ -86,11 +86,14 @@ export const CorporateHeader = () => {
       {/* USER DROPDOWN */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-auto rounded-lg px-3 hover:bg-neutral-100 transition-colors">
+          <Button
+            variant="ghost"
+            className="relative h-10 w-auto rounded-lg px-3 hover:bg-neutral-100 transition-colors"
+          >
             {isLoading ? (
               <div className="flex items-center gap-2">
-                 <Skeleton className="h-8 w-8 rounded" />
-                 <Skeleton className="h-4 w-20 hidden md:block" />
+                <Skeleton className="h-8 w-8 rounded" />
+                <Skeleton className="h-4 w-20 hidden md:block" />
               </div>
             ) : (
               <div className="flex items-center gap-3">
@@ -105,7 +108,9 @@ export const CorporateHeader = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-center text-xs">
-                    <span className="font-semibold text-neutral-800 text-sm">{user.name}</span>
+                  <span className="font-semibold text-neutral-800 text-sm">
+                    {user.name}
+                  </span>
                 </div>
               </div>
             )}
@@ -115,13 +120,24 @@ export const CorporateHeader = () => {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user.name}</p>
-                <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+              <p className="text-sm font-medium leading-none">{user.name}</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user.email}
+              </p>
             </div>
           </DropdownMenuLabel>
-          
+
           <DropdownMenuSeparator />
-          
+
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => navigate("/profile/my-profile")}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+
+          <DropdownMenuSeparator />
+
           <DropdownMenuItem
             onClick={handleLogout}
             className="text-red-600 focus:text-red-600 focus:bg-red-50"
