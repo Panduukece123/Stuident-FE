@@ -32,6 +32,7 @@ import ShareActionButtons from "@/components/shared/ShareActionButtons";
 const ScholarshipDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
 
   const { data: data = [], isLoading } = useQuery({
     queryKey: ["scholarship-detail", id],
@@ -167,9 +168,9 @@ const ScholarshipDetail = () => {
         <div className="lg:col-span-2 space-y-8">
           {/* Hero Image */}
           <div className="rounded-xl overflow-hidden shadow-sm border bg-white">
-            {data.image ? (
+            {data.image_url ? (
               <img
-                src={data.image}
+                src={data.image_url}
                 alt={data.name}
                 className="w-full h-[300px] md:h-[400px] object-cover"
               />
@@ -185,9 +186,9 @@ const ScholarshipDetail = () => {
             {/* Logo Organization */}
             <div className="shrink-0">
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border bg-white p-4 shadow-sm flex items-center justify-center overflow-hidden">
-                {organization?.logo_url ? (
+                {organization?.logo_full_url ? (
                   <img
-                    src={organization.logo_url}
+                    src={organization.logo_full_url}
                     alt={organization.name}
                     className="w-full h-full object-contain"
                   />
@@ -286,9 +287,15 @@ const ScholarshipDetail = () => {
                 </div>
                 
                 <Button className="w-full h-12 text-lg bg-[#3DBDC2] hover:bg-[#2da8ad] text-white font-semibold rounded-lg shadow-md transition-all cursor-pointer">
-                  <Link to={`/scholarship/application/${data.id}`}>
-                  Register Now
-                  </Link>
+                  {isLoggedIn ? (
+                    <Link to={`/scholarship/application/${data.id}`}>
+                      Register Now
+                    </Link>
+                  ) : (
+                    <Link to="/login">
+                      Login to Register
+                    </Link>
+                  )}
                 </Button>
                
 

@@ -19,7 +19,7 @@ export const ScholarshipCard = ({
   status,
   studyField,
   deadline,
-  image,
+  image_url,
 }) => {
   // Format deadline
   const formatDeadline = (date) => {
@@ -37,8 +37,8 @@ export const ScholarshipCard = ({
       <Link to={`/scholarship/show/${id}`}>
       
       <div className="h-40 bg-muted w-full relative">
-        {image ? (
-          <img src={image} alt={name} className="w-full h-full object-cover" />
+        {image_url ? (
+          <img src={image_url} alt={name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center">
             <GraduationCap className="w-16 h-16 text-white/50" />

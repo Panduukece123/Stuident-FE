@@ -38,12 +38,29 @@ const ScholarshipService = {
 
   // CREATE
   createScholarship: async (data) => {
-    // data = { organization_id, name, description, benefit, location, status, deadline }
     const token = localStorage.getItem("token");
-    const response = await api.post("/scholarships", data, {
+    
+    // Gunakan FormData untuk mendukung file upload
+    const formData = new FormData();
+    formData.append("organization_id", data.organization_id);
+    formData.append("name", data.name);
+    formData.append("study_field", data.study_field);
+    formData.append("location", data.location);
+    formData.append("deadline", data.deadline);
+    formData.append("status", data.status);
+    formData.append("benefit", data.benefit);
+    formData.append("description", data.description);
+    
+    // Append image jika ada (File object)
+    if (data.image && data.image instanceof File) {
+      formData.append("image", data.image);
+    }
+
+    const response = await api.post("/scholarships", formData, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -52,10 +69,30 @@ const ScholarshipService = {
   // UPDATE
   updateScholarship: async (id, data) => {
     const token = localStorage.getItem("token");
-    const response = await api.put(`/scholarships/${id}`, data, {
+    
+    // Gunakan FormData untuk mendukung file upload
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("study_field", data.study_field);
+    formData.append("location", data.location);
+    formData.append("deadline", data.deadline);
+    formData.append("status", data.status);
+    formData.append("benefit", data.benefit);
+    formData.append("description", data.description);
+    
+    // Append image jika ada perubahan (File object baru)
+    if (data.image && data.image instanceof File) {
+      formData.append("image", data.image);
+    }
+    
+    // Untuk Laravel, gunakan POST dengan _method untuk simulate PUT
+    formData.append("_method", "PUT");
+
+    const response = await api.post(`/scholarships/${id}`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
