@@ -13,7 +13,7 @@ import { ChevronLeft, MessageCircle, Star, User } from "lucide-react";
 import * as React from "react";
 import { Tabs } from "@radix-ui/react-tabs";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import courseService from "@/services/CourseService";
 import LevelBadge from "@/components/LevelBadge";
 import ShareActionButtons from "@/components/shared/ShareActionButtons";
@@ -30,6 +30,7 @@ import { useState } from "react";
 
 export default function CourseShowPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [course, setCourse] = React.useState({});
   const [profileData, setProfileData] = React.useState(null);
@@ -170,7 +171,11 @@ export default function CourseShowPage() {
       <div className="basis-full">
         {/* Legend Page */}
         <div className="w-full flex flex-row gap-4 items-center border-b">
-          <Button className={"rounded-full"} variant={"primary"}>
+          <Button
+            className="rounded-full cursor-pointer hover:opacity-80 transition-all"
+            variant="primary"
+            onClick={() => navigate(-1)}
+          >
             <ChevronLeft />
             Back
           </Button>
@@ -283,7 +288,8 @@ export default function CourseShowPage() {
           <section className="mb-4 pb-4 border-b">
             <div className="mb-4">
               <p className="text-muted-foreground font-light text-sm italic">
-                *Program Bootcamp dikelola secara melalui WhatsApp. Chat Admin WhatsApp kami untuk informasi lebih lanjut
+                *Program Bootcamp dikelola secara melalui WhatsApp. Chat Admin
+                WhatsApp kami untuk informasi lebih lanjut
               </p>
             </div>
             <div className="w-full flex flex-col gap-3">
@@ -297,7 +303,6 @@ export default function CourseShowPage() {
                 <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
                 Chat WhatsApp
               </a>
-
             </div>
           </section>
         ) : (
@@ -318,7 +323,6 @@ export default function CourseShowPage() {
                   <Button variant={"default"} asChild>
                     <Link to={`/my-courses/learn/${course?.id}`}>Belajar</Link>
                   </Button>
-                 
                 </div>
               </section>
             ) : (
@@ -333,7 +337,6 @@ export default function CourseShowPage() {
                   <Button variant={"default"} onClick={handleBuyClick}>
                     Beli Sekarang
                   </Button>
-                 
                 </div>
               </section>
             )}
