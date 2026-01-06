@@ -220,7 +220,9 @@ export const EnrolledCourseShowPage = () => {
       {/* HEADER & BREADCRUMB */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
-          <Link to="/profile/my-enrolled-courses ">
+          <Link to={`/course/show/${id}`}>
+            {" "}
+            {/* Menghapus spasi dan menggunakan template literal */}
             <Button className={"rounded-full cursor-pointer"}>
               <ChevronLeft /> Back
             </Button>

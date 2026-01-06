@@ -13,7 +13,7 @@ import { ChevronLeft, MessageCircle, Star, User } from "lucide-react";
 import * as React from "react";
 import { Tabs } from "@radix-ui/react-tabs";
 import { TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import courseService from "@/services/CourseService";
 import LevelBadge from "@/components/LevelBadge";
 import ShareActionButtons from "@/components/shared/ShareActionButtons";
@@ -30,19 +30,15 @@ import { useState } from "react";
 
 export default function CourseShowPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
-
   const [course, setCourse] = React.useState({});
   const [profileData, setProfileData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  // --- STATE TRANSAKSI ---
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isProofOpen, setIsProofOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("qris");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Kita simpan FULL object data transaksi disini (id, qr_code_url, nominal, dll)
   const [transactionData, setTransactionData] = useState(null);
 
   const fetchData = React.useCallback(async () => {
@@ -171,14 +167,13 @@ export default function CourseShowPage() {
       <div className="basis-full">
         {/* Legend Page */}
         <div className="w-full flex flex-row gap-4 items-center border-b">
-          <Button
-            className="rounded-full cursor-pointer hover:opacity-80 transition-all"
-            variant="primary"
-            onClick={() => navigate(-1)}
-          >
-            <ChevronLeft />
-            Back
-          </Button>
+          <Link to="/e-learning">
+            {" "}
+            {/* Pastikan path sudah benar */}
+            <Button className={"rounded-full cursor-pointer"}>
+              <ChevronLeft /> Back
+            </Button>
+          </Link>
 
           <Breadcrumb>
             <BreadcrumbList>
