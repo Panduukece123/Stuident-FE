@@ -49,7 +49,13 @@ export const MentorPage = () => {
   const fetchMySessions = async () => {
     try {
       const res = await MentoringService.getMySessions();
-      setMySessions(res?.data ?? []);
+      const allSessions = res?.data ?? [];
+
+      const scheduledSessions = allSessions.filter(
+        (session) => session.status?.toLowerCase() === "scheduled"
+      );
+
+      setMySessions(scheduledSessions);
     } catch (err) {
       console.warn("Skip my sessions (not logged in)");
     }

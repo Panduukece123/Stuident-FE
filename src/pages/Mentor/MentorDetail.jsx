@@ -13,7 +13,10 @@ import {
   Clock,
   CalendarDays,
   FileText,
+  Compass,
+  BookOpen,
 } from "lucide-react";
+import BookMentoringDialog from "@/components/dialog/BookMentoringDialog";
 
 export const MentorDetail = () => {
   const { id } = useParams();
@@ -22,6 +25,7 @@ export const MentorDetail = () => {
   const [loading, setLoading] = useState(true);
   const [mentor, setMentor] = useState(null);
   const [schedules, setSchedules] = useState([]);
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -69,6 +73,16 @@ export const MentorDetail = () => {
       </p>
     );
   }
+
+  const formatRupiah = (price) => {
+  if (!price) return "Gratis / Tanyakan Mentor";
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(price);
+};
+
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
@@ -172,6 +186,47 @@ export const MentorDetail = () => {
             </p>
           </div>
 
+          {/* Price */}
+          {/* Price Section - Grid Layout */}
+<div className="space-y-4">
+  <h3 className="text-lg font-bold flex items-center gap-2">
+    <span className="bg-green-100 text-green-600 p-1 rounded-md">
+      <FileText size={18} />
+    </span>
+    Paket Mentoring
+  </h3>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {/* Academic Card */}
+    <div className="border border-blue-100 bg-blue-50/50 p-5 rounded-2xl flex flex-col justify-between hover:shadow-md transition-all">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+          <BookOpen size={20} />
+        </div>
+        <span className="font-semibold text-gray-700">Academic</span>
+      </div>
+      <p className="text-2xl font-bold text-blue-700">
+        {formatRupiah(mentor.mentoring_prices?.academic)}
+      </p>
+      <p className="text-xs text-gray-500 mt-1">per sesi pertemuan</p>
+    </div>
+
+    {/* Life Plan Card */}
+    <div className="border border-purple-100 bg-purple-50/50 p-5 rounded-2xl flex flex-col justify-between hover:shadow-md transition-all">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
+          <Compass size={20} />
+        </div>
+        <span className="font-semibold text-gray-700">Life Plan</span>
+      </div>
+      <p className="text-2xl font-bold text-purple-700">
+        {formatRupiah(mentor.mentoring_prices?.life_plan)}
+      </p>
+      <p className="text-xs text-gray-500 mt-1">per sesi pertemuan</p>
+    </div>
+  </div>
+</div>
+
           {/* Schedule */}
           <div className="space-y-3">
             <h3 className="text-lg font-bold">Jadwal</h3>
@@ -217,12 +272,24 @@ export const MentorDetail = () => {
           </div>
           <Button
             className="w-full h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700 rounded-xl"
-            onClick={() => navigate(`/my-mentor/${mentor.id}/booking`)}
+            onClick={() => setBookingDialogOpen(true)}
           >
             Book Mentoring Session
           </Button>
+
         </CardContent>
       </Card>
+
+      {/* Booking Dialog */}
+      <BookMentoringDialog
+        open={bookingDialogOpen}
+        onOpenChange={setBookingDialogOpen}
+        mentor={mentor}
+        onSuccess={() => {
+          fetchMentorSchedule();
+          sweetalert("Berhasil membooking sesi mentoring! ", "success");
+        }}
+      />
     </div>
   );
 };
