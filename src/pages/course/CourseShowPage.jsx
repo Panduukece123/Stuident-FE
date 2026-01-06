@@ -217,8 +217,8 @@ export default function CourseShowPage() {
               id="course_summary_badge"
             >
               <LevelBadge level={course.level} />
-              <Badge variant="default">{course.category}</Badge>
-              <Badge variant="default">{course.type}</Badge>
+              <Badge variant="default" className={"capitalize"}>{course.category}</Badge>
+              <Badge variant="default" className={"capitalize"}>{course.type}</Badge>
             </div>
 
             <div
