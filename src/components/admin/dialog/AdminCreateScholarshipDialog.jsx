@@ -31,7 +31,7 @@ const scholarshipSchema = z.object({
   description: z.string().min(20, "Deskripsi wajib diisi (min 20 karakter)"),
 });
 
-export const CorporateCreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading }) => {
+export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading }) => {
   // State untuk preview gambar
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -52,7 +52,7 @@ export const CorporateCreateScholarshipDialog = ({ open, onOpenChange, onSave, i
 
   const { data: rawOrgs, isLoading: loadingOrgs } = useQuery({
     queryKey: ["organizations-list"],
-    queryFn: OrganizationService.getMyOrganizations,
+    queryFn: OrganizationService.getOrganizations,
     enabled: open,
   });
 

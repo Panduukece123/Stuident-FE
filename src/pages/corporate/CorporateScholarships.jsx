@@ -22,7 +22,7 @@ import ScholarshipService from "@/services/corporate/ScholarshipService";
 // Components
 import { ScholarshipStats } from "@/components/corporate/ScholarshipStats";
 import { ScholarshipTable } from "@/components/corporate/table/ScholarshipTable";
-import { CreateScholarshipDialog } from "@/components/corporate/dialog/CreateScholarshipDialog";
+import { CorporateCreateScholarshipDialog } from "@/components/corporate/dialog/CreateScholarshipDialog";
 import { EditScholarshipDialog } from "@/components/corporate/dialog/EditScholarshipDialog";
 import { ViewScholarshipDialog } from "@/components/corporate/dialog/ViewScholarshipDialog";
 
@@ -71,7 +71,7 @@ export const CorporateManageScholarships = () => {
       studyFieldFilter,
     ],
     queryFn: () =>
-      ScholarshipService.getScholarships({
+      ScholarshipService.getMyScholarships({
         page,
         search,
         status: statusFilter,
@@ -294,7 +294,7 @@ export const CorporateManageScholarships = () => {
       )}
 
       {/* DIALOGS */}
-      <CreateScholarshipDialog
+      <CorporateCreateScholarshipDialog
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
         onSave={handleCreateSubmit}
