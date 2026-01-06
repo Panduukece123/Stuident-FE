@@ -102,6 +102,17 @@ export default function CourseShowPage() {
       const response = await courseService.enrollCourse(id, paymentMethod);
 
       const responseData = response.data?.data || response.data;
+      
+      // 1. CEK JIKA KURSUS GRATIS (Biasanya tidak ada data transaksi)
+      // Berdasarkan JSON Anda, price adalah "0.00"
+      if (parseFloat(course?.price) === 0) {
+        console.log("Selamat, anda sudah terdaftar disini!");
+        setIsCheckoutOpen(false);
+        fetchData(); // Refresh data supaya tombol berubah jadi "Belajar"
+        return;
+      }
+
+      // 2. LOGIKA UNTUK KURSUS BERBAYAR
       const transaction = responseData?.transaction;
 
       if (transaction?.id) {
@@ -119,21 +130,22 @@ export default function CourseShowPage() {
       const errorResponse = error.response?.data;
 
       if (errorResponse) {
-        // 1. Cek kalau ada field 'errors' (Validasi Laravel standar)
-        if (errorResponse.errors) {
-          const firstError = Object.values(errorResponse.errors)[0][0];
-          alert(`Gagal Validasi: ${firstError}`);
+        // JIKA USER SUDAH TERDAFTAR (Error 400/403 dari backend)
+        if (
+          errorResponse.pesan?.includes("sudah terdaftar") ||
+          error.response?.status === 400
+        ) {
+          console.log("User sudah terdaftar, mengalihkan...");
+          setIsCheckoutOpen(false);
+          fetchData(); // Refresh tampilan
+          return;
         }
-        // 2. Cek kalau ada field 'pesan' (Format custom backend kamu)
-        else if (errorResponse.pesan) {
-          alert(`Gagal: ${errorResponse.pesan}`);
-        }
-        // 3. Cek kalau ada field 'message' (Error umum)
-        else if (errorResponse.message) {
-          alert(`Gagal: ${errorResponse.message}`);
-        } else {
-          alert("Terjadi kesalahan pada server.");
-        }
+
+        const errorMsg =
+          errorResponse.pesan ||
+          errorResponse.message ||
+          "Terjadi kesalahan server";
+        alert(`Gagal: ${errorMsg}`);
       } else {
         alert("Terjadi kesalahan jaringan atau server tidak merespon.");
       }
@@ -330,8 +342,12 @@ export default function CourseShowPage() {
                     </p>
                   </div>
                   <div className="w-full flex flex-col gap-2 pt-2 pb-2">
-                    <Button variant={"default"} onClick={handleBuyClick}>
-                      Beli Sekarang
+                    <Button
+                    variant={"default"}
+                    onClick={handleBuyClick}
+                    disabled={!!userEnrollData} // Jika sudah ada data enroll, tombol mati
+                  >
+                    {userEnrollData ? "Sudah Terdaftar" : "Beli Sekarang"}
                     </Button>
                   </div>
                 </section>

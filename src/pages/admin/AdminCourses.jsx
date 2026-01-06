@@ -52,21 +52,20 @@ const AdminCourses = () => {
 
       if (editingCourse) {
         await CourseService.updateCourse(editingCourse.id, formData);
+        await fetchCourses();
       } else {
-        await CourseService.createCourse(formData);
+        const response = await CourseService.createCourse(formData);
+        if (response.data) {
+          setCourses((prev) => [...prev, response.data]);
+        } else {
+          await fetchCourses();
+        }
       }
 
-      // Refresh data dari server
-      await fetchCourses();
-      
-      // Tutup dialog dan reset state editing
       setOpenDialog(false);
       setEditingCourse(null);
     } catch (err) {
-      // Menampilkan pesan error yang lebih spesifik jika ada dari server
-      const errorMsg = err.response?.data?.message || "Gagal menyimpan perubahan.";
-      alert(errorMsg);
-      console.error(err);
+      alert(err.response?.data?.message || "Gagal menyimpan.");
     } finally {
       setSaving(false);
     }
