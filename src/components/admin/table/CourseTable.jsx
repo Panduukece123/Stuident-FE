@@ -162,13 +162,13 @@ const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
                       onClick={() => onView(course)}
                       className="cursor-pointer"
                     >
-                      <Eye className="mr-2 h-4 w-4 text-blue-500" />
+                      <Eye />
                       View Details
                     </DropdownMenuItem>
 
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link to={`/admin/courses/${course.id}`}>
-                        <List className="mr-2 h-4 w-4 text-purple-500" />
+                        <List />
                         Edit Curriculums
                       </Link>
                     </DropdownMenuItem>
@@ -177,7 +177,7 @@ const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
                       onClick={() => onEdit(course)}
                       className="cursor-pointer"
                     >
-                      <Pencil className="mr-2 h-4 w-4 text-orange-500" />
+                      <Pencil />
                       Edit Basic Info
                     </DropdownMenuItem>
 
@@ -185,7 +185,7 @@ const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
                       onClick={() => onDelete(course.id)}
                       className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                     >
-                      <Trash className="mr-2 h-4 w-4" />
+                      <Trash className='text-red-600 focus:text-red-600' />
                       Delete Course
                     </DropdownMenuItem>
                   </DropdownMenuContent>

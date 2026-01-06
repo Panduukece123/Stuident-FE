@@ -554,7 +554,7 @@ export const CourseViewDialog = ({
                         </div>
                         <div>
                             <p className="text-sm font-medium">Level:</p>
-                            <LevelBadge level={course?.level} showIcon={false} />
+                            <LevelBadge level={course?.level} showIcon={true} />
                         </div>
                         <div>
                             <p className="text-sm font-medium">Course Duration:</p>

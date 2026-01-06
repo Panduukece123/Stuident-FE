@@ -8,6 +8,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { ArrowLeft, Loader2, Plus, RefreshCcw, SearchIcon } from "lucide-react";
 import { CurriculumDeleteDialog, CurriculumDialog, CurriculumViewDialog } from "@/components/admin/dialog/CurriculumDialogs";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AdminCurriculumCourse = () => {
     const { id } = useParams();
@@ -76,9 +77,13 @@ const AdminCurriculumCourse = () => {
                             Back
                         </Link>
                     </Button>
-                    <p className="font-medium text-lg md:text-xl">
-                        {isLoading ? "Loading..." : course.title}
-                    </p>
+                    {isLoading ? (
+                        <Skeleton className="w-64 h-6 rounded-2xl" />
+                    ) : (
+                        <p className="font-medium text-lg md:text-xl">
+                            {course.title}
+                        </p>
+                    )}
                 </div>
 
                 {/* Actions */}

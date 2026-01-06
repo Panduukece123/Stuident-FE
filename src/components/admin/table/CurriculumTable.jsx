@@ -14,7 +14,7 @@ const CurriculumTable = ({
         <div className="rounded-md border bg-white">
             {/* Table */}
             <Table>
-                <TableHeader>
+                <TableHeader className="bg-neutral-50">
                     <TableRow>
                         <TableHead>Section</TableHead>
                         <TableHead>Title</TableHead>
@@ -45,16 +45,16 @@ const CurriculumTable = ({
 
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                            <DropdownMenuItem onClick={() => onView(curriculum)}>
+                                            <DropdownMenuItem onClick={() => onView(curriculum)} className="cursor-pointer">
                                                 <Eye/>
                                                 View Details
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => onEdit(curriculum)}>
+                                            <DropdownMenuItem onClick={() => onEdit(curriculum)} className="cursor-pointer">
                                                 <Pencil />
                                                 Edit
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => onDelete(curriculum)}>
-                                                <Trash />
+                                            <DropdownMenuItem onClick={() => onDelete(curriculum)} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+                                                <Trash className='text-red-600 focus:text-red-600' />
                                                 Delete
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
