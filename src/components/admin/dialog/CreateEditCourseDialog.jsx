@@ -95,7 +95,7 @@ const CreateEditCourseDialog = ({ open, onOpenChange, onSave, course, saving }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="md:min-w-xl">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>{course ? "Edit Course" : "Create Course"}</DialogTitle>

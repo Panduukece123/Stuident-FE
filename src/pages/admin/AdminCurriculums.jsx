@@ -5,9 +5,10 @@ import CurriculumTable from "@/components/admin/table/CurriculumTable";
 import CurriculumService from "@/services/admin/CurriculumService";
 import courseService from "@/services/CourseService";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { ArrowLeft, Loader2, Plus, SearchIcon } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, RefreshCcw, SearchIcon } from "lucide-react";
 import { CurriculumDeleteDialog, CurriculumDialog, CurriculumViewDialog } from "@/components/admin/dialog/CurriculumDialogs";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AdminCurriculumCourse = () => {
     const { id } = useParams();
@@ -76,13 +77,17 @@ const AdminCurriculumCourse = () => {
                             Back
                         </Link>
                     </Button>
-                    <p className="font-medium text-lg md:text-xl">
-                        {isLoading ? "Loading..." : course.title}
-                    </p>
+                    {isLoading ? (
+                        <Skeleton className="w-64 h-6 rounded-2xl" />
+                    ) : (
+                        <p className="font-medium text-lg md:text-xl">
+                            {course.title}
+                        </p>
+                    )}
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-row gap-2 md:gap-4 items-center">
+                <div className="flex flex-row gap-2 items-center">
                     <InputGroup>
                         <InputGroupAddon>
                             <SearchIcon />
@@ -93,6 +98,17 @@ const AdminCurriculumCourse = () => {
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </InputGroup>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                            setSearch("");
+                            fetchData();
+                        }}
+                        title="Refresh the table"
+                    >
+                        <RefreshCcw />
+                    </Button>
                     <Button
                         onClick={() => {
                             setOpenDialog(true);

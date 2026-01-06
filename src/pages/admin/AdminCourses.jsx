@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, Search } from "lucide-react";
+import { Loader2, Plus, RefreshCcw, Search } from "lucide-react";
 import CourseService from "@/services/admin/CourseService";
-import CreateEditCourseDialog from "@/components/admin/dialog/CreateEditCourseDialog";
 import CourseTable from "@/components/admin/table/CourseTable";
-import { CourseViewDialog } from "@/components/admin/dialog/CourseDialogs";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { CourseDeleteDialog, CourseDialog, CourseViewDialog } from "@/components/admin/dialog/CourseDialogs";
+import CreateEditCourseDialog from "@/components/admin/dialog/CreateEditCourseDialog";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
+  
   const [openDialog, setOpenDialog] = useState(false);
+  // const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openViewDialog, setOpenViewDialog] = useState(false);
+  
   const [editingCourse, setEditingCourse] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  
+  const [loading, setLoading] = useState(false);
 
   const fetchCourses = async () => {
     setLoading(true);
@@ -85,18 +85,32 @@ const AdminCourses = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-medium">Courses Management</h1>
-        <div className="flex gap-4">
+        <div>
+          <h1 className="text-xl font-medium tracking-tight text-neutral-800">Courses Management</h1>
+          <p className="text-muted-foreground">List and manage all courses.</p>
+        </div>
+        <div className="flex flex-row gap-2 items-center">
           <InputGroup>
             <InputGroupAddon>
               <Search size={18} />
             </InputGroupAddon>
             <InputGroupInput
-              placeholder="Search..."
+              placeholder="Search name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </InputGroup>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              setSearch("");
+              fetchCourses();
+            }}
+            title="Refresh the table"
+          >
+            <RefreshCcw />
+          </Button>
           <Button
             onClick={() => {
               setEditingCourse(null);
@@ -130,12 +144,23 @@ const AdminCourses = () => {
           onDelete={handleDelete}
         />
       )}
+      
+      {/* 
+      OBSOLETE, ORIGINALLY MADE BY ZIDAN
 
+      <CourseDialog
+        open={openDialog}
+        onOpenChange={setOpenDialog}
+        course={editingCourse}
+        onFinish={fetchCourses}
+      /> 
+      */}
       <CreateEditCourseDialog
         open={openDialog}
         onOpenChange={setOpenDialog}
         onSave={handleSave}
         course={editingCourse}
+        onFinish={fetchCourses}
         saving={saving}
       />
       <CourseViewDialog
@@ -143,6 +168,16 @@ const AdminCourses = () => {
         onOpenChange={setOpenViewDialog}
         course={editingCourse}
       />
+      {/* 
+      OBSOLETE, ORIGINALLY MADE BY ZIDAN
+
+      <CourseDeleteDialog
+        open={openDeleteDialog}
+        onOpenChange={setOpenDeleteDialog}
+        course={editingCourse}
+        onFinish={fetchCourses}
+      />
+      */}
     </div>
   );
 };
