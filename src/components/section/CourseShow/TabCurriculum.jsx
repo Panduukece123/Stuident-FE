@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
-import { Item, ItemContent } from "@/components/ui/item";
+import { Item, ItemContent, ItemMedia } from "@/components/ui/item";
+import { Info } from "lucide-react";
 
 export const TabCurriculum = ({ course }) => {
   const sections = [ ...new Set( course.curriculums?.map((c) => c.section) || [] ) ];
@@ -9,6 +10,16 @@ export const TabCurriculum = ({ course }) => {
       <h1 className="text-xl md:text-2xl font-semibold">Kurikulum</h1>
 
       <div className="space-y-4">
+        {sections.length === 0 && (
+          <Item variant="outline" size="sm">
+            <ItemMedia variant="icon">
+              <Info />
+            </ItemMedia>
+            <ItemContent>
+              <p className="italic text-muted-foreground">Kurikulum tidak tersedia.</p>
+            </ItemContent>
+          </Item>
+        )}
         {sections.map((section, index) => (
           <div key={index}>
             {/* Section */}
