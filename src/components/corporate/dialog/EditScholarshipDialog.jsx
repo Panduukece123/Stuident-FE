@@ -55,8 +55,8 @@ export const EditScholarshipDialog = ({ open, onOpenChange, itemToEdit, onSave, 
       });
 
       // Set preview gambar lama
-      if (itemToEdit.image) {
-        setPreviewImage(itemToEdit.image); // Gunakan URL dari backend
+      if (itemToEdit.image_url) {
+        setPreviewImage(itemToEdit.image_url); // Gunakan URL dari backend
       } else {
         setPreviewImage(null);
       }
