@@ -9,6 +9,8 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
+
+  const [saving, setSaving] = useState(false);
   
   const [openDialog, setOpenDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -18,16 +20,13 @@ const AdminCourses = () => {
   
   const [loading, setLoading] = useState(false);
 
-  // Fetch courses dari backend
   const fetchCourses = async () => {
     setLoading(true);
     try {
       const res = await CourseService.getCourses();
-      const dataArray = Array.isArray(res) ? res : res.data ? res.data : [];
-      setCourses(dataArray);
+      setCourses(Array.isArray(res) ? res : res.data || []);
     } catch (err) {
-      console.error("Failed to fetch courses:", err);
-      setCourses([]);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -37,24 +36,51 @@ const AdminCourses = () => {
     fetchCourses();
   }, []);
 
-  const handleView = (course) => {
-    setEditingCourse(course);
-    setOpenViewDialog(true);
+ const handleSave = async (courseData) => {
+    setSaving(true);
+    try {
+      const formData = new FormData();
+      
+      // Mengonversi objek data dari React Hook Form ke FormData
+      Object.keys(courseData).forEach((key) => {
+        // Pastikan hanya mengirim data yang ada nilainya
+        if (courseData[key] !== null && courseData[key] !== undefined) {
+          // Khusus untuk File/Blob tetap dimasukkan, sisanya dikonversi ke string oleh FormData
+          formData.append(key, courseData[key]);
+        }
+      });
+
+      if (editingCourse) {
+        await CourseService.updateCourse(editingCourse.id, formData);
+      } else {
+        await CourseService.createCourse(formData);
+      }
+
+      // Refresh data dari server
+      await fetchCourses();
+      
+      // Tutup dialog dan reset state editing
+      setOpenDialog(false);
+      setEditingCourse(null);
+    } catch (err) {
+      // Menampilkan pesan error yang lebih spesifik jika ada dari server
+      const errorMsg = err.response?.data?.message || "Gagal menyimpan perubahan.";
+      alert(errorMsg);
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleEdit = (course) => {
-    setEditingCourse(course);
-    setOpenDialog(true);
+  const handleDelete = async (id) => {
+    if (!confirm("Hapus kursus ini?")) return;
+    try {
+      await CourseService.deleteCourse(id);
+      setCourses(courses.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
   };
-
-  const handleDelete = (course) => {
-    setEditingCourse(course);
-    setOpenDeleteDialog(true);
-  };
-
-  const filteredCourses = courses.filter((c) =>
-    c.title?.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <div className="space-y-6">
@@ -66,7 +92,7 @@ const AdminCourses = () => {
         <div className="flex flex-row gap-2 items-center">
           <InputGroup>
             <InputGroupAddon>
-              <Search />
+              <Search size={18} />
             </InputGroupAddon>
             <InputGroupInput
               placeholder="Search name..."
@@ -91,22 +117,30 @@ const AdminCourses = () => {
               setOpenDialog(true);
             }}
           >
-            <Plus/>
-            Add A Course
+            <Plus size={18} className="mr-2" />
+            Add Course
           </Button>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center w-full p-4 border border-neutral-200 rounded-sm bg-neutral-50 text-center">
-          <Loader2 className="mr-4 animate-spin" />
+        <div className="flex justify-center p-12 border rounded-lg bg-neutral-50">
+          <Loader2 className="animate-spin mr-2" />
           Loading...
         </div>
       ) : (
         <CourseTable
-          courses={filteredCourses}
-          onView={handleView}
-          onEdit={handleEdit}
+          courses={courses.filter((c) =>
+            c.title.toLowerCase().includes(search.toLowerCase())
+          )}
+          onView={(c) => {
+            setEditingCourse(c);
+            setOpenViewDialog(true);
+          }}
+          onEdit={(c) => {
+            setEditingCourse(c);
+            setOpenDialog(true);
+          }}
           onDelete={handleDelete}
         />
       )}
@@ -116,6 +150,7 @@ const AdminCourses = () => {
         onOpenChange={setOpenDialog}
         course={editingCourse}
         onFinish={fetchCourses}
+        saving={saving}
       />
       <CourseViewDialog
         open={openViewDialog}

@@ -78,9 +78,7 @@ export const SessionDetail = ({ session, onBack, userRole }) => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="scheduled">Terjadwal</SelectItem>
-                    <SelectItem value="ongoing">Berlangsung</SelectItem>
                     <SelectItem value="completed">Selesai</SelectItem>
-                    <SelectItem value="cancelled">Dibatalkan</SelectItem>
                   </SelectContent>
                 </Select>
              ) : (
