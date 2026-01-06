@@ -26,6 +26,7 @@ import { MyPortfolio } from "./pages/profile/MyPortfolio";
 import AdminLayout from "./layouts/AdminLayout";
 import { ManageUsers } from "./pages/admin/AdminUsers";
 import AdminRoute from "./components/route/AdminRoute";
+import PrivateRoute from "./components/route/PrivateRoute";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCurriculumCourse from "./pages/admin/AdminCurriculums";
 import AdminTransactions from "./pages/admin/AdminTransactions";
@@ -84,8 +85,11 @@ function App() {
           <Route path="/" element={<AppLayout />}>
             <Route index element={<HomePage />} />
             <Route path="e-learning" element={<ElearningPage />} />
-            <Route path="my-mentor" element={<MentorPage />} />
-            <Route path="my-mentor/:id" element={<MentorDetail />} />
+            {/* Protected Routes - Require Login */}
+            <Route element={<PrivateRoute />}>
+              <Route path="my-mentor" element={<MentorPage />} />
+              <Route path="my-mentor/:id" element={<MentorDetail />} />
+            </Route>
             <Route path="course">
               <Route path="show/:id" element={<CourseShowPage />} />
             </Route>
