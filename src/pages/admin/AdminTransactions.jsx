@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -8,7 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, RefreshCw, ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
+import { 
+  Search, RefreshCw, ChevronLeft, ChevronRight, Filter, X,
+  DollarSign, Clock, CheckCircle, XCircle, TrendingUp, CreditCard
+} from "lucide-react";
 import AdminTransactionService from "@/services/admin/TransactionService";
 import TransactionTable from "@/components/admin/table/TransactionTable";
 import { TransactionDetailDialog } from "@/components/admin/dialog/TransactionDetailDialog";
@@ -18,6 +22,10 @@ const AdminTransactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // State for statistics
+  const [statistics, setStatistics] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   // State for filters
   const [filters, setFilters] = useState({
@@ -41,6 +49,19 @@ const AdminTransactions = () => {
 
   // State for confirming payment
   const [confirmingId, setConfirmingId] = useState(null);
+
+  // Fetch statistics
+  const fetchStatistics = async () => {
+    setLoadingStats(true);
+    try {
+      const result = await AdminTransactionService.getStatistics();
+      setStatistics(result);
+    } catch (err) {
+      console.error("Failed to fetch statistics:", err);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   // Fetch transactions
   const fetchTransactions = async () => {
@@ -70,6 +91,11 @@ const AdminTransactions = () => {
       setLoading(false);
     }
   };
+
+  // Fetch statistics on mount
+  useEffect(() => {
+    fetchStatistics();
+  }, []);
 
   // Fetch on mount and when filters change
   useEffect(() => {
@@ -118,8 +144,9 @@ const AdminTransactions = () => {
     setConfirmingId(transactionId);
     try {
       await AdminTransactionService.confirmPayment(transactionId, "paid");
-      // Refresh the list
+      // Refresh the list and statistics
       await fetchTransactions();
+      await fetchStatistics();
       // Close dialog if open
       if (detailDialogOpen && selectedTransaction?.id === transactionId) {
         setDetailDialogOpen(false);
@@ -136,6 +163,15 @@ const AdminTransactions = () => {
   // Check if any filter is active
   const hasActiveFilters = filters.status || filters.type || filters.payment_method;
 
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount || 0);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -144,12 +180,86 @@ const AdminTransactions = () => {
           <h1 className="text-2xl font-bold text-gray-900">Manajemen Transaksi</h1>
           <Button
             variant="outline"
-            onClick={fetchTransactions}
-            disabled={loading}
+            onClick={() => {
+              fetchTransactions();
+              fetchStatistics();
+            }}
+            disabled={loading || loadingStats}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading || loadingStats ? "animate-spin" : ""}`} />
             Refresh
           </Button>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Total Revenue */}
+          <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium opacity-80">Total Revenue</p>
+                  <p className="text-xl font-bold mt-1">
+                    {loadingStats ? "..." : formatCurrency(statistics?.total_revenue)}
+                  </p>
+                </div>
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <DollarSign className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Transactions */}
+          <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium opacity-80">Total Transaksi</p>
+                  <p className="text-xl font-bold mt-1">
+                    {loadingStats ? "..." : statistics?.total_transactions || 0}
+                  </p>
+                </div>
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <CreditCard className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pending Transactions */}
+          <Card className="bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium opacity-80">Menunggu Bayar</p>
+                  <p className="text-xl font-bold mt-1">
+                    {loadingStats ? "..." : statistics?.pending_transactions || 0}
+                  </p>
+                </div>
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <Clock className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Paid Transactions */}
+          <Card className="bg-gradient-to-br from-teal-500 to-cyan-600 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium opacity-80">Lunas</p>
+                  <p className="text-xl font-bold mt-1">
+                    {loadingStats ? "..." : statistics?.paid_transactions || 0}
+                  </p>
+                </div>
+                <div className="bg-white/20 p-2 rounded-lg">
+                  <CheckCircle className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Filters */}
@@ -187,7 +297,7 @@ const AdminTransactions = () => {
             <SelectContent>
               <SelectItem value="course_enrollment">Pendaftaran Kursus</SelectItem>
               <SelectItem value="subscription">Langganan</SelectItem>
-              <SelectItem value="mentoring">Mentoring</SelectItem>
+              <SelectItem value="mentoring_session">Mentoring</SelectItem>
             </SelectContent>
           </Select>
 

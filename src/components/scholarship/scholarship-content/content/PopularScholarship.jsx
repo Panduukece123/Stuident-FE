@@ -106,7 +106,7 @@ const PopularScholarship = () => {
                   status={scholarship.status}
                   studyField={scholarship.study_field}
                   deadline={scholarship.deadline}
-                  image={scholarship.image}
+                  image_url={scholarship.image_url}
                 />
               </div>
             ))}

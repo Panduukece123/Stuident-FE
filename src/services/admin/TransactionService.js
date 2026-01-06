@@ -1,7 +1,8 @@
 import api from "../Api";
 
 const BACKEND_URL = "http://localhost:8000";
-const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1573496546038-82f9c39f6365?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D0";
+
 
 const AdminTransactionService = {
   /**
@@ -96,6 +97,15 @@ const AdminTransactionService = {
       }
     );
     return response.data;
+  },
+
+  
+  getStatistics: async () => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/transactions/statistics", {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    });
+    return response.data?.data || response.data;
   },
 };
 

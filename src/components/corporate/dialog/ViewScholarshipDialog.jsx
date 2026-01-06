@@ -165,9 +165,9 @@ export const ViewScholarshipDialog = ({ open, onOpenChange, scholarshipId }) => 
 
                     {/* TAB 1: DETAIL INFORMASI */}
                     <TabsContent value="detail" className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 m-0">
-                        {scholarship.image && (
+                        {scholarship.image_url && (
                             <div className="w-full h-56 rounded-xl overflow-hidden shadow-sm border border-neutral-200 group">
-                                <img src={scholarship.image} alt="Banner" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                <img src={scholarship.image_url} alt="Banner" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                             </div>
                         )}
 
@@ -176,7 +176,7 @@ export const ViewScholarshipDialog = ({ open, onOpenChange, scholarshipId }) => 
                                 <div className="flex flex-col md:flex-row gap-5 items-start">
                                     <div className="w-20 h-20 shrink-0 border rounded-lg p-2 flex items-center justify-center bg-white shadow-sm">
                                         <img 
-                                            src={scholarship.organization.logo_url} 
+                                            src={scholarship.organization.logo_full_url} 
                                             alt="Logo Org" 
                                             className="w-full h-full object-contain"
                                             onError={(e) => {e.target.src = "https://via.placeholder.com/100?text=ORG"}} 
