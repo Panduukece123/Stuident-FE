@@ -555,15 +555,15 @@ export const CourseViewDialog = ({
                         </div>
                         <div>
                             <p className="text-sm font-medium">Total Videos:</p>
-                            <p className="text-sm">{course?.total_videos}</p>
+                            <p className="text-sm">{course?.total_videos} videos</p>
                         </div>
                         <div>
                             <p className="text-sm font-medium">Enrollments:</p>
-                            <p className="text-sm">{course?.enrollments_count}</p>
+                            <p className="text-sm">{course?.enrollments_count} participants</p>
                         </div>
                         <div>
                             <p className="text-sm font-medium">Average Rating:</p>
-                            <p className="text-sm">{course?.reviews_avg_rating}</p>
+                            <p className="text-sm">{course?.average_rating} out of {course?.total_reviews} reviews</p>
                         </div>
                         <div>
                             <p className="text-sm font-medium">Thumbnail:</p>
@@ -578,7 +578,7 @@ export const CourseViewDialog = ({
                         </div>
                         <div>
                             <p className="text-sm font-medium">Description:</p>
-                            <p className="text-sm">{course?.instructor}</p>
+                            <p className="text-sm">{course?.description}</p>
                         </div>
                         <div>
                             <p className="text-sm font-medium">Overview Video Duration:</p>
