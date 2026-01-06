@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 export const ElearningBootcampList = ({ title, subtitle, courses = [], searchQuery, onSearchChange }) => {
   return (
     <section className="pt-12 pb-4 px-6 bg-background border-t">
+      
       <div className="">
         
         {/* --- HEADER (JUDUL + SEARCH) --- */}

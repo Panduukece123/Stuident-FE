@@ -138,7 +138,8 @@ export const ProfileLayout = () => {
                     .join("")
                     .substring(0, 2)
                     .toUpperCase()
-                : "US"}
+                : "PG"}{" "}
+              {/* PG = Pengguna */}
             </AvatarFallback>
           </Avatar>
 
@@ -202,14 +203,6 @@ export const ProfileLayout = () => {
                 <GraduationCap className="mr-3 h-5 w-5" /> Enrolled Courses
               </Button>
             </Link>
-            <Link to="/profile/my-order-history">
-              <Button
-                variant="ghost"
-                className={getSidebarClass("/profile/my-order-history")}
-              >
-                <ShoppingCart className="mr-3 h-5 w-5" /> Order History
-              </Button>
-            </Link>
 
             {/* --- MENTORING SESSION (ALL ROLES) --- */}
             {/* Langsung dirender tanpa cek kondisi role */}
@@ -226,9 +219,21 @@ export const ProfileLayout = () => {
             <Link to="/profile/my-scholarship-applications">
               <Button
                 variant="ghost"
-                className={getSidebarClass("/profile/my-scholarship-applications")}
+                className={getSidebarClass(
+                  "/profile/my-scholarship-applications"
+                )}
               >
                 <GraduationCap className="mr-3 h-5 w-5" /> Scholarships
+              </Button>
+            </Link>
+
+            <Link to="/profile/my-order-history">
+              <Button
+                variant="ghost"
+                className={getSidebarClass("/profile/my-order-history")}
+              >
+                {/* Translate: Order History -> Riwayat Pesanan */}
+                <ShoppingCart className="mr-3 h-5 w-5" /> Riwayat Pesanan
               </Button>
             </Link>
 
