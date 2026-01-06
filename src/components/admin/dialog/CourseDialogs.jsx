@@ -501,7 +501,7 @@ export const CourseViewDialog = ({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogPortal>
-                <DialogContent>
+                <DialogContent className={"md:min-w-xl"}>
                     
                     <DialogHeader>
                         <DialogTitle>

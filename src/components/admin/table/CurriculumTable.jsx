@@ -44,7 +44,7 @@ const CurriculumTable = ({
                                         </DropdownMenuTrigger>
 
                                         <DropdownMenuContent align="end">
-                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                            <DropdownMenuLabel>Curriculum Actions</DropdownMenuLabel>
                                             <DropdownMenuItem onClick={() => onView(curriculum)} className="cursor-pointer">
                                                 <Eye/>
                                                 View Details

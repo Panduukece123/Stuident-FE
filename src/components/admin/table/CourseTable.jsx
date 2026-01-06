@@ -112,7 +112,7 @@ const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
                         variant="secondary"
                         className="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100 cursor-pointer"
                       >
-                        Link Cert
+                        Link Certification
                       </Badge>
                     </a>
                   )}

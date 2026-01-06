@@ -34,7 +34,7 @@ const schemaCurriculum = z.object({
     title: z.string().min(1, "Title wajib diisi!"),
     description: z.string().min(1, "Description wajib diisi!"),
     duration: z.string().min(1, "Duration wajib diisi!"),
-    video_url: z.string().min(1, "Video URL wajib diisi!"),
+    video_url: z.url("Harus merupakan URL!").min(1, "Video URL wajib diisi!"),
 })
 
 export const CurriculumDeleteDialog = ({
@@ -150,7 +150,7 @@ export const CurriculumDialog = ({
             <DialogPortal>
                 
                 <DialogContent
-                    className={"sm:w-max [&>button:first-of-type]:hidden"}
+                    className={"md:min-w-xl [&>button:first-of-type]:hidden"}
                     onInteractOutside={(e) => {e.preventDefault();}}
                 >
 
@@ -244,7 +244,7 @@ export const CurriculumDialog = ({
                                         <Textarea
                                             {...field}
                                             id="description"
-                                            placeholder="Description"
+                                            placeholder="e.g. Lorem Ipsum Dolor Sit Amet"
                                         />
                                         {fieldState.invalid && (<FieldError errors={[fieldState.error]} />)}
                                     </Field>
@@ -261,11 +261,8 @@ export const CurriculumDialog = ({
                                             <InputGroupInput
                                                 {...field}
                                                 id="duration"
-                                                placeholder="e.g. 1"
+                                                placeholder="e.g. 1 minutes"
                                             />
-                                            <InputGroupAddon align="inline-end">
-                                                <InputGroupText>minutes</InputGroupText>
-                                            </InputGroupAddon>
                                         </InputGroup>
                                         {fieldState.invalid && (<FieldError errors={[fieldState.error]} />)}
                                     </Field>
@@ -321,7 +318,7 @@ export const CurriculumViewDialog = ({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogPortal>
-                <DialogContent>
+                <DialogContent className={"md:min-w-xl"}>
                     
                     <DialogHeader>
                         <DialogTitle>
