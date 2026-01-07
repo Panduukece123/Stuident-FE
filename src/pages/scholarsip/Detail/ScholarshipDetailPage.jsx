@@ -317,12 +317,18 @@ const ScholarshipDetail = () => {
               <p className="text-sm text-gray-500 mb-3">
                 Fraudulent scholarship? Report it here:
               </p>
-              <Button
-                variant="destructive"
-                className="w-full bg-red-500 hover:bg-red-600 text-white gap-2  cursor-pointer"
+              <a
+                href={`https://wa.me/6285124423755?text=${encodeURIComponent(`Halo, saya ingin melaporkan beasiswa yang mencurigakan:\n\nNama: ${data.name}\nOrganisasi: ${organization?.name || 'Unknown'}\nURL: ${window.location.href}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Flag size={18} /> Report
-              </Button>
+                <Button
+                  variant="destructive"
+                  className="w-full bg-red-500 hover:bg-red-600 text-white gap-2 cursor-pointer"
+                >
+                  <Flag size={18} /> Report
+                </Button>
+              </a>
             </div>
           </div>
         </div>
