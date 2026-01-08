@@ -397,7 +397,7 @@ const [categoryInput, setCategoryInput] = useState("");
 
         {/* --- 3. DISCOVERY SECTION (SKELETON) --- */}
         <div id="discovery-section" className="mt-8 scroll-mt-10 mx-auto px-6 border-t pt-8">
-          <div className="flex flex-col lg:flex-row justify-between items-end mb-6 gap-4">
+          <div className="flex flex-col lg:flex-row justify-between items-start mb-6 gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
                 Temukan Keahlian Baru
