@@ -11,7 +11,7 @@ export const ElearningCategories = ({ categories = [], onCategoryClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Logic: Kalau tutup, tampilkan 9 item (slot ke-10 buat tombol). Kalau buka, tampilkan semua.
-  const visibleCategories = isExpanded ? categories : categories.slice(0, 9);
+  const visibleCategories = isExpanded ? categories : categories.slice(0, 10);
 
   // Helper warna & icon (Gabungan logic supaya sesuai style baru)
   const getCategoryStyle = (categoryName) => {
@@ -67,27 +67,6 @@ export const ElearningCategories = ({ categories = [], onCategoryClick }) => {
                   </button>
                 );
               })}
-
-              {/* TOMBOL LAINNYA/TUTUP: Masuk ke dalam grid (sebagai kartu) sesuai request kode kedua */}
-              {categories.length > 9 && (
-                !isExpanded ? (
-                  <button
-                    onClick={() => setIsExpanded(true)}
-                    className="flex flex-col items-center justify-center h-24 p-2 bg-muted/30 border-2 border-dashed border-muted-foreground/30 rounded-xl text-muted-foreground hover:bg-accent hover:text-primary hover:border-primary/50 transition-all"
-                  >
-                    <LayoutGrid className="w-8 h-8 mb-2" />
-                    <span className="text-xs font-medium">Lainnya</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setIsExpanded(false)}
-                    className="flex flex-col items-center justify-center h-24 p-2 bg-destructive/5 border border-destructive/20 rounded-xl text-destructive hover:bg-destructive/10 hover:border-destructive/40 transition-all"
-                  >
-                    <ChevronUp className="w-8 h-8 mb-2" />
-                    <span className="text-xs font-medium">Tutup</span>
-                  </button>
-                )
-              )}
 
             </div>
           </div>

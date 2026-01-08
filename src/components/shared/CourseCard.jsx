@@ -49,7 +49,7 @@ export const CourseCard = ({
       </CardContent>
       <CardFooter className="p-4 pt-0 flex items-center justify-between mt-auto">
         <div className="font-bold text-lg">
-          Rp {price.toLocaleString("id-ID")}
+          {price.toLocaleString("id-ID")}
         </div>
         <Button size="sm" className="bg-cyan-500 hover:bg-cyan-600 text-white">
           {price > 0 ? "Beli Kursus" : "Lihat Kursus"}
