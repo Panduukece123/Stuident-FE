@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
+import { BookOpen, Loader2, X, Search } from "lucide-react";
 
 // IMPORT COMPONENTS
 import { ElearningBanner } from "../components/section/ElearningBanner";
@@ -10,112 +11,213 @@ import { ElearningList } from "@/components/section/ElearningList";
 import { InfoBootcamp } from "@/components/section/InfoBootcampSection";
 import { ElearningBootcampList } from "@/components/section/ElearningBootcampList";
 import { ElearningEnrolledList } from "@/components/section/ElearningEnrolledList";
-import { BookOpen } from "lucide-react";
 import { ElearningPageSkeleton } from "@/components/skeleton/ElearningPageSkeleton";
 import { InfoSubscription } from "@/components/section/InfoSubscription";
 import { SubscriptionDialog } from "@/components/dialog/SubscriptionDialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton"; // Pastikan import Skeleton shadcn
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // IMPORT SERVICES
 import ElearningService from "@/services/elearningService";
 import ProfileService from "@/services/ProfileService";
 import { subscriptionService } from "@/services/SubscriptionService";
 
+// --- CUSTOM HOOK: DEBOUNCE ---
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  return debouncedValue;
+}
+
+// --- COMPONENT: SECTION SKELETON (Untuk loading per-section) ---
+const CourseSectionSkeleton = () => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+        <div key={item} className="flex flex-col space-y-3">
+          <Skeleton className="h-56 w-full rounded-xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+          <div className="flex justify-between pt-2">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4 w-1/4" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export const ElearningPage = () => {
   const { hash } = useLocation();
   const token = localStorage.getItem("token");
-  const isLoggedIn = !!localStorage.getItem("token");
+  const isLoggedIn = !!token;
 
-  // --- KONFIGURASI JUMLAH ITEM PER HALAMAN ---
-  const ITEMS_PER_PAGE_SMALL = 4; // Khusus Enrolled & Rekomendasi
-  const ITEMS_PER_PAGE_DEFAULT = 8; // Khusus Discovery, Popular, Bootcamp
-
-  // --- 1. STATE PAGINATION ---
-  const [enrolledPage, setEnrolledPage] = useState(1);
-  const [recPage, setRecPage] = useState(1);
-  const [discoveryPage, setDiscoveryPage] = useState(1);
-  const [popularPage, setPopularPage] = useState(1);
-  const [bootcampPage, setBootcampPage] = useState(1);
-
-  // --- 2. STATE SEARCH ---
-  const [searchEnrolled, setSearchEnrolled] = useState("");
-  const [searchRec, setSearchRec] = useState("");
-  const [searchDiscovery, setSearchDiscovery] = useState("");
-  const [searchPopular, setSearchPopular] = useState("");
-  const [searchBootcamp, setSearchBootcamp] = useState("");
-
-  // --- 3. RESET PAGINATION ---
-  useEffect(() => setEnrolledPage(1), [searchEnrolled]);
-  useEffect(() => setRecPage(1), [searchRec]);
-  useEffect(() => setDiscoveryPage(1), [searchDiscovery]);
-  useEffect(() => setPopularPage(1), [searchPopular]);
-  useEffect(() => setBootcampPage(1), [searchBootcamp]);
-
-  // --- LOGIC SUBSCRIPTION ---
+  // --- STATE SUBSCRIPTION ---
   const [subscriptions, setSubscriptions] = useState([]);
   const [subsLoading, setSubsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [targetPlan, setTargetPlan] = useState("");
 
-  const fetchSubscriptions = async () => {
-    try {
-      setSubsLoading(true);
-      const response = await subscriptionService.getMySubscriptions();
-      if (response.sukses) setSubscriptions(response.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setSubsLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchSubscriptions();
-  }, []);
+  // ==========================================
+  // 1. STATE & PARAMS
+  // ==========================================
+  const [enrolledParams, setEnrolledParams] = useState({ page: 1, search: "" });
 
+  // Recommendations
+  const [recInput, setRecInput] = useState("");
+  const debouncedRec = useDebounce(recInput, 500);
+  const [recParams, setRecParams] = useState({ page: 1, search: "" });
+
+  // Discovery
+  const [discoveryInput, setDiscoveryInput] = useState("");
+  const debouncedDiscovery = useDebounce(discoveryInput, 500);
+
+const [categoryInput, setCategoryInput] = useState(""); 
+  const debouncedCategory = useDebounce(categoryInput, 500); // Debounce biar gak lag
+
+  const [discoveryParams, setDiscoveryParams] = useState({
+    page: 1,
+    search: "",
+    category: "",
+    level: "",
+    access_type: "",
+    type: "course",
+  });
+
+  // Popular
+  const [popularInput, setPopularInput] = useState("");
+  const debouncedPopular = useDebounce(popularInput, 500);
+  const [popularParams, setPopularParams] = useState({
+    page: 1,
+    search: "",
+    type: "course",
+    sort: "popular",
+  });
+
+  // Bootcamp
+  const [bootcampInput, setBootcampInput] = useState("");
+  const debouncedBootcamp = useDebounce(bootcampInput, 500);
+  const [bootcampParams, setBootcampParams] = useState({
+    page: 1,
+    search: "",
+    type: "bootcamp",
+  });
+
+  // --- SYNC INPUT TO PARAMS ---
+  useEffect(
+    () => setRecParams((p) => ({ ...p, search: debouncedRec, page: 1 })),
+    [debouncedRec]
+  );
+  useEffect(
+    () =>
+      setDiscoveryParams((p) => ({
+        ...p,
+        search: debouncedDiscovery,
+        category: debouncedCategory,
+        page: 1,
+      })),
+    [debouncedDiscovery, debouncedCategory]
+  );
+  useEffect(
+    () =>
+      setPopularParams((p) => ({ ...p, search: debouncedPopular, page: 1 })),
+    [debouncedPopular]
+  );
+  useEffect(
+    () =>
+      setBootcampParams((p) => ({ ...p, search: debouncedBootcamp, page: 1 })),
+    [debouncedBootcamp]
+  );
+
+  // --- QUERIES (With placeholderData for Pagination Smoothness) ---
+
+  const { data: enrolledData } = useQuery({
+    queryKey: ["enrolled", enrolledParams],
+    queryFn: () => ProfileService.getEnrolledCourses(enrolledParams),
+    enabled: isLoggedIn,
+    placeholderData: keepPreviousData,
+  });
+  const enrolledList = enrolledData?.data || [];
+  const enrolledMeta = enrolledData?.meta || {};
+
+  const { data: recData, isFetching: isRefetchingRec } = useQuery({
+    queryKey: ["recommendations", recParams],
+    queryFn: () => ProfileService.getRecommendations(recParams),
+    enabled: isLoggedIn,
+    placeholderData: keepPreviousData,
+  });
+  const recList = recData?.data?.recommendations || [];
+  const recMeta = recData?.meta || {};
+
+  const {
+    data: discoveryData,
+    isLoading: isInitialLoadingDiscovery,
+    isFetching: isRefetchingDiscovery,
+  } = useQuery({
+    queryKey: ["discovery", discoveryParams],
+    queryFn: () => ElearningService.getCourses(discoveryParams),
+    placeholderData: keepPreviousData,
+  });
+  const discoveryList = discoveryData?.data || [];
+  const discoveryMeta = discoveryData?.meta || {};
+
+  const { data: popularData, isFetching: isRefetchingPopular } = useQuery({
+    queryKey: ["popular", popularParams],
+    queryFn: () => ElearningService.getCourses(popularParams),
+    placeholderData: keepPreviousData,
+  });
+  const popularList = popularData?.data || [];
+  const popularMeta = popularData?.meta || {};
+
+  const { data: bootcampData, isFetching: isRefetchingBootcamp } = useQuery({
+    queryKey: ["bootcamp", bootcampParams],
+    queryFn: () => ElearningService.getCourses(bootcampParams),
+    placeholderData: keepPreviousData,
+  });
+  const bootcampList = bootcampData?.data || [];
+  const bootcampMeta = bootcampData?.meta || {};
+
+  // --- HELPERS ---
   const handlePlanClick = (plan) => {
     setTargetPlan(plan);
     setIsDialogOpen(true);
   };
-
-  const handleSubscriptionSuccess = () => {
-    setIsDialogOpen(false);
-    fetchSubscriptions();
-  };
-
-  // --- QUERY DATA ---
-  const {
-    data: courses = [],
-    isLoading: loadingCourses,
-    isError,
-  } = useQuery({
-    queryKey: ["courses"],
-    queryFn: ElearningService.fetchCourses,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const { data: recData, isLoading: loadingRecs } = useQuery({
-    queryKey: ["recommendations", token],
-    queryFn: ProfileService.getRecommendations,
-    enabled: isLoggedIn,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const { data: enrolledCourses = [] } = useQuery({
-    queryKey: ["enrolled-courses", token],
-    queryFn: async () => {
-      if (!isLoggedIn) return [];
-      try {
-        const res = await ProfileService.getEnrolledCourses();
-        return Array.isArray(res) ? res : res.data || [];
-      } catch {
-        return [];
-      }
-    },
-    enabled: isLoggedIn,
-    staleTime: 1000 * 60 * 2,
-  });
+  const handleSubscriptionSuccess = () => setIsDialogOpen(false);
 
   useEffect(() => {
-    if (!loadingCourses && hash) {
+    const fetchSubs = async () => {
+      try {
+        const res = await subscriptionService.getMySubscriptions();
+        if (res.sukses) setSubscriptions(res.data);
+      } finally {
+        setSubsLoading(false);
+      }
+    };
+    fetchSubs();
+  }, []);
+
+  useEffect(() => {
+    if (!isInitialLoadingDiscovery && hash) {
       const el = document.getElementById(hash.replace("#", ""));
       if (el)
         setTimeout(
@@ -123,101 +225,60 @@ export const ElearningPage = () => {
           100
         );
     }
-  }, [loadingCourses, hash]);
+  }, [isInitialLoadingDiscovery, hash]);
 
-  // --- HELPER FILTER ---
-  const filterData = (data, query) => {
-    if (!query) return data;
-    return data.filter(
-      (item) =>
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.category?.toLowerCase().includes(query.toLowerCase())
-    );
-  };
-
-  // --- PREPARE DATA SOURCE ---
-
-  // 1. Enrolled (PAKAI ITEMS_PER_PAGE_SMALL = 4)
-  const filteredEnrolled = filterData(enrolledCourses, searchEnrolled);
-  const currentEnrolledCourses = filteredEnrolled.slice(
-    (enrolledPage - 1) * ITEMS_PER_PAGE_SMALL,
-    enrolledPage * ITEMS_PER_PAGE_SMALL
-  );
-
-  // 2. Recommendations (PAKAI ITEMS_PER_PAGE_SMALL = 4)
-  const rawRecommendations = isLoggedIn
-    ? recData?.data?.recommendations || []
-    : [];
-  const filteredRecs = filterData(rawRecommendations, searchRec);
-  const currentRecCourses = filteredRecs.slice(
-    (recPage - 1) * ITEMS_PER_PAGE_SMALL,
-    recPage * ITEMS_PER_PAGE_SMALL
-  );
-
-  // 3. Discovery (PAKAI ITEMS_PER_PAGE_DEFAULT = 8)
-  const rawDiscovery = courses;
-  const filteredDiscovery = filterData(rawDiscovery, searchDiscovery);
-  const currentDiscoveryCourses = filteredDiscovery.slice(
-    (discoveryPage - 1) * ITEMS_PER_PAGE_DEFAULT,
-    discoveryPage * ITEMS_PER_PAGE_DEFAULT
-  );
-
-  // 4. Popular (PAKAI ITEMS_PER_PAGE_DEFAULT = 8)
-  const allRegular = courses.filter((c) => c.type === "course");
-  const filteredPopular = filterData(allRegular, searchPopular);
-  const currentPopularCourses = filteredPopular.slice(
-    (popularPage - 1) * ITEMS_PER_PAGE_DEFAULT,
-    popularPage * ITEMS_PER_PAGE_DEFAULT
-  );
-
-  // 5. Bootcamp (PAKAI ITEMS_PER_PAGE_DEFAULT = 8)
-  const allBootcamp = courses.filter((c) => c.type === "bootcamp");
-  const filteredBootcamp = filterData(allBootcamp, searchBootcamp);
-  const currentBootcampCourses = filteredBootcamp.slice(
-    (bootcampPage - 1) * ITEMS_PER_PAGE_DEFAULT,
-    bootcampPage * ITEMS_PER_PAGE_DEFAULT
-  );
-
-  const uniqueCategories = [...new Set(courses.map((c) => c.category))];
-
-  const handleCategoryClick = (categoryName) => {
-    setSearchDiscovery(categoryName);
-    setDiscoveryPage(1);
-    const element = document.getElementById("discovery-section");
-    if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  if (loadingCourses || (isLoggedIn && loadingRecs))
-    return <ElearningPageSkeleton />;
-  if (isError)
+  // --- COMPONENTS ---
+  const PaginationControl = ({ meta, onPageChange }) => {
+    const currentPage = meta?.halaman_sekarang || 1;
+    const lastPage = meta?.halaman_terakhir || 1;
+    const total = meta?.total || 0;
+    if (total === 0 || lastPage <= 1) return null;
     return (
-      <div className="p-10 text-center text-red-500">Gagal memuat data.</div>
-    );
-
-  const PaginationControl = ({ page, total, onPageChange }) => {
-    if (total <= 1) return null;
-    return (
-      <div className="container mx-auto px-6 py-4 flex justify-center items-center gap-4">
-        <button
-          onClick={() => onPageChange(page - 1)}
-          disabled={page === 1}
-          className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent text-sm"
+      <div className="cmx-auto px-6 py-4 flex justify-center items-center gap-4">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={currentPage === 1}
+          onClick={() => onPageChange(currentPage - 1)}
         >
           Previous
-        </button>
+        </Button>
         <span className="text-sm font-medium">
-          Page {page} of {total}
+          Page {currentPage} of {lastPage}
         </span>
-        <button
-          onClick={() => onPageChange(page + 1)}
-          disabled={page === total}
-          className="px-4 py-2 border rounded-md disabled:opacity-50 hover:bg-accent text-sm"
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={currentPage === lastPage}
+          onClick={() => onPageChange(currentPage + 1)}
         >
           Next
-        </button>
+        </Button>
       </div>
     );
   };
+
+  const EmptyStateBox = ({ title, onReset }) => (
+    <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-xl bg-white flex flex-col items-center justify-center gap-3">
+      <div className="bg-gray-50 p-4 rounded-full">
+        <Search className="h-8 w-8 text-gray-400" />
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900">
+          Tidak ada {title} ditemukan
+        </h3>
+        <p className="text-gray-500 max-w-sm mx-auto text-sm">
+          Coba ubah kata kunci pencarian atau filter Anda.
+        </p>
+      </div>
+      <Button variant="outline" onClick={onReset}>
+        Reset Pencarian
+      </Button>
+    </div>
+  );
+
+  if (isInitialLoadingDiscovery && !discoveryData)
+    return <ElearningPageSkeleton />;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -225,35 +286,50 @@ export const ElearningPage = () => {
         <ElearningBanner />
 
         <ElearningCategories
-          categories={uniqueCategories}
-          onCategoryClick={handleCategoryClick}
+          categories={[
+            "Web Development",
+            "Data Science",
+            "Mobile Dev",
+            "Design",
+            "Soft Skills",
+            "Game Development",
+            "Cyber Security",
+            "DevOps", 
+            "Cloud Computing",
+            "Business",
+          ]}
+          onCategoryClick={(cat) => {
+            setDiscoveryParams((p) => ({ ...p, category: cat, page: 1 }));
+            document
+              .getElementById("discovery-section")
+              ?.scrollIntoView({ behavior: "smooth" });
+          }}
         />
 
-        {/* --- 1. ENROLLED SECTION (Limit 4) --- */}
+        {/* --- 1. ENROLLED SECTION --- */}
         {isLoggedIn && (
-          <div className="mt-8">
-            {enrolledCourses.length > 0 ? (
+          <div className="mt-6">
+            {enrolledList.length > 0 || enrolledParams.search !== "" ? (
               <>
                 <ElearningEnrolledList
                   title="Kursus yang Sedang Diikuti"
                   subtitle="Lanjutkan progres belajar Anda."
-                  courses={currentEnrolledCourses}
-                  searchQuery={searchEnrolled}
-                  onSearchChange={setSearchEnrolled}
+                  courses={enrolledList}
+                  searchQuery={enrolledParams.search}
+                  onSearchChange={(val) =>
+                    setEnrolledParams((p) => ({ ...p, search: val, page: 1 }))
+                  }
                 />
-                {filteredEnrolled.length === 0 && searchEnrolled && (
-                  <div className="text-center pb-10 text-gray-500 -mt-4">
-                    Tidak ditemukan kursus.
+                {enrolledList.length === 0 && enrolledParams.search !== "" && (
+                  <div className="text-center py-8 text-gray-500">
+                    Tidak ada kursus yang cocok dengan pencarian.
                   </div>
                 )}
-
-                {/* Pagination pakai ITEMS_PER_PAGE_SMALL */}
                 <PaginationControl
-                  page={enrolledPage}
-                  total={Math.ceil(
-                    filteredEnrolled.length / ITEMS_PER_PAGE_SMALL
-                  )}
-                  onPageChange={setEnrolledPage}
+                  meta={enrolledMeta}
+                  onPageChange={(page) =>
+                    setEnrolledParams((p) => ({ ...p, page }))
+                  }
                 />
               </>
             ) : (
@@ -280,51 +356,170 @@ export const ElearningPage = () => {
           </div>
         )}
 
-        {/* --- 2. RECOMMENDATION SECTION (Limit 4) --- */}
-        {isLoggedIn && rawRecommendations.length > 0 && (
-          <div id="recommendation-section" className="mt-8 scroll-mt-10">
-            <ElearningList
-              title="Rekomendasi Untuk Anda"
-              subtitle="Kursus yang disesuaikan minat Anda."
-              courses={currentRecCourses}
-              searchQuery={searchRec}
-              onSearchChange={setSearchRec}
-            />
-            {filteredRecs.length === 0 && searchRec && (
-              <div className="text-center pb-10 text-gray-500 -mt-4">
-                Tidak ada rekomendasi ditemukan.
+        {/* --- 2. RECOMMENDATION SECTION (SKELETON) --- */}
+        {isLoggedIn && (recList.length > 0 || recInput !== "") && (
+          <div id="recommendation-section" className="mt-8 scroll-mt-10 px-6 border-t pt-8">
+            <div className="mx-auto mb-4 flex flex-col md:flex-row justify-between items-start gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Rekomendasi Untuk Anda
+                </h2>
+                <p className="text-gray-500">
+                  Kursus yang disesuaikan minat Anda.
+                </p>
+              </div>
+            </div>
+
+            {/* Logic: Jika fetching karena search, tampilkan Skeleton. Jika tidak, tampilkan data */}
+            {isRefetchingRec ? (
+              <div className="mx-auto px-6">
+                <CourseSectionSkeleton />
+              </div>
+            ) : (
+              <ElearningList courses={recList} hideHeader />
+            )}
+
+            {!isRefetchingRec && recList.length === 0 && recInput !== "" && (
+              <div className="px-6">
+                <EmptyStateBox
+                  title="rekomendasi"
+                  onReset={() => setRecInput("")}
+                />
               </div>
             )}
 
-            {/* Pagination pakai ITEMS_PER_PAGE_SMALL */}
             <PaginationControl
-              page={recPage}
-              total={Math.ceil(filteredRecs.length / ITEMS_PER_PAGE_SMALL)}
-              onPageChange={setRecPage}
+              meta={recMeta}
+              onPageChange={(page) => setRecParams((p) => ({ ...p, page }))}
             />
           </div>
         )}
 
-        {/* --- 3. DISCOVERY SECTION (Limit 8) --- */}
-        <div id="discovery-section" className="mt-8 scroll-mt-10">
-          <ElearningList
-            title="Temukan Keahlian Baru"
-            subtitle="Jelajahi semua kursus yang tersedia untuk meningkatkan skill Anda."
-            courses={currentDiscoveryCourses}
-            searchQuery={searchDiscovery}
-            onSearchChange={setSearchDiscovery}
-          />
-          {filteredDiscovery.length === 0 && searchDiscovery && (
-            <div className="text-center pb-10 text-gray-500 -mt-4">
-              Tidak ada kursus ditemukan.
+        {/* --- 3. DISCOVERY SECTION (SKELETON) --- */}
+        <div id="discovery-section" className="mt-8 scroll-mt-10 mx-auto px-6 border-t pt-8">
+          <div className="flex flex-col lg:flex-row justify-between items-end mb-6 gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Temukan Keahlian Baru
+              </h2>
+              <p className="text-gray-500">
+                Jelajahi semua kursus yang tersedia.
+              </p>
             </div>
+            <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+              <Input
+                placeholder="Cari kursus..."
+                className="w-full lg:w-64"
+                value={discoveryInput}
+                onChange={(e) => setDiscoveryInput(e.target.value)}
+              />
+
+              {/* 2. Input Search Kategori (PENGGANTI COMBOBOX) */}
+              <Input
+                placeholder="Cari kategori..."
+                className="w-full lg:w-40"
+                value={categoryInput} // Menggunakan state khusus kategori
+                onChange={(e) => setCategoryInput(e.target.value)}
+              />
+
+              <Select
+                value={discoveryParams.level}
+                onValueChange={(val) =>
+                  setDiscoveryParams((p) => ({
+                    ...p,
+                    level: val === "all" ? "" : val,
+                    page: 1,
+                  }))
+                }
+              >
+                <SelectTrigger className="w-[130px]">
+                  <SelectValue placeholder="Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Level</SelectItem>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={discoveryParams.access_type}
+                onValueChange={(val) =>
+                  setDiscoveryParams((p) => ({
+                    ...p,
+                    access_type: val === "all" ? "" : val,
+                    page: 1,
+                  }))
+                }
+              >
+                <SelectTrigger className="w-[130px]">
+                  <SelectValue placeholder="Akses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Akses</SelectItem>
+                  <SelectItem value="free">Gratis</SelectItem>
+                  <SelectItem value="regular">Regular</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {(discoveryInput !== "" || discoveryParams.level !== "" || discoveryParams.access_type !== "" || discoveryParams.category !== "") && (
+             <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm animate-in fade-in slide-in-from-top-2">
+                <div className="text-primary">
+                   <span className="mr-1">Anda sedang melihat hasil untuk:</span>
+                   
+                   {/* Logic menampilkan teks sesuai filter yang aktif */}
+                   {discoveryParams.category && <span className="font-bold bg-white px-2 py-0.5 rounded border border-blue-200 mr-2">{discoveryParams.category}</span>}
+                   {discoveryInput && <span className="font-bold bg-white px-2 py-0.5 rounded border border-blue-200 mr-2">"{discoveryInput}"</span>}
+                   {discoveryParams.level && <span className="font-bold bg-white px-2 py-0.5 rounded border border-blue-200 mr-2">Level {discoveryParams.level}</span>}
+                   {discoveryParams.access_type && <span className="font-bold bg-white px-2 py-0.5 rounded border border-blue-200 mr-2">{discoveryParams.access_type}</span>}
+                </div>
+
+                <button 
+                  onClick={() => {
+                      setDiscoveryInput("");
+                      setDiscoveryParams(p => ({ 
+                          ...p, 
+                          search: "", level: "", access_type: "", category: "", page: 1 
+                      }));
+                  }}
+                  className="whitespace-nowrap font-semibold text-primary/80 hover:text-primary hover:underline flex items-center gap-1"
+                >
+                   <X className="h-3 w-3" /> Reset Filter
+                </button>
+             </div>
           )}
 
-          {/* Pagination pakai ITEMS_PER_PAGE_DEFAULT */}
+          {/* Logic Skeleton Discovery */}
+          {isRefetchingDiscovery ? (
+            <CourseSectionSkeleton />
+          ) : (
+            <ElearningList courses={discoveryList} hideHeader />
+          )}
+
+          {!isRefetchingDiscovery &&
+            discoveryList.length === 0 &&
+            !isInitialLoadingDiscovery && (
+              <EmptyStateBox
+                title="kursus"
+                onReset={() => {
+                  setDiscoveryInput("");
+                  setDiscoveryParams((p) => ({
+                    ...p,
+                    level: "",
+                    access_type: "",
+                    category: "",
+                    page: 1,
+                  }));
+                }}
+              />
+            )}
+
           <PaginationControl
-            page={discoveryPage}
-            total={Math.ceil(filteredDiscovery.length / ITEMS_PER_PAGE_DEFAULT)}
-            onPageChange={setDiscoveryPage}
+            meta={discoveryMeta}
+            onPageChange={(page) => setDiscoveryParams((p) => ({ ...p, page }))}
           />
         </div>
 
@@ -336,47 +531,85 @@ export const ElearningPage = () => {
           />
         </div>
 
-        {/* --- 4. POPULAR SECTION (Limit 8) --- */}
-        <div id="course" className="scroll-mt-10 mt-8">
-          <ElearningCourseList
-            title="Kursus Terpopuler"
-            subtitle="Lihat apa yang sedang dipelajari orang lain."
-            courses={currentPopularCourses}
-            searchQuery={searchPopular}
-            onSearchChange={setSearchPopular}
-          />
-          {filteredPopular.length === 0 && searchPopular && (
-            <div className="text-center pb-10 text-gray-500 -mt-4">
-              Tidak ada kursus populer ditemukan.
+        {/* --- 4. POPULAR SECTION (SKELETON) --- */}
+        <div id="course" className="scroll-mt-10 mt-8 mx-auto px-6 border-t pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Kursus Terpopuler
+              </h2>
+              <p className="text-gray-500">
+                Lihat apa yang sedang dipelajari orang lain.
+              </p>
             </div>
+            <div className="w-full md:w-64">
+              <Input
+                placeholder="Cari kursus populer..."
+                value={popularInput}
+                onChange={(e) => setPopularInput(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Logic Skeleton Popular */}
+          {isRefetchingPopular ? (
+            <CourseSectionSkeleton />
+          ) : (
+            <ElearningList courses={popularList} hideHeader />
           )}
+
+          {!isRefetchingPopular && popularList.length === 0 && (
+            <EmptyStateBox
+              title="kursus populer"
+              onReset={() => setPopularInput("")}
+            />
+          )}
+
           <PaginationControl
-            page={popularPage}
-            total={Math.ceil(filteredPopular.length / ITEMS_PER_PAGE_DEFAULT)}
-            onPageChange={setPopularPage}
+            meta={popularMeta}
+            onPageChange={(page) => setPopularParams((p) => ({ ...p, page }))}
           />
         </div>
 
         <InfoBootcamp />
 
-        {/* --- 5. BOOTCAMP SECTION (Limit 8) --- */}
-        <div id="bootcamp" className="scroll-mt-10 mt-8">
-          <ElearningBootcampList
-            title="Kursus Bootcamp"
-            subtitle="Pilih kursus terbaik untuk meningkatkan skill kamu"
-            courses={currentBootcampCourses}
-            searchQuery={searchBootcamp}
-            onSearchChange={setSearchBootcamp}
-          />
-          {filteredBootcamp.length === 0 && searchBootcamp && (
-            <div className="text-center pb-10 text-gray-500 -mt-4">
-              Tidak ada bootcamp ditemukan.
+        {/* --- 5. BOOTCAMP SECTION (SKELETON) --- */}
+        <div id="bootcamp" className="scroll-mt-10 mt-8 mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Kursus Bootcamp
+              </h2>
+              <p className="text-gray-500">
+                Pilih kursus terbaik untuk meningkatkan skill kamu
+              </p>
             </div>
+            <div className="w-full md:w-64">
+              <Input
+                placeholder="Cari bootcamp..."
+                value={bootcampInput}
+                onChange={(e) => setBootcampInput(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Logic Skeleton Bootcamp */}
+          {isRefetchingBootcamp ? (
+            <CourseSectionSkeleton />
+          ) : (
+            <ElearningList courses={bootcampList} hideHeader />
           )}
+
+          {!isRefetchingBootcamp && bootcampList.length === 0 && (
+            <EmptyStateBox
+              title="bootcamp"
+              onReset={() => setBootcampInput("")}
+            />
+          )}
+
           <PaginationControl
-            page={bootcampPage}
-            total={Math.ceil(filteredBootcamp.length / ITEMS_PER_PAGE_DEFAULT)}
-            onPageChange={setBootcampPage}
+            meta={bootcampMeta}
+            onPageChange={(page) => setBootcampParams((p) => ({ ...p, page }))}
           />
         </div>
 

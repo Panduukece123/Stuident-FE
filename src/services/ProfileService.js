@@ -177,68 +177,66 @@ const ProfileService = {
     return response.data;
   },
 
-  getEnrolledCourses: async () => {
-    const token = localStorage.getItem("token");
+  getEnrolledCourses: async (params = {}) => {
+    try {
+      // 1. Request ke Backend
+      const response = await api.get("/my-courses", { params });
+      const responseData = response.data;
+      
+      // Ambil array data & meta
+      const rawList = responseData.data || [];
+      const meta = responseData.meta || {};
 
-    const response = await api.get("/my-courses", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-    });
+      // Config URL Gambar
+      const BACKEND_URL = "http://127.0.0.1:8000"; 
+      const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
 
-    const responseData = response.data;
-    const data = responseData.data || [];
+      // 2. MAPPING DATA (PENTING!)
+      // Kita harus membongkar object 'course' dari dalam wrapper enrollment
+      const formattedList = rawList.map((item) => {
+        // 'item' adalah data enrollment
+        // 'item.course' adalah detail kursusnya
+        const courseData = item.course || {}; 
 
-    const BACKEND_URL = "http://localhost:8000";
-    const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
-
-    if (Array.isArray(data)) {
-      return data.map((item) => {
-        const courseData = item.course || {};
-
+        // Fix Image URL dari dalam object course
         let imageUrl = courseData.image;
-
-        if (imageUrl && !imageUrl.startsWith("http")) {
-          // Tambahkan base URL jika path relatif (bukan dari unsplash)
-          imageUrl = `${BACKEND_URL}${
-            imageUrl.startsWith("/") ? "" : "/"
-          }${imageUrl}`;
+        if (imageUrl && !imageUrl.startsWith('http')) {
+             imageUrl = `${BACKEND_URL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
         }
 
-        // 2. RETURN OBJECT YANG SUDAH DIRAPIKAN
         return {
-          // Gunakan ID dari courseData (5), bukan ID enrollment (7)
-          // Biar kalau diklik arahnya benar ke /course/5
-          id: courseData.id,
-
+          // Kita pakai ID Course, bukan ID Enrollment, untuk navigasi
+          id: courseData.id, 
+          
+          // Data Utama Kursus
           title: courseData.title || "Untitled Course",
-          level: courseData.level || "Beginner",
-
-          // Sesuaikan key dengan JSON backend
-          rating: Number(courseData.average_rating) || 0,
-          reviews: Number(courseData.total_reviews) || 0,
-
-          description: courseData.description || "No description available.",
-          price: courseData.price ? Number(courseData.price) : 0,
-
           image: imageUrl || DEFAULT_IMAGE,
-
+          category: courseData.category || "General",
           instructor: courseData.instructor || "Unknown",
-          category: courseData.category || "Umum",
-          progress: courseData.progress || 0,
-          completed: courseData.completed || false,
-          certificate: courseData.certificate_url || null,
+          level: courseData.level || "All Level",
+          rating: courseData.reviews_avg_rating ? parseFloat(courseData.reviews_avg_rating) : 0,
+          total_reviews: courseData.total_reviews || 0,
 
-          // --- DATA PENTING DARI ENROLLMENT (Parent Object) ---
-          progress: item.progress || 0, // Ambil dari item, bukan courseData
+          // Data Spesifik Enrollment (Progress user)
+          // Progress diambil dari 'item' (wrapper), bukan 'courseData'
+          progress: item.progress || 0, 
           completed: item.completed || false,
-          enrollment_id: item.id, // Simpan ID pendaftaran kalau butuh nanti
+          
+          // Data lain jika perlu
+          enrollment_id: item.id, // Simpan ID enrollment jika butuh nanti
         };
       });
-    }
 
-    return [];
+      // 3. Return format standard { data, meta }
+      return {
+        data: formattedList,
+        meta: meta
+      };
+
+    } catch (error) {
+      console.error("Gagal mengambil enrolled courses:", error);
+      throw error;
+    }
   },
 
   uploadCv: async (file) => {
@@ -341,9 +339,10 @@ const ProfileService = {
     return response.data;
   },
 
-  getRecommendations: async () => {
+  getRecommendations: async (params = {}) => {
     const token = localStorage.getItem("token");
-    const response = await api.get("/auth/recommendations", {
+    const response = await api.get("/auth/recommendations", {params},
+      {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",

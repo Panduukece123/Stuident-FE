@@ -2,41 +2,43 @@ import api from "./Api";
 
 const ElearningService = {
   // 1. Fungsi Utama
-  fetchCourses: async () => {
+  getCourses: async (params) => {
     try {
-      const response = await api.get("/courses");
+      // params: { page, search, type, level, access_type, ... }
+      const response = await api.get("/courses", { params });
+      // Mapping response sesuai struktur backend kamu
+      // Asumsi response: { data: [...], meta: { halaman_sekarang: 1, ... } }
       const responseData = response.data;
-      const data = responseData.data || [];
       
-      // Config URL Gambar (Sesuaikan port backendmu)
-      const BACKEND_URL = "http://localhost:8000"; 
+      const rawList = responseData.data || [];
+      const meta = responseData.meta || {}; 
+
+      const BACKEND_URL = "http://127.0.0.1:8000"; 
       const DEFAULT_IMAGE = "https://placehold.co/600x400?text=No+Image";
 
-      if (Array.isArray(data)) {
-        return data.map((course) => {
-          // Logika perbaikan gambar
-          let imageUrl = course.image; // Cek kedua kemungkinan key
-          if (imageUrl && !imageUrl.startsWith('http')) {
+      const formattedList = rawList.map((course) => {
+        let imageUrl = course.image;
+        if (imageUrl && !imageUrl.startsWith('http')) {
              imageUrl = `${BACKEND_URL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
-          }
-          
-          return {
-            id: course.id,
-            title: course.title || "Untitled Course",
-            level: course.level || "Beginner",
-            type : course.type || "course",
-            rating: course.reviews_avg_rating || 0,
-            reviews: course.total_reviews || 0,
-            description: course.description || "No description available.",
-            price: course.price ? Number(course.price) : 0,
-            image: imageUrl || DEFAULT_IMAGE, // Pakai hasil olahan tadi
-            instructor: course.instructor,
-            category: course.category || "Umum",
-          };
-        });
-      } else {
-        return [];
-      }
+        }
+        
+        return {
+          id: course.id,
+          title: course.title || "Untitled Course",
+          level: course.level || "Beginner",
+          type: course.type || "course",
+          rating: course.reviews_avg_rating ? parseFloat(course.reviews_avg_rating) : 0,
+          reviews: course.total_reviews || 0,
+          description: course.description || "-",
+          price: course.price ? Number(course.price) : 0,
+          image: imageUrl || DEFAULT_IMAGE,
+          instructor: course.instructor, 
+          category: course.category || "Umum",
+        };
+      });
+
+      return { data: formattedList, meta };
+
     } catch (err) {
       console.error("Error fetching courses:", err);
       throw err;
