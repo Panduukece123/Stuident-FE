@@ -28,6 +28,18 @@ const courseService = {
     return response.data;
   },
 
+  // Get user enrollment data for a course (includes certificate_url)
+  getEnrollment: async (courseId) => {
+    const token = localStorage.getItem("token");
+    const response = await api.get(`/courses/${courseId}/enrollment`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+    return response.data;
+  },
+
   markComplete: async (curriculumId) => {
     const token = localStorage.getItem("token"); // <--- Harus ambil dulu!
 

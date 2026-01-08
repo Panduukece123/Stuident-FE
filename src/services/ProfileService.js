@@ -216,11 +216,16 @@ const ProfileService = {
           level: courseData.level || "All Level",
           rating: courseData.reviews_avg_rating ? parseFloat(courseData.reviews_avg_rating) : 0,
           total_reviews: courseData.total_reviews || 0,
+          description: courseData.description || "",
+          reviews: courseData.reviews_count || courseData.total_reviews || 0,
 
           // Data Spesifik Enrollment (Progress user)
           // Progress diambil dari 'item' (wrapper), bukan 'courseData'
           progress: item.progress || 0, 
           completed: item.completed || false,
+          
+          // Certificate URL dari enrollment
+          certificate: item.certificate_url || null,
           
           // Data lain jika perlu
           enrollment_id: item.id, // Simpan ID enrollment jika butuh nanti

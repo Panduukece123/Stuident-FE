@@ -99,6 +99,12 @@ export const submitApplication = async (applicationId) => {
   return response.data;
 };
 
+// Check existing application for a scholarship
+export const checkExistingApplication = async (scholarshipId) => {
+  const response = await api.get(`/scholarships/${scholarshipId}/my-application`);
+  return response.data;
+};
+
 const scholarshipService = {
   getScholarships,
   getRecommendedScholarships,
@@ -111,6 +117,7 @@ const scholarshipService = {
   getApplicationDetail,
   updateDraft,
   submitApplication,
+  checkExistingApplication,
 };
 
 export default scholarshipService;

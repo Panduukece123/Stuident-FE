@@ -93,6 +93,35 @@ const ScholarshipApplicationPage = () => {
     enabled: !!applicationId && currentStep >= 3,
   });
 
+  // Check existing application when page loads
+  const { data: existingApplication, isLoading: existingAppLoading, isError: existingAppError } = useQuery({
+    queryKey: ["existing-application", id],
+    queryFn: async () => {
+      const response = await scholarshipService.checkExistingApplication(id);
+      console.log("Existing Application Response:", response); // Debug
+      return response.data; // { application, currentStep }
+    },
+    retry: false, // Don't retry if 404 (no existing application)
+  });
+
+  // Handle existing application data dengan useEffect
+  React.useEffect(() => {
+    console.log("existingApplication:", existingApplication, "isError:", existingAppError); // Debug
+    
+    if (existingApplication?.application?.id) {
+      setApplicationId(existingApplication.application.id);
+      
+      // Gunakan currentStep dari backend
+      if (existingApplication.currentStep) {
+        console.log("Setting currentStep to:", existingApplication.currentStep); // Debug
+        setCurrentStep(existingApplication.currentStep);
+      }
+    } else if (existingAppError) {
+      // No existing application, start from step 1
+      setCurrentStep(1);
+    }
+  }, [existingApplication, existingAppError]);
+
   // Mutations
  const saveDraftMutation = useMutation({
     mutationFn: (formData) => scholarshipService.saveDraft(id, formData),
@@ -238,11 +267,12 @@ const ScholarshipApplicationPage = () => {
   };
 
   const handleBack = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
+    // Always go back to scholarship detail page
+    navigate(`/scholarship/show/${id}`);
   };
 
   // Loading state
-  if (scholarshipLoading || profileLoading) {
+  if (scholarshipLoading || profileLoading || existingAppLoading) {
     return (
       <div className="p-10 space-y-4">
         <Skeleton className="h-40 w-full" />
