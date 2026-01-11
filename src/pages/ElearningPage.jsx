@@ -17,6 +17,7 @@ import { SubscriptionDialog } from "@/components/dialog/SubscriptionDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton"; // Pastikan import Skeleton shadcn
+import { CourseSectionSkeleton } from "@/components/skeleton/CourseSectionSkeleton";
 import {
   Select,
   SelectContent,
@@ -24,48 +25,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import useDebounce from "@/hooks/useDebounce";
 
 // IMPORT SERVICES
 import ElearningService from "@/services/elearningService";
 import ProfileService from "@/services/ProfileService";
 import { subscriptionService } from "@/services/SubscriptionService";
-
-// --- CUSTOM HOOK: DEBOUNCE ---
-function useDebounce(value, delay) {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-  return debouncedValue;
-}
-
-// --- COMPONENT: SECTION SKELETON (Untuk loading per-section) ---
-const CourseSectionSkeleton = () => {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-        <div key={item} className="flex flex-col space-y-3">
-          <Skeleton className="h-56 w-full rounded-xl" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-          <div className="flex justify-between pt-2">
-            <Skeleton className="h-4 w-1/4" />
-            <Skeleton className="h-4 w-1/4" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
 
 export const ElearningPage = () => {
   const { hash } = useLocation();
@@ -78,9 +43,9 @@ export const ElearningPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [targetPlan, setTargetPlan] = useState("");
 
-  // ==========================================
-  // 1. STATE & PARAMS
-  // ==========================================
+  const [enrolledInput, setEnrolledInput] = useState(""); 
+  const debouncedEnrolled = useDebounce(enrolledInput, 500);
+
   const [enrolledParams, setEnrolledParams] = useState({ page: 1, search: "" });
 
   // Recommendations
@@ -124,6 +89,9 @@ const [categoryInput, setCategoryInput] = useState("");
   });
 
   // --- SYNC INPUT TO PARAMS ---
+  useEffect(() => {
+    setEnrolledParams((p) => ({ ...p, search: debouncedEnrolled, page: 1 }));
+  }, [debouncedEnrolled]);
   useEffect(
     () => setRecParams((p) => ({ ...p, search: debouncedRec, page: 1 })),
     [debouncedRec]
@@ -315,10 +283,8 @@ const [categoryInput, setCategoryInput] = useState("");
                   title="Kursus yang Sedang Diikuti"
                   subtitle="Lanjutkan progres belajar Anda."
                   courses={enrolledList}
-                  searchQuery={enrolledParams.search}
-                  onSearchChange={(val) =>
-                    setEnrolledParams((p) => ({ ...p, search: val, page: 1 }))
-                  }
+                  searchQuery={enrolledInput}
+                  onSearchChange={(val) => setEnrolledInput(val)}
                 />
                 {enrolledList.length === 0 && enrolledParams.search !== "" && (
                   <div className="text-center py-8 text-gray-500">
@@ -533,7 +499,7 @@ const [categoryInput, setCategoryInput] = useState("");
 
         {/* --- 4. POPULAR SECTION (SKELETON) --- */}
         <div id="course" className="scroll-mt-10 mt-8 mx-auto px-6 border-t pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
                 Kursus Terpopuler
@@ -575,7 +541,7 @@ const [categoryInput, setCategoryInput] = useState("");
 
         {/* --- 5. BOOTCAMP SECTION (SKELETON) --- */}
         <div id="bootcamp" className="scroll-mt-10 mt-8 mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-6 gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
                 Kursus Bootcamp
