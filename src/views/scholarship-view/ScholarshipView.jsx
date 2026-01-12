@@ -1,13 +1,13 @@
 import React from "react";
-import HeaderScholarship from "../../components/scholarship/header-scholarship/HeaderScholarship";
 import ScholarshipContent from "../../components/scholarship/scholarship-content/ScholarshipContent";
 import { ScholarshipProvider } from "../../context/ScholarshipContext";
+import { ScholarshipHero } from "@/components/section/ScholarshipHero";
 
 const ScholarshipView = () => {
   return (
     <ScholarshipProvider>
       <div>
-        <HeaderScholarship />
+        <ScholarshipHero />
         <ScholarshipContent />
       </div>
     </ScholarshipProvider>

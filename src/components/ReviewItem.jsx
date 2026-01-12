@@ -1,7 +1,7 @@
 import { Edit, MessageSquareWarning, Star, X } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { DeleteReviewDialog, EditReviewDialog } from "./ReviewDialogs";
+import { DeleteReviewDialog, EditReviewDialog } from "./dialog/ReviewDialogs";
 import { useState } from "react";
 
 const getInitials = (fullName) => {

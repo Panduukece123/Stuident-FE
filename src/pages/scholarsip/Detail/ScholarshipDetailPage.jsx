@@ -32,6 +32,7 @@ import ShareActionButtons from "@/components/shared/ShareActionButtons";
 const ScholarshipDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
 
   const { data: data = [], isLoading } = useQuery({
     queryKey: ["scholarship-detail", id],
@@ -167,9 +168,9 @@ const ScholarshipDetail = () => {
         <div className="lg:col-span-2 space-y-8">
           {/* Hero Image */}
           <div className="rounded-xl overflow-hidden shadow-sm border bg-white">
-            {data.image ? (
+            {data.image_url ? (
               <img
-                src={data.image}
+                src={data.image_url}
                 alt={data.name}
                 className="w-full h-[300px] md:h-[400px] object-cover"
               />
@@ -185,9 +186,9 @@ const ScholarshipDetail = () => {
             {/* Logo Organization */}
             <div className="shrink-0">
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border bg-white p-4 shadow-sm flex items-center justify-center overflow-hidden">
-                {organization?.logo_url ? (
+                {organization?.logo_full_url ? (
                   <img
-                    src={organization.logo_url}
+                    src={organization.logo_full_url}
                     alt={organization.name}
                     className="w-full h-full object-contain"
                   />
@@ -286,18 +287,18 @@ const ScholarshipDetail = () => {
                 </div>
                 
                 <Button className="w-full h-12 text-lg bg-[#3DBDC2] hover:bg-[#2da8ad] text-white font-semibold rounded-lg shadow-md transition-all cursor-pointer">
-                  <Link to={`/scholarship/application/${data.id}`}>
-                  Register Now
-                  </Link>
+                  {isLoggedIn ? (
+                    <Link to={`/scholarship/application/${data.id}`}>
+                      Register Now
+                    </Link>
+                  ) : (
+                    <Link to="/login">
+                      Login to Register
+                    </Link>
+                  )}
                 </Button>
                
 
-                <Button
-                  variant="outline"
-                  className=" cursor-pointer w-full h-12 text-lg border-[#bcf0f4] bg-[#e0fbfc] text-[#3DBDC2] hover:bg-[#d1f7f9] hover:text-[#2da8ad] font-semibold rounded-lg border-none"
-                >
-                  Keep
-                </Button>
 
                 <div className="pt-4 border-t border-gray-100">
                   <p className="text-sm text-gray-500 mb-2">
@@ -316,12 +317,18 @@ const ScholarshipDetail = () => {
               <p className="text-sm text-gray-500 mb-3">
                 Fraudulent scholarship? Report it here:
               </p>
-              <Button
-                variant="destructive"
-                className="w-full bg-red-500 hover:bg-red-600 text-white gap-2  cursor-pointer"
+              <a
+                href={`https://wa.me/6285124423755?text=${encodeURIComponent(`Halo, saya ingin melaporkan beasiswa yang mencurigakan:\n\nNama: ${data.name}\nOrganisasi: ${organization?.name || 'Unknown'}\nURL: ${window.location.href}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Flag size={18} /> Report
-              </Button>
+                <Button
+                  variant="destructive"
+                  className="w-full bg-red-500 hover:bg-red-600 text-white gap-2 cursor-pointer"
+                >
+                  <Flag size={18} /> Report
+                </Button>
+              </a>
             </div>
           </div>
         </div>

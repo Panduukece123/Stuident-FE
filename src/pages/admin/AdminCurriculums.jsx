@@ -5,8 +5,10 @@ import CurriculumTable from "@/components/admin/table/CurriculumTable";
 import CurriculumService from "@/services/admin/CurriculumService";
 import courseService from "@/services/CourseService";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Loader2, SearchIcon } from "lucide-react";
-import { CurriculumDeleteDialog, CurriculumDialog } from "@/components/admin/dialog/CurriculumDialogs";
+import { ArrowLeft, Loader2, Plus, RefreshCcw, SearchIcon } from "lucide-react";
+import { CurriculumDeleteDialog, CurriculumDialog, CurriculumViewDialog } from "@/components/admin/dialog/CurriculumDialogs";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AdminCurriculumCourse = () => {
     const { id } = useParams();
@@ -16,7 +18,10 @@ const AdminCurriculumCourse = () => {
 
     const [openDialog, setOpenDialog] = React.useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = React.useState(false);
-    const [editCurriculum, setEditCurriculum] = React.useState(null);
+    const [openViewDialog, setOpenViewDialog] = React.useState(false);
+    
+    const [editCurriculum, setEditCurriculum] = React.useState(null); // null = new
+    const [search, setSearch] = React.useState("");
 
     const [isLoading, setIsLoading] = React.useState(false);
 
@@ -35,6 +40,11 @@ const AdminCurriculumCourse = () => {
         }
     }, [id]);
 
+    const handleView = (curriculum) => {
+        setEditCurriculum(curriculum);
+        setOpenViewDialog(true);
+    };
+
     const handleEdit = (curriculum) => {
         setEditCurriculum(curriculum);
         setOpenDialog(true);
@@ -49,36 +59,65 @@ const AdminCurriculumCourse = () => {
         fetchData();
     }, [id, fetchData]);
 
+    const filteredCurriculums = curriculums.filter((c) =>
+        c.title?.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
-        <div className="flex flex-col gap-4">
+        <div className="space-y-6">
             
             {/* Action Header */}
             <div className="flex flex-row justify-between">
 
                 {/* Details */}
                 <div className="flex flex-row gap-2 md:gap-4 items-center">
-                    <Button asChild>
-                        <Link to="/admin/courses">Back</Link>
+                    <Button variant="outline" asChild>
+                        <Link to="/admin/courses">
+                            <ArrowLeft/>
+                            Back
+                        </Link>
                     </Button>
-                    <p className="font-medium text-lg md:text-xl">
-                        {isLoading ? "Loading..." : course.title}
-                    </p>
+                    {isLoading ? (
+                        <Skeleton className="w-64 h-6 rounded-2xl" />
+                    ) : (
+                        <p className="font-medium text-lg md:text-xl">
+                            {course.title}
+                        </p>
+                    )}
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-row gap-2 md:gap-4 items-center">
+                <div className="flex flex-row gap-2 items-center">
                     <InputGroup>
                         <InputGroupAddon>
                             <SearchIcon />
                         </InputGroupAddon>
-                        <InputGroupInput placeholder="Search" />
+                        <InputGroupInput
+                            placeholder="Search"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                     </InputGroup>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                            setSearch("");
+                            fetchData();
+                        }}
+                        title="Refresh the table"
+                    >
+                        <RefreshCcw />
+                    </Button>
                     <Button
                         onClick={() => {
                             setOpenDialog(true);
                             setEditCurriculum(null);
                         }}
-                    >Add A Curriculum</Button>
+                    >
+                        <Plus />
+                        Add A Curriculum
+                    </Button>
                 </div>
             </div>
 
@@ -90,12 +129,14 @@ const AdminCurriculumCourse = () => {
                 </div>
             ) : (
                 <CurriculumTable
-                    curriculums={curriculums}
+                    curriculums={filteredCurriculums}
+                    onView={handleView}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                 />
             )}
 
+            {/* Dialogs */}
             <CurriculumDialog
                 open={openDialog}
                 onOpenChange={setOpenDialog}
@@ -103,14 +144,17 @@ const AdminCurriculumCourse = () => {
                 curriculum={editCurriculum}
                 onFinish={fetchData}
             />
-
             <CurriculumDeleteDialog
                 open={openDeleteDialog}
                 onOpenChange={setOpenDeleteDialog}
                 curriculum={editCurriculum}
                 onFinish={fetchData}
             />
-
+            <CurriculumViewDialog
+                open={openViewDialog}
+                onOpenChange={setOpenViewDialog}
+                curriculum={editCurriculum}
+            />
         </div>
     )
 };

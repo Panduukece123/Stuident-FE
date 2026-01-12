@@ -5,6 +5,7 @@ import { fieldOptions, locationOptions, statusOptions } from "@/data/mockData";
 import { useScholarship } from "@/context/ScholarshipContext";
 import { useQueryClient } from "@tanstack/react-query";
 
+
 const HeaderScholarship = () => {
  const { filters, updateFilter, setShowAllList } = useScholarship();
   

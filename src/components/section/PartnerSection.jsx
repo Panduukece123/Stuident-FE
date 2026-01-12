@@ -1,18 +1,58 @@
 import React from "react";
 
 const partners = [
-  { name: "Google", logo: "https://placehold.co/120x60?text=Google" },
-  { name: "Microsoft", logo: "https://placehold.co/120x60?text=Microsoft" },
-  { name: "Amazon", logo: "https://placehold.co/120x60?text=Amazon" },
-  { name: "Meta", logo: "https://placehold.co/120x60?text=Meta" },
-  { name: "Netflix", logo: "https://placehold.co/120x60?text=Netflix" },
-  { name: "Apple", logo: "https://placehold.co/120x60?text=Apple" },
-  { name: "Gojek", logo: "https://placehold.co/120x60?text=Gojek" },
-  { name: "Tokopedia", logo: "https://placehold.co/120x60?text=Tokopedia" },
-  { name: "Traveloka", logo: "https://placehold.co/120x60?text=Traveloka" },
-  { name: "Shopee", logo: "https://placehold.co/120x60?text=Shopee" },
-  { name: "Lazada", logo: "https://placehold.co/120x60?text=Lazada" },
-  { name: "Blibli", logo: "https://placehold.co/120x60?text=Blibli" },
+  // --- TECH GIANTS (DEFAULT) ---
+  { 
+    name: "Google", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" 
+  },
+  { 
+    name: "Microsoft", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" 
+  },
+  { 
+    name: "Amazon", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" 
+  },
+  { 
+    name: "Meta", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg" 
+  },
+  { 
+    name: "Netflix", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" 
+  },
+  { 
+    name: "Apple", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" 
+  },
+  
+  // --- GLOBAL TECH (PENGGANTI YANG ERROR) ---
+  // Adobe, Samsung, Intel diganti dengan link PNG yang stabil
+  { 
+    name: "Zoom", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Zoom_Communications_Logo.svg/2560px-Zoom_Communications_Logo.svg.png" 
+  },
+  { 
+    name: "Spotify", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/2/26/Spotify_logo_with_text.svg" 
+  },
+  { 
+    name: "Salesforce", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/2560px-Salesforce.com_logo.svg.png" 
+  },
+  { 
+    name: "Dropbox", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Dropbox_logo_2017.svg/2560px-Dropbox_logo_2017.svg.png" 
+  },
+  { 
+    name: "IBM", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" 
+  },
+  { 
+    name: "Oracle", 
+    logo: "https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" 
+  },
 ];
 
 export const Partner = () => {
@@ -33,25 +73,16 @@ export const Partner = () => {
         </div>
 
         {/* --- LOGO GRID SECTION --- */}
-        {/* - grid-cols-2 : Di HP (2 logo per baris)
-           - md:grid-cols-4 : Di Tablet (4 logo per baris)
-           - lg:grid-cols-6 : Di Laptop (6 logo per baris)
-        */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
           {partners.map((item, idx) => (
             <div
               key={idx}
-              // Style Card:
-              // 1. h-20 md:h-24: Tinggi fix biar rapi
-              // 2. grayscale hover:grayscale-0: Efek hitam putih jadi warna
-              // 3. opacity-70: Agak transparan biar gak mencolok, jadi jelas pas hover
-              className="group flex items-center justify-center rounded-lg border bg-card p-4 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/50"
+              className="group flex items-center justify-center rounded-lg border bg-white p-4 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/50"
             >
               <img
                 src={item.logo}
                 alt={item.name}
-                // grayscale & opacity transition
-                className="h-8 md:h-10 w-auto object-contain opacity-60 grayscale transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100"
+                className="h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-110"
               />
             </div>
           ))}

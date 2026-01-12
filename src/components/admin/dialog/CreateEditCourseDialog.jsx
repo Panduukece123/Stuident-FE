@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -17,208 +18,180 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const CreateEditCourseDialog = ({
-  open,
-  onOpenChange,
-  onSave,
-  course,
-  saving,
-}) => {
-  const [form, setForm] = useState({
-    title: "",
-    image: "",
-    category: "",
-    description: "",
-    type: "course",
-    instructor: "",
-    level: "beginner",
-    duration: "",
-    price: 0,
-    access_type: "free",
-    certificate_url: "",
-    video_url: "",
-    video_duration: "",
+const CreateEditCourseDialog = ({ open, onOpenChange, onSave, course, saving }) => {
+  const [preview, setPreview] = useState(null);
+
+  // Inisialisasi React Hook Form
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      title: "",
+      category: "",
+      description: "",
+      type: "course",
+      instructor: "",
+      level: "beginner",
+      duration: "",
+      price: 0,
+      access_type: "free",
+      certificate_url: "",
+      video_url: "",
+      video_duration: "",
+    },
   });
 
+  // Perhatikan nilai watch untuk Select dan Image preview
+  const watchType = watch("type");
+  const watchLevel = watch("level");
+  const watchAccess = watch("access_type");
+
+  // Reset form saat dialog buka/tutup atau course berubah
   useEffect(() => {
-    if (course) {
-      setForm({ ...course, price: Number(course.price) });
-    } else {
-      setForm({
-        title: "",
-        image: "",
-        category: "",
-        description: "",
-        type: "course",
-        instructor: "",
-        level: "beginner",
-        duration: "",
-        price: 0,
-        access_type: "free",
-        certificate_url: "",
-        video_url: "",
-        video_duration: "",
-      });
+    if (open) {
+      if (course) {
+        reset({
+          ...course,
+          price: Number(course.price),
+          image: null, // Reset file input
+        });
+      } else {
+        reset({
+          title: "", category: "", description: "", type: "course",
+          instructor: "", level: "beginner", duration: "", price: 0,
+          access_type: "free", certificate_url: "", video_url: "", video_duration: "",
+          image: null
+        });
+      }
+      setPreview(null);
     }
-  }, [course]);
+  }, [course, open, reset]);
 
-  const handleChange = (field, value) => setForm({ ...form, [field]: value });
+  // Handler untuk file upload
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setValue("image", file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
 
-  const handleSubmit = () => {
-    // cek field yang kosong
-    const requiredFields = [
-      "title",
-      "image",
-      "category",
-      "description",
-      "type",
-      "instructor",
-      "level",
-      "duration",
-      "price",
-      "access_type",
-      "certificate_url",
-      "video_url",
-      "video_duration",
-    ];
-
-    const emptyField = requiredFields.find((field) => {
-      const value = form[field];
-      return value === "" || value === null || value === undefined;
-    });
-
-    if (emptyField) {
-      alert(`Field "${emptyField}" wajib diisi!`);
-      return;
+  // Handler Submit
+  const onSubmit = (data) => {
+    const submitData = { ...data };
+    
+    // Jika update dan tidak ganti gambar, hapus key image
+    if (course && !data.image) {
+      delete submitData.image;
     }
 
-    // validasi video_url
-    const urlPattern = /^(https?:\/\/[^\s]+)$/;
-    if (form.video_url && !urlPattern.test(form.video_url)) {
-      alert(
-        "Video URL tidak valid! Pastikan formatnya: https://example.com/video"
-      );
-      return;
-    }
-
-    // panggil onSave
-    onSave({ ...form, price: Number(form.price) });
+    onSave(submitData);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{course ? "Edit Course" : "Create Course"}</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="md:min-w-xl">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogHeader>
+            <DialogTitle>{course ? "Edit Course" : "Create Course"}</DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-4 max-h-[50vh] overflow-y-auto p-2">
-          <Input
-            placeholder="Title"
-            value={form.title}
-            onChange={(e) => handleChange("title", e.target.value)}
-          />
-          <Input
-            placeholder="Image URL"
-            value={form.image}
-            onChange={(e) => handleChange("image", e.target.value)}
-          />
-          <Input
-            placeholder="Category"
-            value={form.category}
-            onChange={(e) => handleChange("category", e.target.value)}
-          />
-          <Input
-            placeholder="Instructor"
-            value={form.instructor}
-            onChange={(e) => handleChange("instructor", e.target.value)}
-          />
-          <Textarea
-            placeholder="Description"
-            value={form.description}
-            onChange={(e) => handleChange("description", e.target.value)}
-          />
-          <Input
-            placeholder="Duration"
-            value={form.duration}
-            onChange={(e) => handleChange("duration", e.target.value)}
-          />
-          <Input
-            placeholder="Price"
-            type="number"
-            value={form.price}
-            onChange={(e) => handleChange("price", e.target.value)}
-          />
-          <Input
-            placeholder="Certificate URL"
-            value={form.certificate_url}
-            onChange={(e) => handleChange("certificate_url", e.target.value)}
-          />
-          <Input
-            placeholder="Video URL"
-            value={form.video_url}
-            onChange={(e) => handleChange("video_url", e.target.value)}
-          />
-          <Input
-            placeholder="Video Duration"
-            value={form.video_duration}
-            onChange={(e) => handleChange("video_duration", e.target.value)}
-          />
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto p-2 mt-4">
+            {/* Title */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Course Title</label>
+              <Input 
+                {...register("title", { required: "Title wajib diisi" })} 
+                placeholder="e.g. Mastering React"
+              />
+              {errors.title && <span className="text-xs text-red-500">{errors.title.message}</span>}
+            </div>
 
-          <Select
-            value={form.type}
-            onValueChange={(v) => handleChange("type", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="course">Course</SelectItem>
-              <SelectItem value="bootcamp">Bootcamp</SelectItem>
-            </SelectContent>
-          </Select>
+            {/* Image */}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Thumbnail Image</label>
+              <Input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange}
+              />
+              {preview ? (
+                <img src={preview} className="mt-2 w-32 aspect-video object-cover rounded border" alt="Preview" />
+              ) : course?.image && (
+                <img src={course.image} className="mt-2 w-32 aspect-video object-cover rounded border opacity-50" alt="Current" />
+              )}
+              {!course && !preview && <span className="text-xs text-amber-600 italic">Thumbnail wajib diunggah untuk kursus baru</span>}
+            </div>
 
-          <Select
-            value={form.level}
-            onValueChange={(v) => handleChange("level", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Level" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Input placeholder="Category" {...register("category", { required: "Kategori wajib diisi" })} />
+              </div>
+              <div className="space-y-1">
+                <Input placeholder="Instructor" {...register("instructor", { required: "Instruktur wajib diisi" })} />
+              </div>
+            </div>
 
-          <Select
-            value={form.access_type}
-            onValueChange={(v) => handleChange("access_type", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Access Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="free">Free</SelectItem>
-              <SelectItem value="regular">Regular</SelectItem>
-              <SelectItem value="premium">Premium</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            <div className="space-y-1">
+              <Textarea placeholder="Description" {...register("description", { required: "Deskripsi wajib diisi" })} />
+            </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={saving}
-          >
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={saving}>
-            {saving ? "Saving..." : course ? "Update" : "Create"}
-          </Button>
-        </DialogFooter>
+            <div className="grid grid-cols-2 gap-4">
+              <Input placeholder="Duration (e.g. 3 Hours)" {...register("duration", { required: "Durasi wajib diisi" })} />
+              <Input placeholder="Price" type="number" {...register("price")} />
+            </div>
+
+            <Input placeholder="Certificate Link" {...register("certificate_url")} />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <Input placeholder="Video URL" {...register("video_url", { required: "Video URL wajib diisi" })} />
+              <Input placeholder="Video Duration" {...register("video_duration")} />
+            </div>
+
+            {/* Selects menggunakan Controller manual karena shadcn Select tidak support ref register langsung */}
+            <div className="grid grid-cols-3 gap-2">
+              <Select value={watchType} onValueChange={(v) => setValue("type", v)}>
+                <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="course">Course</SelectItem>
+                  <SelectItem value="bootcamp">Bootcamp</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={watchLevel} onValueChange={(v) => setValue("level", v)}>
+                <SelectTrigger><SelectValue placeholder="Level" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={watchAccess} onValueChange={(v) => setValue("access_type", v)}>
+                <SelectTrigger><SelectValue placeholder="Access" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">Free</SelectItem>
+                  <SelectItem value="regular">Regular</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter className="mt-6">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Saving..." : course ? "Update" : "Create"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

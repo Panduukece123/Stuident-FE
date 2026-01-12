@@ -15,8 +15,8 @@ import { OurServices } from "./pages/OurServices";
 import { AuthCallbackPage } from "./pages/auth/AuthCallbackPage";
 import { MyProfileEnrolledCourse } from "./pages/profile/MyProfileEnrolledCourse";
 import { EnrolledCourseShowPage } from "./pages/course/EnrolledCourseShowPage";
-import { ArticlePage } from "./pages/ArticlePage";
-import { ArticleDetailPage } from "./pages/ArticleDetailPage";
+import { ArticlePage } from "./pages/article/ArticlePage";
+import { ArticleDetailPage } from "./pages/article/ArticleDetailPage";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ScholarshipDetail from "./pages/scholarsip/Detail/ScholarshipDetailPage";
@@ -26,20 +26,24 @@ import { MyPortfolio } from "./pages/profile/MyPortfolio";
 import AdminLayout from "./layouts/AdminLayout";
 import { ManageUsers } from "./pages/admin/AdminUsers";
 import AdminRoute from "./components/route/AdminRoute";
+import PrivateRoute from "./components/route/PrivateRoute";
 import AdminCourses from "./pages/admin/AdminCourses";
 import AdminCurriculumCourse from "./pages/admin/AdminCurriculums";
 import AdminTransactions from "./pages/admin/AdminTransactions";
 import CorporateRoute from "./components/route/CorporateRoute";
 import CorporateLayout from "./layouts/CorporateLayout";
-import { CorporateScholarships } from "./pages/corporate/CorporateScholarships";
+import { CorporateManageScholarships } from "./pages/corporate/CorporateScholarships";
 import { MyProfileMySession } from "./pages/profile/MyProfileMySession";
 import MyMentoringSessionDetail from "./pages/profile/MyMentoringSessionDetail";
 import { MentorPage } from "./pages/MentorPage";
 import { MentorDetail } from "./pages/Mentor/MentorDetail";
 import { MyProfileScholarshipApplication } from "./pages/profile/MyProfileScholarshipApplication";
-import { ManageArticles } from "./pages/corporate/CorporateArticles";
+import { CorporateManageArticles } from "./pages/corporate/CorporateArticles";
 import { ManageOrganizations } from "./pages/admin/AdminOrganizations";
 import { CorporateManageOrganizations } from "./pages/corporate/CorporateOrganizations";
+import { ManageArticles } from "./pages/admin/AdminArticles";
+import { ManageScholarships } from "./pages/admin/AdminScholarships";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,7 +67,7 @@ function App() {
                 <Route index element={<AdminCourses />} />
                 <Route path=":id" element={<AdminCurriculumCourse />} />
               </Route>
-              <Route path="scholarships" element={<CorporateScholarships />} />
+              <Route path="scholarships" element={<ManageScholarships />} />
               <Route path="transactions" element={<AdminTransactions />} />
               <Route path="organizations" element={<ManageOrganizations />} />
               <Route path="articles" element={<ManageArticles />} />
@@ -72,17 +76,20 @@ function App() {
 
           <Route element={<CorporateRoute />}>
             <Route path="corporate" element={<CorporateLayout />}>
-              <Route path="scholarships" element={<CorporateScholarships />} />
+              <Route path="scholarships" element={<CorporateManageScholarships/>} />
               <Route path="organizations" element={<CorporateManageOrganizations/>} />
-              <Route path="articles" element={<ManageArticles />} />
+              <Route path="articles" element={<CorporateManageArticles />} />
             </Route>
           </Route>
 
           <Route path="/" element={<AppLayout />}>
             <Route index element={<HomePage />} />
             <Route path="e-learning" element={<ElearningPage />} />
-            <Route path="my-mentor" element={<MentorPage />} />
-            <Route path="my-mentor/:id" element={<MentorDetail />} />
+            {/* Protected Routes - Require Login */}
+            <Route element={<PrivateRoute />}>
+              <Route path="my-mentor" element={<MentorPage />} />
+              <Route path="my-mentor/:id" element={<MentorDetail />} />
+            </Route>
             <Route path="course">
               <Route path="show/:id" element={<CourseShowPage />} />
             </Route>
@@ -135,6 +142,7 @@ function App() {
               element={<EnrolledCourseShowPage />}
             />
           </Route>
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

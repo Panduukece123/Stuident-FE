@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import MentoringService from "@/services/MentoringService";
 import { MentorCard } from "@/components/shared/MentorCard";
 import { SessionCard } from "@/components/shared/SessionCard";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { MyMentorBanner } from "@/components/section/MyMentorBanner";
 
 export const MentorPage = () => {
   const navigate = useNavigate();
@@ -11,241 +14,315 @@ export const MentorPage = () => {
   const [mentors, setMentors] = useState([]);
   const [mySessions, setMySessions] = useState([]);
 
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [filterType, setFilterType] = useState("both");
+
   const academicRef = useRef(null);
   const lifeRef = useRef(null);
 
+  // ✅ CEK LOGIN TANPA AUTHSERVICE
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
+
+  /* ================= FETCH ================= */
+
   useEffect(() => {
-    fetchAllData();
+    fetchMentors();
+
+    if (isLoggedIn) {
+      fetchMySessions();
+    }
   }, []);
 
-  const fetchAllData = async () => {
+  const fetchMentors = async () => {
     try {
       setLoading(true);
-
-      const [mentorRes, mySessionRes] = await Promise.all([
-        MentoringService.getAllmentor(),
-        MentoringService.getMySessions(),
-      ]);
-
-      // ⚠️ pastikan data array
-      setMentors(mentorRes?.data ?? []);
-      setMySessions(mySessionRes?.data ?? []);
-    } catch (error) {
-      console.error("Failed to fetch mentor data", error);
+      const res = await MentoringService.getAllmentor();
+      setMentors(res?.data ?? []);
+    } catch (err) {
+      console.error("Failed to fetch mentors", err);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchMySessions = async () => {
+    try {
+      const res = await MentoringService.getMySessions();
+      const allSessions = res?.data ?? [];
+
+      const scheduledSessions = allSessions.filter(
+        (session) => session.status?.toLowerCase() === "scheduled"
+      );
+
+      setMySessions(scheduledSessions);
+    } catch (err) {
+      console.warn("Skip my sessions (not logged in)");
+    }
+  };
+
+  /* ================= SEARCH ================= */
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const matchSearch = (mentor) =>
+    mentor.name?.toLowerCase().includes(debouncedSearch.toLowerCase());
+
+  const isAcademic = (mentor) => Number(mentor.academic_sessions_count) > 0;
+  const isLife = (mentor) => Number(mentor.life_plan_sessions_count) > 0;
+
+  // Logika untuk mentor baru (keduanya 0)
+  const isNew = (mentor) =>
+    Number(mentor.academic_sessions_count) === 0 &&
+    Number(mentor.life_plan_sessions_count) === 0;
+
+  const filteredMentors = mentors.filter((mentor) => {
+    if (!matchSearch(mentor)) return false;
+    // Jika sedang mencari/filter tipe tertentu, biarkan logika lama
+    if (filterType === "academic") return isAcademic(mentor);
+    if (filterType === "life") return isLife(mentor);
+
+    // Jika filter "both/all", tampilkan semua yang cocok dengan search
+    return true;
+  });
+
+  const academicMentors = filteredMentors.filter(isAcademic);
+  const lifeMentors = filteredMentors.filter(isLife);
+  const newMentors = filteredMentors.filter(isNew); // Ambil mentor baru
+
   const scrollToSection = (ref) => {
     if (!ref.current) return;
-
     const yOffset = -100;
     const y =
       ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
     window.scrollTo({ top: y, behavior: "smooth" });
   };
 
-  /* ===============================
-     🔥 FILTER LOGIC UTAMA
-     =============================== */
-
-  const academicMentors = mentors.filter(
-    (mentor) => Number(mentor.academic_sessions_count) > 0
-  );
-
-  const lifeMentors = mentors.filter(
-    (mentor) => Number(mentor.life_plan_sessions_count) > 0
-  );
-
-  /* =============================== */
-
   if (loading) {
     return (
-      <p className="text-center mt-20 text-muted-foreground">
+      <p className="text-center mt-20 text-muted-foreground uppercase tracking-widest font-bold">
         Loading mentors...
       </p>
     );
   }
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-16 py-10 space-y-16">
-      {/* HEADER */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">My Mentor</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Kelola sesi mentoring akademik dan pengembangan diri kamu bersama
-          mentor pilihan
-        </p>
-      </div>
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 bg-gray-50">
-        {/* Academic Coaching Card */}
-        <div
-          onClick={() => scrollToSection(academicRef)}
-          className="bg-white border-2 border-blue-400 rounded-[2rem] p-8 shadow-sm flex flex-col"
-        >
-          <h2 className="text-2xl font-black text-center italic tracking-wider mb-6">
-            ACADEMIC COACHING
-          </h2>
-
-          <div className="w-full h-48 rounded-lg overflow-hidden mb-6">
-            <img
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrU2Hi0Ae_yiCgeqoXPy8ZKgIqd5QkXsITvQ&s"
-              alt="Academic Coaching"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          <p className="text-center text-sm font-medium leading-relaxed mb-6 px-4">
-            Proses 1-on-1 yang mempertemukan Anda dengan coach berpengalaman
-            yang siap mendengarkan dan membantu Anda menemukan jalan terbaik
-            dalam perjalanan akademik Anda.
-          </p>
-
-          <div className="border-t border-b border-dashed border-blue-400 py-2 mb-6">
-            <p className="text-center text-[0.75rem] font-bold italic">
-              7 Benefits From Academic Coaching
+    <div className="w-full flex flex-col bg-white">
+      <MyMentorBanner />
+      <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-20 py-16 space-y-24">
+        {/* HEADER & SEARCH AREA */}
+        <div className="flex flex-col items-center space-y-12">
+          {/* My Mentor Title */}
+          <div className="text-center">
+            <h1 className="text-3xl md:text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-b from-black to-neutral-500 tracking-tighter">
+              My Mentoring
+            </h1>
+            <p className="mt-8 text-neutral-500 font-light max-w-lg mx-auto text-lg leading-relaxed">
+              Kelola sesi mentoring akademik dan pengembangan diri kamu bersama
+              mentor pilihan
             </p>
           </div>
-
-          <ul className="space-y-3 text-sm font-bold italic ml-4">
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Pre-Assessment
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Habit & Grit Tracker
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Personal Development Plan Form
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Laporan Coaching (PDF)
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> One-month Personalized Roadmap
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Akses ke Materi Tambahan
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Garansi Uang Kembali
-            </li>
-          </ul>
         </div>
 
-        {/* Life Coaching Card */}
-        <div
-          onClick={() => scrollToSection(lifeRef)}
-          className="bg-white border-2 border-blue-400 rounded-[2rem] p-8 shadow-sm flex flex-col"
-        >
-          <h2 className="text-2xl font-black text-center italic tracking-wider mb-6">
-            LIFE COACHING
-          </h2>
-
-          {/* Placeholder untuk Gambar/Icon besar */}
-          <div className="w-full h-48 rounded-lg overflow-hidden mb-6">
-            <img
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD2dqfI0MC0J6jszIAR_QRLYjbXp3-iqWgJQ&s"
-              alt="Life Coaching"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          <p className="text-center text-sm font-medium leading-relaxed mb-6 px-4">
-            Proses 1-on-1 yang mempertemukan Anda dengan coach berpengalaman
-            yang siap mendengarkan dan membantu Anda menemukan jalan terbaik
-            dalam perjalanan akademik Anda.
-          </p>
-
-          <div className="border-t border-b border-dashed border-blue-400 py-2 mb-6">
-            <p className="text-center text-[0.75rem] font-bold italic">
-              7 Benefits From Life Coaching
-            </p>
-          </div>
-
-          <ul className="space-y-3 text-sm font-bold italic ml-4 text-center">
-            <li className="flex items-start text-ce">
-              <span className="mr-2">•</span> Personality mapping
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Strength assessment
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Life timeline reflection
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Goal planning system
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> 30-day life roadmap
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Coach feedback PDF
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span> Monthly check-in option
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      {/* MY SESSIONS */}
-      <section className="space-y-4 pt-4 border-t">
-        <h2 className="text-xl font-semibold">Jadwal Sesi Mentoring</h2>
-
-        {mySessions.length === 0 ? (
-          <div className="rounded-xl border border-dashed bg-neutral-50 p-10 text-center text-neutral-500">
-            Belum ada sesi mentoring yang terdaftar.
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {mySessions.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                onClick={() =>
-                  navigate(`/profile/my-mentoring-sessions/${session.id}`)
-                }
+        {/* 3. COACHING CARDS SECTION */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {/* Academic Card */}
+          <div
+            onClick={() => scrollToSection(academicRef)}
+            className="cursor-pointer group bg-white border-4 border-blue-400 rounded-[3rem] p-10 flex flex-col"
+          >
+            <h2 className="text-3xl font-black text-center tracking-tighter mb-8 transition-colors">
+              ACADEMIC COACHING
+            </h2>
+            <div className="w-full h-56 rounded-[2rem] overflow-hidden mb-8 border-2 border-neutral-100">
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrU2Hi0Ae_yiCgeqoXPy8ZKgIqd5QkXsITvQ&s"
+                alt="Academic"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-            ))}
+            </div>
+            <p className="text-center font-semibold text-neutral-600 mb-8 leading-relaxed">
+              Proses 1-on-1 bersama coach berpengalaman untuk membantu menemukan
+              jalan terbaik dalam perjalanan akademik Anda.
+            </p>
+            <div className="border-y-2 border-dashed border-blue-200 py-3 mb-8">
+              <p className="text-center text-xs font-black italic text-blue-400 uppercase tracking-widest">
+                7 Benefits From Academic Coaching
+              </p>
+            </div>
+            <ul className="grid grid-cols-1 gap-3 text-sm italic text-neutral-700">
+              {[
+                "Pre-Assessment",
+                "Habit & Grit Tracker",
+                "Personal Development Plan",
+                "Laporan Coaching (PDF)",
+                "Personalized Roadmap",
+                "Materi Tambahan",
+                "Garansi Uang Kembali",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" />{" "}
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
-        )}
-      </section>
 
-      {/* ACADEMIC LIST */}
-      <section ref={academicRef} className="space-y-4 scroll-mt-20">
-        <h2 className="text-xl font-semibold">🎓 Academic Coaching</h2>
-
-        {academicMentors.length === 0 ? (
-          <p className="text-muted-foreground">
-            Belum ada mentor academic coaching.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {academicMentors.map((mentor) => (
-              <MentorCard key={`academic-${mentor.id}`} mentor={mentor} />
-            ))}
+          {/* Life Card */}
+          <div
+            onClick={() => scrollToSection(lifeRef)}
+            className="cursor-pointer group bg-white border-4 border-emerald-400 rounded-[3rem] p-10 flex flex-col"
+          >
+            <h2 className="text-3xl font-black text-center tracking-tighter mb-8 transition-colors">
+              LIFE COACHING
+            </h2>
+            <div className="w-full h-56 rounded-[2rem] overflow-hidden mb-8 border-2 border-neutral-100">
+              <img
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD2dqfI0MC0J6jszIAR_QRLYjbXp3-iqWgJQ&s"
+                alt="Life"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+            <p className="text-center font-semibold text-neutral-600 mb-8 leading-relaxed">
+              Temukan potensi diri, pemetaan kepribadian, dan rancang strategi
+              masa depan bersama coach profesional.
+            </p>
+            <div className="border-y-2 border-dashed border-emerald-200 py-3 mb-8">
+              <p className="text-center text-xs font-black italic text-emerald-400 uppercase tracking-widest">
+                7 Benefits From Life Coaching
+              </p>
+            </div>
+            <ul className="grid grid-cols-1 gap-3 text-sm italic text-neutral-700">
+              {[
+                "Personality mapping",
+                "Strength assessment",
+                "Life timeline reflection",
+                "Goal planning system",
+                "30-day life roadmap",
+                "Coach feedback PDF",
+                "Monthly check-in",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />{" "}
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
-        )}
-      </section>
+        </section>
 
-      {/* LIFE LIST */}
-      <section ref={lifeRef} className="space-y-4 scroll-mt-20">
-        <h2 className="text-xl font-semibold">🌱 Life Coaching</h2>
-
-        {lifeMentors.length === 0 ? (
-          <p className="text-muted-foreground">
-            Belum ada mentor life coaching.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {lifeMentors.map((mentor) => (
-              <MentorCard key={`life-${mentor.id}`} mentor={mentor} />
-            ))}
+        {/* SEARCH */}
+        <div className="flex justify-center w-full">
+          <div className="flex gap-2 w-full max-w-4xl bg-white p-1.5 rounded-full border border-neutral-200 flex-wrap justify-center">
+            <div className="flex-1 w-full">
+              <Input
+                placeholder="Cari mentor berdasarkan nama..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-14 rounded-full px-8 border-neutral-200 focus-visible:ring-blue-400 bg-white font-medium"
+              />
+            </div>
+            <div className="flex gap-2 shrink-0 bg-white p-1.5 rounded-full border border-neutral-200">
+              {["both", "academic", "life"].map((type) => (
+                <Button
+                  key={type}
+                  variant={filterType === type ? "default" : "ghost"}
+                  className={`rounded-full px-6 font-bold capitalize ${
+                    filterType === type
+                      ? "bg-black text-white hover:bg-black"
+                      : "text-neutral-500"
+                  }`}
+                  onClick={() => setFilterType(type)}
+                >
+                  {type === "both" ? "All" : type}
+                </Button>
+              ))}
+            </div>
           </div>
+        </div>
+
+        {/* ================= MY SESSIONS (LOGIN ONLY) ================= */}
+        {isLoggedIn && (
+          <section className="space-y-6 pt-12 border-t-2 border-neutral-100">
+            <h2 className="text-2xl font-black uppercase">
+              Jadwal Sesi Mentoring
+            </h2>
+
+            {mySessions.length === 0 ? (
+              <div className="rounded-[2rem] border-4 border-dashed border-neutral-100 bg-neutral-50 p-12 text-center font-bold text-neutral-400">
+                Belum ada sesi mentoring yang terdaftar.
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {mySessions.map((session) => (
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    onClick={() =>
+                      navigate(`/profile/my-mentoring-sessions/${session.id}`)
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         )}
-      </section>
+
+        <section ref={academicRef} className="space-y-8 scroll-mt-24">
+          <h2 className="text-2xl font-black">🎓 Academic Coaching</h2>
+          {academicMentors.length === 0 ? (
+            <p className="text-neutral-400 font-bold italic">
+              Mentor academic tidak ditemukan.
+            </p>
+          ) : (
+            <div className="grid grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-12">
+              {academicMentors.map((mentor) => (
+                <MentorCard key={mentor.id} mentor={mentor} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section ref={lifeRef} className="space-y-8 scroll-mt-24">
+          <h2 className="text-2xl font-black">🌱 Life Coaching</h2>
+          {lifeMentors.length === 0 ? (
+            <p className="text-neutral-400 font-bold italic">
+              Mentor life tidak ditemukan.
+            </p>
+          ) : (
+            // Tambahkan xl dan 2xl agar saat zoom out jumlah kolom bertambah
+            <div className="grid grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-12">
+              {lifeMentors.map((mentor) => (
+                <MentorCard key={mentor.id} mentor={mentor} />
+              ))}
+            </div>
+          )}
+        </section>
+        {newMentors.length > 0 && (
+          <section className="space-y-8 scroll-mt-24 pt-12 border-t border-dashed border-neutral-200">
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-black">Mentor baru</h2>
+              <span className="bg-yellow-400 text-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                Segera IKuti
+              </span>
+            </div>
+            <p className="text-neutral-500 -mt-6">
+              Mentor-mentor baru yang akan segera membuka jadwal sesi mereka.
+            </p>
+
+            <div className="grid grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-12">
+              {newMentors.map((mentor) => (
+                <MentorCard key={mentor.id} mentor={mentor} />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 };

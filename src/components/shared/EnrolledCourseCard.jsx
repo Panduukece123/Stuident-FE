@@ -10,7 +10,6 @@ import { Button } from "../ui/button";
 import { Star, FileText, PlayCircle } from "lucide-react"; // Saya tambah icon biar cakep
 import { Progress } from "../ui/progress";
 
-
 export const EnrolledCourseCard = ({
   title,
   level,
@@ -67,7 +66,9 @@ export const EnrolledCourseCard = ({
           </span>
           <div className="flex items-center text-yellow-500 gap-0.5">
             <Star className="w-3 h-3 fill-current" />
-            <span className="font-medium text-foreground">{rating}</span>
+            <span className="font-medium text-foreground">
+              {Number(rating).toFixed(1)}
+            </span>
           </div>
           <span className="text-muted-foreground">({reviews} Review)</span>
         </div>

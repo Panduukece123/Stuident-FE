@@ -23,6 +23,7 @@ const ScholarshipApplicationPage = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [applicationId, setApplicationId] = useState(null);
+  const [profileCv, setProfileCv] = useState(null); // CV from profile
 
   // Document states
   const [documents, setDocuments] = useState({
@@ -65,6 +66,24 @@ const ScholarshipApplicationPage = () => {
     },
   });
 
+  // Fetch CV from profile
+  const { data: cvData, isLoading: cvLoading } = useQuery({
+    queryKey: ["profile-cv"],
+    queryFn: async () => {
+      const response = await ProfileService.getCV();
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data?.data?.cv_url) {
+        setProfileCv({
+          url: data.data.cv_url,
+          name: data.data.cv_filename || "CV dari Profil",
+          fromProfile: true,
+        });
+      }
+    },
+  });
+
   const { data: applicationDetail, refetch: refetchApplication } = useQuery({
     queryKey: ["application-detail", applicationId],
     queryFn: async () => {
@@ -74,16 +93,69 @@ const ScholarshipApplicationPage = () => {
     enabled: !!applicationId && currentStep >= 3,
   });
 
+  // Check existing application when page loads
+  const { data: existingApplication, isLoading: existingAppLoading, isError: existingAppError } = useQuery({
+    queryKey: ["existing-application", id],
+    queryFn: async () => {
+      const response = await scholarshipService.checkExistingApplication(id);
+      console.log("Existing Application Response:", response); // Debug
+      return response.data; // { application, currentStep }
+    },
+    retry: false, // Don't retry if 404 (no existing application)
+  });
+
+  // Handle existing application data dengan useEffect
+  React.useEffect(() => {
+    console.log("existingApplication:", existingApplication, "isError:", existingAppError); // Debug
+    
+    if (existingApplication?.application?.id) {
+      setApplicationId(existingApplication.application.id);
+      
+      // Gunakan currentStep dari backend
+      if (existingApplication.currentStep) {
+        console.log("Setting currentStep to:", existingApplication.currentStep); // Debug
+        setCurrentStep(existingApplication.currentStep);
+      }
+    } else if (existingAppError) {
+      // No existing application, start from step 1
+      setCurrentStep(1);
+    }
+  }, [existingApplication, existingAppError]);
+
   // Mutations
-  const saveDraftMutation = useMutation({
+ const saveDraftMutation = useMutation({
     mutationFn: (formData) => scholarshipService.saveDraft(id, formData),
     onSuccess: (response) => {
       setApplicationId(response.data.id);
-      Swal.fire({ icon: "success", title: "Berhasil", text: "Draft berhasil disimpan!", timer: 2000, showConfirmButton: false });
+      Swal.fire({ 
+        icon: "success", 
+        title: "Berhasil", 
+        text: "Draft berhasil disimpan!", 
+        timer: 2000, 
+        showConfirmButton: false 
+      });
       setCurrentStep(2);
     },
     onError: (error) => {
-      Swal.fire({ icon: "error", title: "Error", text: error.response?.data?.message || "Gagal menyimpan draft" });
+      // PERBAIKAN DISINI
+      console.log("Error Detail:", error.response?.data); // Cek console untuk debug
+
+      // Prioritaskan error.response.data.pesan sesuai format JSON backend Anda
+      const errorMessage = 
+        error.response?.data?.pesan || 
+        error.response?.data?.message || 
+        "Terjadi kesalahan inputan / Anda telah mengirim lamaran ini sebelumnya";
+
+      Swal.fire({ 
+        icon: "error", 
+        title: "Gagal", 
+        text: errorMessage 
+      }).then(() => {
+        // Opsional: Jika errornya karena sudah melamar, mungkin mau redirect user kembali?
+        if (errorMessage.toLowerCase().includes("sudah memiliki lamaran")) {
+            navigate(`/scholarship/show/${id}`); 
+        }
+      });
     },
   });
 
@@ -130,6 +202,22 @@ const ScholarshipApplicationPage = () => {
     setDocuments((prev) => ({ ...prev, [field]: null }));
   };
 
+  // Handler untuk menggunakan CV dari profil
+  const handleUseProfileCv = () => {
+    if (cvData?.data?.cv_url) {
+      setDocuments((prev) => ({
+        ...prev,
+        cv: {
+          name: cvData.data.cv_filename || "CV dari Profil",
+          size: "-",
+          type: "PDF",
+          fromProfile: true,
+          url: cvData.data.cv_url,
+        },
+      }));
+    }
+  };
+
   const handleSaveDraft = () => {
     if (!documents.cv) {
       Swal.fire({ icon: "warning", title: "Perhatian", text: "CV wajib diupload!" });
@@ -137,7 +225,17 @@ const ScholarshipApplicationPage = () => {
     }
 
     const formData = new FormData();
-    if (documents.cv?.file) formData.append("cv_path", documents.cv.file);
+    
+    // Handle CV - bisa dari file upload atau dari profil
+    if (documents.cv?.fromProfile && documents.cv?.url) {
+      // CV dari profil - kirim URL
+      formData.append("cv_from_profile", "true");
+      formData.append("cv_url", documents.cv.url);
+    } else if (documents.cv?.file) {
+      // CV dari upload file
+      formData.append("cv_path", documents.cv.file);
+    }
+    
     if (documents.transcript?.file) formData.append("transcript_path", documents.transcript.file);
     if (documents.recommendation?.file) formData.append("recommendation_path", documents.recommendation.file);
     
@@ -169,11 +267,12 @@ const ScholarshipApplicationPage = () => {
   };
 
   const handleBack = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
+    // Always go back to scholarship detail page
+    navigate(`/scholarship/show/${id}`);
   };
 
   // Loading state
-  if (scholarshipLoading || profileLoading) {
+  if (scholarshipLoading || profileLoading || existingAppLoading) {
     return (
       <div className="p-10 space-y-4">
         <Skeleton className="h-40 w-full" />
@@ -207,6 +306,8 @@ const ScholarshipApplicationPage = () => {
             onReset={() => window.location.reload()}
             onContinue={handleSaveDraft}
             isPending={saveDraftMutation.isPending}
+            profileCv={cvData?.data}
+            onUseProfileCv={handleUseProfileCv}
           />
         )}
 

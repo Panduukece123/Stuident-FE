@@ -6,18 +6,16 @@ const navigation = [
   {
     title: "Program",
     links: [
-      { label: "E-Learning", href: "#" },
-      { label: "Bootcamp", href: "#" },
-      { label: "My Mentor", href: "#" },
-      { label: "Corporate Service", href: "#" },
+      { label: "E-Learning", href: "/e-learning" },
+      { label: "Bootcamp", href: "/e-learning#bootcamp" },
+      { label: "My Mentor", href: "/my-mentor" },
     ],
   },
   {
     title: "Perusahaan",
     links: [
-      { label: "Tentang Kami", href: "#" },
-      { label: "Karier", href: "#" },
-      { label: "Artikel", href: "#" },
+      { label: "Corporate Service", href: "/our-service" },
+      { label: "Artikel", href: "/article" },
       { label: "Kontak Kami", href: "#" },
     ],
   },

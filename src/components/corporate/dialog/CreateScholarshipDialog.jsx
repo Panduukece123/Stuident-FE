@@ -31,7 +31,7 @@ const scholarshipSchema = z.object({
   description: z.string().min(20, "Deskripsi wajib diisi (min 20 karakter)"),
 });
 
-export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading }) => {
+export const CorporateCreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading }) => {
   // State untuk preview gambar
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -52,7 +52,7 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
 
   const { data: rawOrgs, isLoading: loadingOrgs } = useQuery({
     queryKey: ["organizations-list"],
-    queryFn: OrganizationService.getOrganizations,
+    queryFn: OrganizationService.getMyOrganizations,
     enabled: open,
   });
 
@@ -192,6 +192,7 @@ export const CreateScholarshipDialog = ({ open, onOpenChange, onSave, isLoading 
                   <SelectTrigger><SelectValue placeholder="Pilih status" /></SelectTrigger>
                   <SelectContent>
                       <SelectItem value="open">Open (Dibuka)</SelectItem>
+                      <SelectItem value="coming_soon">Coming Soon (Mendatang)</SelectItem>
                       <SelectItem value="closed">Closed (Ditutup)</SelectItem>
                   </SelectContent>
               </Select>

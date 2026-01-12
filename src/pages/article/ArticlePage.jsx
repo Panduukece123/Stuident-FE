@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ArticleService from "@/services/ArticleService";
-import { ArticleBanner } from "@/components/section/ArticleBanner";
-import { ArticleList } from "@/components/section/ArticleList";
+import { ArticleBanner } from "@/pages/article/ArticleBanner";
+import { ArticleList } from "@/pages/article/ArticleList";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,

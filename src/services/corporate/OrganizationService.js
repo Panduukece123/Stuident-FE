@@ -2,27 +2,36 @@
 import api from "../Api"; // Pastikan path ini sesuai dengan file api axios kamu
 
 const OrganizationService = {
-  getOrganizations: async () => {
+  getOrganizations: async ({ page = 1, search = "", type = "" }) => {
     const token = localStorage.getItem("token");
     const response = await api.get("/organizations/list/all", {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
+      params: {
+        page: page,
+        search: search || undefined, 
+        type: (type === "all" || type === "") ? undefined : type,
+      },
     });
+    
     return response.data;
-  },
+},
 
-  getMyOrganizations: async () => {
-    const token = localStorage.getItem("token");
-    const response = await api.get("/organizations", {
+  getMyOrganizations: async ({ page = 1 }) => {
+    const token = localStorage.getItem("token"); // Ambil token
+    const response = await api.get("/organizations", { // Sesuaikan endpoint user
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
+      params: {
+        page,
+      },
     });
     return response.data;
-  },
+},
 
   // GET DETAIL ORGANIZATION
   getOrganizationDetail: async (id) => {

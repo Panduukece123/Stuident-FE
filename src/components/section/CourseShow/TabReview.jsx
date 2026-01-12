@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertCircle, Loader2, Star, X } from "lucide-react";
+import { AlertCircle, Info, Loader2, Star, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReviewItem from "@/components/ReviewItem";
 import { useState } from "react";
@@ -181,9 +181,14 @@ export const TabReview = ({ course, user, onReviewModified }) => {
               />
             ))
           ) : (
-            <p className="text-muted-foreground italic">
-              Belum ada ulasan untuk kursus ini.
-            </p>
+            <Item variant="outline" size="sm">
+              <ItemMedia variant="icon">
+                <Info />
+              </ItemMedia>
+              <ItemContent>
+                <p className="italic text-muted-foreground">Belum ada ulasan.</p>
+              </ItemContent>
+            </Item>
           )}
         </div>
       </section>

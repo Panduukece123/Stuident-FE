@@ -1,16 +1,33 @@
-import React, { useState } from "react";
+import React, { Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Edit, List, Trash } from "lucide-react";
+import {
+  Eye,
+  ImageOff,
+  List,
+  MoreHorizontal,
+  Pencil,
+  Trash,
+} from "lucide-react";
 import { Link } from "react-router";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const CourseTable = ({ courses, onEdit, onDelete }) => {
-  const [expandedId, setExpandedId] = useState(null);
-
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
-
+const CourseTable = ({ courses, onView, onEdit, onDelete }) => {
+  // Fungsi helper untuk warna badge akses
   const getAccessBadgeColor = (type) => {
     switch (type) {
       case "free":
@@ -25,153 +42,159 @@ const CourseTable = ({ courses, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full table-auto border-collapse border shadow-sm">
+    <div className="rounded-md border bg-white overflow-hidden">
+      <Table>
+        <TableHeader className="bg-neutral-50">
+          <TableRow>
+            <TableHead className="w-[80px]">ID</TableHead>
+            <TableHead>Thumbnail</TableHead>
+            <TableHead className="min-w-[200px]">Title</TableHead>
+            <TableHead>Instructor</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead>Access</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
 
-        {/* Head row */}
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border p-2 text-left font-medium text-sm">ID</th>
-            <th className="border p-2 text-left font-medium text-sm">Gambar</th>
-            <th className="border p-2 text-left font-medium text-sm">Title</th>
-            <th className="border p-2 text-left font-medium text-sm">Instructor</th>
-            <th className="border p-2 text-right font-medium text-sm">Price</th>
-            <th className="border p-2 text-center font-medium text-sm">Access</th>
-            <th className="border p-2 text-center font-medium text-sm">Actions</th>
-          </tr>
-        </thead>
-        
-        {/* Course row */}
-        <tbody>
-          {courses.map((course) => (
-            <React.Fragment key={course.id}>
-              <tr className="hover:bg-gray-50 transition-colors">
-                <td className="border p-2 text-sm">{course.id}</td>
-                <td className="border p-2">
+        <TableBody>
+          {/* State jika data kosong */}
+          {courses.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={7} className="h-32 text-center">
+                <p className="text-muted-foreground font-light italic">
+                  No courses found...
+                </p>
+              </TableCell>
+            </TableRow>
+          )}
+
+          {courses?.map((course) => (
+            <TableRow
+              key={course.id}
+              className="group transition-colors hover:bg-neutral-50/50"
+            >
+              <TableCell className="font-mono text-xs text-neutral-500">
+                #{course.id}
+              </TableCell>
+
+              <TableCell>
+                {course.image ? (
                   <img
                     src={course.image}
                     alt={course.title}
-                    className="w-24 h-16 object-cover rounded-md shadow-sm"
+                    className="w-16 md:w-20 aspect-video object-cover rounded-md shadow-sm border border-neutral-200"
+                    // Handle error jika URL gambar rusak
+                    onError={(e) => {
+                      e.target.src = "https://placehold.co/600x400?text=Error";
+                    }}
                   />
-                </td>
-                <td className="border p-2 font-medium text-sm">{course.title}</td>
-                <td className="border p-2 text-sm">{course.instructor}</td>
-                <td className="border p-2 text-right text-sm">
-                  {Number(course.price).toLocaleString("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                  })}
-                </td>
-                <td className="border p-2 text-center">
-                  <Badge
-                    variant="outline"
-                    className={`capitalize font-medium border-0 ${getAccessBadgeColor(
-                      course.access_type
-                    )}`}
-                  >
-                    {course.access_type}
-                  </Badge>
-                </td>
-                <td className="border p-2">
-                  <div className="flex gap-1 justify-center">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => toggleExpand(course.id)}
-                      title={expandedId === course.id ? "Hide details" : "Show details"}
+                ) : (
+                  <div className="w-16 md:w-20 aspect-video flex items-center justify-center gap-2 bg-neutral-100 text-neutral-400 border rounded-md">
+                    <ImageOff size={16} />
+                  </div>
+                )}
+              </TableCell>
+
+              <TableCell className="font-medium text-neutral-900">
+                {course.title}
+                <div className="flex gap-2 items-center mt-1">
+                  <div className="text-xs text-neutral-500 font-normal md:hidden">
+                    {course.instructor}
+                  </div>
+                  {course.certificate_url && (
+                    <a
+                      href={course.certificate_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:opacity-80 transition-opacity"
                     >
-                      Details
-                      {expandedId === course.id ? (<ChevronUp />) : (<ChevronDown />)}
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] h-4 px-1 bg-blue-50 text-blue-600 border-blue-100 cursor-pointer"
+                      >
+                        Link Certification
+                      </Badge>
+                    </a>
+                  )}
+                </div>
+              </TableCell>
+
+              <TableCell className="hidden md:table-cell text-neutral-600">
+                {course.instructor}
+              </TableCell>
+
+              <TableCell>
+                {Number(course?.price || 0) <= 0 ? (
+                  <span className="text-green-600 font-semibold">Free</span>
+                ) : (
+                  <span className="text-neutral-700">
+                    {Number(course?.price || 0).toLocaleString("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      maximumFractionDigits: 0,
+                    })}
+                  </span>
+                )}
+              </TableCell>
+
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={`capitalize font-medium border ${getAccessBadgeColor(
+                    course.access_type
+                  )}`}
+                >
+                  {course.access_type}
+                </Badge>
+              </TableCell>
+
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-8 w-8">
+                      <MoreHorizontal size={16} />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      title="Edit curriculum"
-                      asChild
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-[180px]">
+                    <DropdownMenuLabel>Course Actions</DropdownMenuLabel>
+                    <DropdownMenuItem
+                      onClick={() => onView(course)}
+                      className="cursor-pointer"
                     >
+                      <Eye />
+                      View Details
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild className="cursor-pointer">
                       <Link to={`/admin/courses/${course.id}`}>
                         <List />
+                        Edit Curriculums
                       </Link>
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => onEdit(course)}
-                      title="Edit course"
-                    >
-                      <Edit />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => onDelete(course.id)}
-                      title="Delete course"
-                    >
-                      <Trash />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
+                    </DropdownMenuItem>
 
-              {expandedId === course.id && (
-                <tr>
-                  <td colSpan={7} className="border p-4 bg-gray-50">
-                    <div className="flex flex-col md:flex-row gap-4">
-                      <div className="flex-1 space-y-1 text-sm">
-                        <p>
-                          <strong>Category:</strong> {course.category}
-                        </p>
-                        <p>
-                          <strong>Type:</strong> {course.type}
-                        </p>
-                        <p>
-                          <strong>Level:</strong> {course.level}
-                        </p>
-                        <p>
-                          <strong>Duration:</strong> {course.duration}
-                        </p>
-                        <p>
-                          <strong>Total Curriculum Duration:</strong>{" "}
-                          {course.total_curriculum_duration}
-                        </p>
-                        <p>
-                          <strong>Total Videos:</strong> {course.total_videos}
-                        </p>
-                        <p>
-                          <strong>Video Duration:</strong> {course.video_duration}
-                        </p>
-                        <p>
-                          <strong>Certificate:</strong>{" "}
-                          {course.certificate_url ? (
-                            <a
-                              href={course.certificate_url}
-                              target="_blank"
-                              className="text-blue-600 underline"
-                            >
-                              Download
-                            </a>
-                          ) : (
-                            "-"
-                          )}
-                        </p>
-                        <p>
-                          <strong>Enrollments:</strong> {course.enrollments_count}
-                        </p>
-                        <p>
-                          <strong>Average Rating:</strong>{" "}
-                          {course.reviews_avg_rating}
-                        </p>
-                        <p>
-                          <strong>Description:</strong> {course.description}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </React.Fragment>
+                    <DropdownMenuItem
+                      onClick={() => onEdit(course)}
+                      className="cursor-pointer"
+                    >
+                      <Pencil />
+                      Edit Basic Info
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => onDelete(course.id)}
+                      className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                    >
+                      <Trash className='text-red-600 focus:text-red-600' />
+                      Delete Course
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 };

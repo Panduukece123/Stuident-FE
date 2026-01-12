@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EnrolledCourseShowSkeleton } from "@/components/skeleton/EnrolledCourseShowSkeleton";
+import { CourseCompletionDialog } from "@/components/dialog/CourseCompletionDialog";
 
 export const EnrolledCourseShowPage = () => {
   const { id } = useParams();
@@ -39,6 +40,13 @@ export const EnrolledCourseShowPage = () => {
     completedIds: [],
   });
 
+  // State Enrollment (untuk certificate_url)
+  const [enrollmentData, setEnrollmentData] = useState(null);
+
+  // State untuk completion dialog
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [courseTitle, setCourseTitle] = useState("");
+
   // --- 1. FETCH DATA (Curriculum + Progress + Auto Open Logic) ---
   useEffect(() => {
     const fetchData = async () => {
@@ -46,11 +54,23 @@ export const EnrolledCourseShowPage = () => {
         setLoading(true);
         const curriculumPromise = CourseService.getCurriculum(id);
         const progressPromise = CourseService.getProgress(id);
+        const enrollmentPromise = CourseService.getEnrollment(id);
 
-        const [curriculumRes, progressRes] = await Promise.all([
+        const [curriculumRes, progressRes, enrollmentRes] = await Promise.all([
           curriculumPromise,
           progressPromise,
+          enrollmentPromise.catch(() => null), // Optional: don't fail if enrollment data is unavailable
         ]);
+        
+        if (enrollmentRes) {
+          // Handle berbagai kemungkinan struktur response
+          const enrollment = enrollmentRes?.data?.data || enrollmentRes?.data || enrollmentRes;
+          setEnrollmentData(enrollment);
+          // Ambil course title untuk dialog completion
+          if (enrollment?.course?.title) {
+            setCourseTitle(enrollment.course.title);
+          }
+        }
 
         // --- A. SIAPKAN DATA MENTAH ---
         const rawCurriculum = curriculumRes.data || [];
@@ -199,9 +219,8 @@ export const EnrolledCourseShowPage = () => {
 
     // --- LOGIC NAVIGASI ---
     if (isLastModule) {
-      // Kalo materi terakhir, ucapkan selamat & balik ke list kursus
-      alert("Selamat! Anda telah menyelesaikan seluruh materi kursus ini! 🎉");
-      navigate("/profile/my-enrolled-courses");
+      // Kalo materi terakhir, tampilkan dialog completion untuk rating/review
+      setShowCompletionDialog(true);
     } else {
       // Kalo belum, lanjut ke next video
       handleNavigate("next");
@@ -220,7 +239,9 @@ export const EnrolledCourseShowPage = () => {
       {/* HEADER & BREADCRUMB */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
-          <Link to="/profile/my-enrolled-courses ">
+          <Link to={`/course/show/${id}`}>
+            {" "}
+            {/* Menghapus spasi dan menggunakan template literal */}
             <Button className={"rounded-full cursor-pointer"}>
               <ChevronLeft /> Back
             </Button>
@@ -347,6 +368,29 @@ export const EnrolledCourseShowPage = () => {
             </div>
           </div>
 
+          {/* CARD CERTIFICATE - Muncul jika ada certificate_url */}
+          {enrollmentData?.certificate_url && (
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 shadow-sm rounded-2xl p-5 flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-amber-600" />
+                <h1 className="text-lg font-bold text-amber-800">Sertifikat Tersedia</h1>
+              </div>
+              <p className="text-sm text-amber-700">
+                Selamat! Anda telah menyelesaikan kursus ini dan berhak mendapatkan sertifikat.
+              </p>
+              <a
+                href={enrollmentData.certificate_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white gap-2">
+                  <PlayCircle className="h-4 w-4" />
+                  Download Sertifikat
+                </Button>
+              </a>
+            </div>
+          )}
+
           {/* LIST MATERI */}
           <div className="bg-white sticky top-20 max-h-[calc(100vh-8rem)] border shadow-sm rounded-2xl overflow-hidden overflow-y-auto">
             <div className="p-4 border-b bg-gray-50/50">
@@ -441,6 +485,15 @@ export const EnrolledCourseShowPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Course Completion Dialog */}
+      <CourseCompletionDialog
+        open={showCompletionDialog}
+        onOpenChange={setShowCompletionDialog}
+        courseId={Number(id)}
+        courseTitle={courseTitle || activeModule?.title || "Kursus"}
+        onSuccess={() => navigate("/profile/my-enrolled-courses")}
+      />
     </div>
   );
 };

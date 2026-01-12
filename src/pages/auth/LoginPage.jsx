@@ -64,7 +64,7 @@ export const LoginPage = () => {
             navigate("/admin/users");
         } else if (userData?.role === 'corporate') { 
             // Tambahkan kondisi ini 👇
-            navigate("/corporate");
+            navigate("/corporate/scholarships");
         } else {
             // Student & Mentor lari ke Home
             navigate("/");

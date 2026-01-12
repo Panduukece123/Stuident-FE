@@ -5,7 +5,7 @@ import { Briefcase, GraduationCap, Users2 } from "lucide-react";
 
 export const InfoBootcamp = () => {
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+    <div className="px-4 pt-8 max-w-7xl mx-auto border-t">
       <Card
         className={
           "p-6 lg:p-10 flex flex-col lg:flex-row gap-8 lg:gap-10 relative overflow-hidden"

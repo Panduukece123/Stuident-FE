@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react"; // Hapus useState karena tidak dipakai lagi
 import {
   Table,
   TableBody,
@@ -19,13 +19,11 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Tambahan Avatar
 import {
   MoreHorizontal,
   Pencil,
@@ -33,39 +31,27 @@ import {
   Ban,
   CheckCircle,
   Eye,
-  User,
 } from "lucide-react";
 
 export const UserTable = ({
-  users,
+  users,        // Isinya 15 user dari halaman saat ini
+  page = 1,     // Halaman aktif (dari Parent)
+  totalPages = 1, // Total halaman (dari Parent)
+  onPageChange, // Fungsi untuk ganti halaman (dari Parent)
   onView,
   onEdit,
   onDelete,
   onSuspend,
   onActivate,
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentUsers = users.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(users.length / itemsPerPage);
-
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
-  };
-
+  
+  // LOGIC WARNA BADGE (Tetap sama)
   const getRoleBadgeColor = (role) => {
     switch (role) {
-      case "admin":
-        return "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200";
-      case "mentor":
-        return "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200";
-      case "corporate":
-        return "bg-cyan-100 text-cyan-700 border-cyan-200 hover:bg-cyan-200";
-      default:
-        return "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200"; // Student
+      case "admin": return "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200";
+      case "mentor": return "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200";
+      case "corporate": return "bg-cyan-100 text-cyan-700 border-cyan-200 hover:bg-cyan-200";
+      default: return "bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-200";
     }
   };
 
@@ -89,10 +75,11 @@ export const UserTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentUsers.length > 0 ? (
-              currentUsers.map((user) => (
+            {users.length > 0 ? (
+              // Kita langsung map 'users' karena array ini isinya sudah sesuai halaman
+              users.map((user) => (
                 <TableRow key={user.id}>
-                  {/* KOLOM 1: AVATAR + NAMA */}
+                  {/* KOLOM 1: NAMA */}
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col">
@@ -115,9 +102,7 @@ export const UserTable = ({
                   <TableCell className="text-center">
                     <Badge
                       variant="outline"
-                      className={`capitalize font-medium border-0 ${getRoleBadgeColor(
-                        user.role
-                      )}`}
+                      className={`capitalize font-medium border-0 ${getRoleBadgeColor(user.role)}`}
                     >
                       {user.role}
                     </Badge>
@@ -127,9 +112,7 @@ export const UserTable = ({
                   <TableCell className="text-center">
                     <Badge
                       variant="outline"
-                      className={`capitalize font-medium border-0 ${getStatusBadgeColor(
-                        user.status
-                      )}`}
+                      className={`capitalize font-medium border-0 ${getStatusBadgeColor(user.status)}`}
                     >
                       {user.status}
                     </Badge>
@@ -139,54 +122,34 @@ export const UserTable = ({
                   <TableCell className="text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className="h-8 w-8 p-0 hover:bg-neutral-100"
-                        >
+                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-neutral-100">
                           <MoreHorizontal className="h-4 w-4 text-neutral-500" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-40">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                        <DropdownMenuItem
-                          onClick={() => onView(user.id)}
-                          className="cursor-pointer"
-                        >
-                          <Eye className="mr-2 h-4 w-4 text-blue-500" /> View
-                          Details
+                        <DropdownMenuItem onClick={() => onView(user.id)} className="cursor-pointer">
+                          <Eye className="mr-2 h-4 w-4 text-blue-500" /> View Details
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem
-                          onClick={() => onEdit(user)}
-                          className="cursor-pointer"
-                        >
-                          <Pencil className="mr-2 h-4 w-4 text-neutral-500" />{" "}
-                          Edit
+                        <DropdownMenuItem onClick={() => onEdit(user)} className="cursor-pointer">
+                          <Pencil className="mr-2 h-4 w-4 text-neutral-500" /> Edit
                         </DropdownMenuItem>
 
                         <DropdownMenuSeparator />
 
                         {user.status === "active" ? (
-                          <DropdownMenuItem
-                            onClick={() => onSuspend(user.id)}
-                            className="cursor-pointer text-orange-600 focus:text-orange-600 focus:bg-orange-50"
-                          >
+                          <DropdownMenuItem onClick={() => onSuspend(user.id)} className="cursor-pointer text-orange-600 focus:text-orange-600 focus:bg-orange-50">
                             <Ban className="mr-2 h-4 w-4" /> Suspend
                           </DropdownMenuItem>
                         ) : (
-                          <DropdownMenuItem
-                            onClick={() => onActivate(user.id)}
-                            className="cursor-pointer text-green-600 focus:text-green-600 focus:bg-green-50"
-                          >
+                          <DropdownMenuItem onClick={() => onActivate(user.id)} className="cursor-pointer text-green-600 focus:text-green-600 focus:bg-green-50">
                             <CheckCircle className="mr-2 h-4 w-4" /> Activate
                           </DropdownMenuItem>
                         )}
 
-                        <DropdownMenuItem
-                          onClick={() => onDelete(user.id)}
-                          className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-                        >
+                        <DropdownMenuItem onClick={() => onDelete(user.id)} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
                           <Trash className="mr-2 h-4 w-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -196,57 +159,13 @@ export const UserTable = ({
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="h-24 text-center text-muted-foreground"
-                >
+                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                   No users found.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-        
-        {/* PAGINATION */}
-        {totalPages > 1 && (
-          <Pagination className={"my-4"}>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(currentPage - 1);
-                  }}
-                  className={
-                    currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <span className="text-sm text-muted-foreground px-4">
-                  Page {currentPage} of {totalPages}
-                </span>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageChange(currentPage + 1);
-                  }}
-                  className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
       </div>
     </div>
   );

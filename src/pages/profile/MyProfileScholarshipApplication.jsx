@@ -86,7 +86,6 @@ export const MyProfileScholarshipApplication = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Program Beasiswa</TableHead>
-                      <TableHead>Organisasi</TableHead>
                       <TableHead>Tanggal Melamar</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
@@ -96,12 +95,6 @@ export const MyProfileScholarshipApplication = () => {
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">
                           {item.scholarship?.name || "Nama Program Tidak Tersedia"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 text-neutral-600">
-                            <Building className="h-3 w-3" />
-                            {item.scholarship?.organization?.name || "-"}
-                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2 text-neutral-600">

@@ -11,7 +11,8 @@ const DocumentRow = ({
   inputRef, 
   onChange, 
   standalone, 
-  extraAction 
+  extraAction,
+  readonly = false, // New prop untuk sembunyikan edit actions
 }) => (
   <div className={standalone ? "" : "mb-6"}>
     <input type="file" ref={inputRef} className="hidden" onChange={onChange} />
@@ -43,6 +44,9 @@ const DocumentRow = ({
               if (document?.file) {
                 const url = URL.createObjectURL(document.file);
                 window.open(url, '_blank');
+              } else if (document?.url) {
+                // Untuk file dari profile yang punya URL
+                window.open(document.url, '_blank');
               }
             }}
             className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
@@ -50,15 +54,18 @@ const DocumentRow = ({
             <ExternalLink size={18} />
           </button>
         </div>
-        <div className="flex items-center gap-2 mt-4">
-          <Button variant="outline" size="sm" onClick={onBrowse} className="cursor-pointer bg-white border-gray-200 text-gray-600 text-[11px] h-8 rounded-lg">
-            <Pencil size={12} className="mr-1.5 text-gray-400" /> Change
-          </Button>
-          <Button variant="outline" size="sm" onClick={onDelete} className="cursor-pointer bg-white border-red-100 text-red-500 hover:bg-red-50 text-[11px] h-8 rounded-lg">
-            <Trash2 size={12} className="mr-1.5" /> Delete
-          </Button>
-          {extraAction}
-        </div>
+        {/* Sembunyikan tombol Change/Delete jika readonly */}
+        {!readonly && (
+          <div className="flex items-center gap-2 mt-4">
+            <Button variant="outline" size="sm" onClick={onBrowse} className="cursor-pointer bg-white border-gray-200 text-gray-600 text-[11px] h-8 rounded-lg">
+              <Pencil size={12} className="mr-1.5 text-gray-400" /> Change
+            </Button>
+            <Button variant="outline" size="sm" onClick={onDelete} className="cursor-pointer bg-white border-red-100 text-red-500 hover:bg-red-50 text-[11px] h-8 rounded-lg">
+              <Trash2 size={12} className="mr-1.5" /> Delete
+            </Button>
+            {extraAction}
+          </div>
+        )}
       </div>
     ) : (
       <div 

@@ -2,9 +2,25 @@ import api from "@/services/Api";
 
 const ArticleService = {
   // GET ALL ARTICLES
-  getArticles: async () => {
-    const token = localStorage.getItem("token");
+  getArticles: async ({ page = 1, search = "", category = "" }) => {
+    const token = localStorage.getItem("token"); // Ambil token
     const response = await api.get("/articles", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      params: {
+        page,
+        search: search || undefined,
+        category: (category === "all" || category === "") ? undefined : category,
+      },
+    });
+    return response.data;
+  },
+
+  getMyArticles: async () => {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/my-articles", {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",

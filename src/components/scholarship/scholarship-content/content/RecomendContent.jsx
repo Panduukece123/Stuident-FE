@@ -1,31 +1,21 @@
 import React from "react";
-import { MapPin, Loader2 } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import scholarshipService from "@/services/ScholarshipService";
-import { useScholarship } from "@/context/ScholarshipContext";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router";
+import { ScholarshipCard } from "@/components/shared/ScholarshipCard";
 
 const RecomendContent = () => {
-  
-  const { filters } = useScholarship(); 
-
-  const {data: scholarships = [], isLoading} = useQuery({
-    queryKey: ['recommended-scholarships', filters],
-
+  const { data: scholarships = [], isLoading } = useQuery({
+    queryKey: ["scholarship-recommendations"],
     queryFn: async () => {
-      const params = { is_recommended: 1, ...filters }; 
-      const response = await scholarshipService.getScholarships(params);
+      const response = await scholarshipService.getScholarshipRecommendations(4);
 
       if (!response.sukses) {
-        throw new Error('Failed to fetch recommended scholarships');
+        throw new Error("Failed to fetch scholarship recommendations");
       }
-      return response.data;
-  },
-  select: (data) => data
-  .sort((a, b) => new Date(b.deadline) - new Date(a.deadline))
-  .slice(0, 4),
-
-  placeholderData: [],
+      return response.data.recommendations || [];
+    },
+    placeholderData: [],
   });
 
   if (isLoading) {
@@ -37,58 +27,42 @@ const RecomendContent = () => {
   }
 
   if (!isLoading && scholarships.length === 0) {
-     return null; 
+    return null;
   }
 
   return (
-    <div className="flex flex-col gap-6 mx-4 mb-16">
-      <h3 className="font-medium text-2xl">Recommended</h3>
-      <div className="grid grid-cols-2 gap-6">
+    <div className="flex flex-col gap-6 px-8 lg:px-16 mb-8 mt-12">
+      <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+        <div className="bg-blue-100 p-2 rounded-full">
+            {/* Ikon Star dengan fill agar terlihat solid */}
+            <Star className="w-6 h-6 text-blue-600 fill-blue-600" />
+        </div>
+        <div>
+            <h3 className="font-bold text-2xl text-gray-900 flex items-center gap-2">
+                Rekomendasi Untuk Anda    
+            </h3>
+            <p className="text-sm text-gray-500">
+                Rekomendasi beasiswa berdasarkan profil Anda
+            </p>
+        </div>
+      </div>
 
-     
-
-      {scholarships.map((scholarship) => (
-        <Link
-        to={`/scholarship/show/${scholarship.id}`}
-          key={scholarship.id}
-          className=" bg-white p-4 cursor-pointer border-primary border-[3px] rounded-xl mx-3   hover:shadow-xl hover:-translate-y-1  duration-300 transition-all block w-full"
-        >
-          <h3 className="font-medium text-3xl mb-3">{scholarship.name}</h3>
-
-          <div className="flex flex-row gap-2">
-            <MapPin
-              size={35}
-              stroke="#ffffff"
-              strokeWidth={2}
-              fill="#757575"
-            />
-            <h4 className="font-medium text-2xl mb-2">
-              {scholarship.organization?.name || "Unknown Organization"}
-            </h4>
-          </div>
-
-          <p className="font-light mb-3 line-clamp-3">
-            {scholarship.description.substring(0, 150)}...
-          </p>
-
-          <div className="flex flex-wrap gap-2 text-sm mt-2">
-            <span className="bg-primary/10 px-3 py-1 rounded-full font-medium">
-              {scholarship.location}
-            </span>
-            {/* Logic warna status */}
-            <span className={`px-3 py-1 rounded-full font-medium ${
-                scholarship.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-            }`}>
-              {scholarship.status.toUpperCase()}
-            </span>
-            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
-              {scholarship.study_field}
-            </span>
-          </div>
-        </Link>
-        
-      ))}
-       </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {scholarships.map((scholarship) => (
+          <ScholarshipCard
+            key={scholarship.id}
+            id={scholarship.id}
+            name={scholarship.name}
+            organization={scholarship.organization?.name}
+            description={scholarship.description}
+            location={scholarship.location}
+            status={scholarship.status}
+            studyField={scholarship.study_field}
+            deadline={scholarship.deadline}
+            image_url={scholarship.image_url}
+          />
+        ))}
+      </div>
     </div>
   );
 };

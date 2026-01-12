@@ -144,18 +144,8 @@ export const Navbar = () => {
           </div>
         </Link>
 
-        {/* SEARCH BAR */}
-        <div className="hidden md:flex flex-1 max-w-xs lg:max-w-full items-center relative">
-          <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Cari program, mentor..."
-            className="w-full pl-9 pr-3 py-2 rounded-md border bg-background focus-visible:ring-1 focus-visible:ring-primary"
-          />
-        </div>
-
         {/* DESKTOP NAVIGATION */}
-        <div className="hidden md:flex md:flex-1 md:justify-start">
+        <div className="hidden md:flex md:flex-1 md:justify-end">
           <NavigationMenu viewport={false}>
             <NavigationMenuList className="justify-start gap-1 text-sm font-medium text-muted-foreground">
               <NavigationMenuItem>

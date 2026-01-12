@@ -90,20 +90,6 @@ export const AdminHeader = () => {
         {getPageTitle()}
       </h1>
 
-      {/* SEARCH BAR */}
-      <div className="w-full flex-1  ml-4">
-        <form onSubmit={(e) => e.preventDefault()}>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full appearance-none bg-background pl-8 shadow-sm"
-            />
-          </div>
-        </form>
-      </div>
-
       {/* USER DROPDOWN */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

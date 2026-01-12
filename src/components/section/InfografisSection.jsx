@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "../ui/card";
 import BgInfo from "../../assets/images/bg-infografis.svg";
-import { Briefcase, GraduationCap, Users2 } from "lucide-react";
+import { Award, Briefcase, GraduationCap, Users2 } from "lucide-react";
 
 export const Infografis = () => {
   return (
@@ -62,7 +62,7 @@ export const Infografis = () => {
                   <GraduationCap className="text-blue-600 w-8 h-8" />
                 </div>
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-medium text-blue-900">85</h1>
+                  <h1 className="text-2xl md:text-3xl font-medium text-blue-900">85+</h1>
                   <p className="text-sm md:text-lg text-blue-800">Program Beasiswa</p>
                 </div>
               </CardContent>
@@ -73,11 +73,11 @@ export const Infografis = () => {
             <Card className={"bg-blue-100 border-none shadow-none w-full"}>
               <CardContent className={"flex flex-col gap-3 items-center"}>
                 <div className="bg-blue-200 p-2 rounded-lg w-fit">
-                  <Briefcase className="text-blue-600 w-8 h-8" />
+                  <Award className="text-blue-600 w-8 h-8" />
                 </div>
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-medium text-blue-900">84,93%</h1>
-                  <p className="text-sm md:text-lg text-blue-800">Rata-rata Output Proyek</p>
+                  <h1 className="text-2xl md:text-3xl font-medium text-blue-900">50+</h1>
+                  <p className="text-sm md:text-lg text-blue-800">Konsultan Berpengalaman</p>
                 </div>
               </CardContent>
             </Card>
